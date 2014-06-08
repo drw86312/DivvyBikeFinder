@@ -21,6 +21,9 @@
 		0EB161661943D30200A2F96B /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161481943D30200A2F96B /* UIKit.framework */; };
 		0EB1616E1943D30200A2F96B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0EB1616C1943D30200A2F96B /* InfoPlist.strings */; };
 		0EB161701943D30200A2F96B /* DivvyBikeFinderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1616F1943D30200A2F96B /* DivvyBikeFinderTests.m */; };
+		0EB1617B19440CB900A2F96B /* DivvyStation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1617A19440CB900A2F96B /* DivvyStation.m */; };
+		0EB1617D194417C000A2F96B /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB1617C194417C000A2F96B /* MapKit.framework */; };
+		0EB1617F194426F200A2F96B /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB1617E194426F200A2F96B /* QuartzCore.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +56,10 @@
 		0EB1616B1943D30200A2F96B /* DivvyBikeFinderTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DivvyBikeFinderTests-Info.plist"; sourceTree = "<group>"; };
 		0EB1616D1943D30200A2F96B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		0EB1616F1943D30200A2F96B /* DivvyBikeFinderTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DivvyBikeFinderTests.m; sourceTree = "<group>"; };
+		0EB1617919440CB900A2F96B /* DivvyStation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DivvyStation.h; sourceTree = "<group>"; };
+		0EB1617A19440CB900A2F96B /* DivvyStation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DivvyStation.m; sourceTree = "<group>"; };
+		0EB1617C194417C000A2F96B /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		0EB1617E194426F200A2F96B /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +67,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0EB1617F194426F200A2F96B /* QuartzCore.framework in Frameworks */,
+				0EB1617D194417C000A2F96B /* MapKit.framework in Frameworks */,
 				0EB161471943D30200A2F96B /* CoreGraphics.framework in Frameworks */,
 				0EB161491943D30200A2F96B /* UIKit.framework in Frameworks */,
 				0EB161451943D30200A2F96B /* Foundation.framework in Frameworks */,
@@ -101,6 +110,8 @@
 		0EB161431943D30200A2F96B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0EB1617E194426F200A2F96B /* QuartzCore.framework */,
+				0EB1617C194417C000A2F96B /* MapKit.framework */,
 				0EB161441943D30200A2F96B /* Foundation.framework */,
 				0EB161461943D30200A2F96B /* CoreGraphics.framework */,
 				0EB161481943D30200A2F96B /* UIKit.framework */,
@@ -117,6 +128,8 @@
 				0EB161561943D30200A2F96B /* Main.storyboard */,
 				0EB161591943D30200A2F96B /* ViewController.h */,
 				0EB1615A1943D30200A2F96B /* ViewController.m */,
+				0EB1617919440CB900A2F96B /* DivvyStation.h */,
+				0EB1617A19440CB900A2F96B /* DivvyStation.m */,
 				0EB1615C1943D30200A2F96B /* Images.xcassets */,
 				0EB1614B1943D30200A2F96B /* Supporting Files */,
 			);
@@ -250,6 +263,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0EB1615B1943D30200A2F96B /* ViewController.m in Sources */,
+				0EB1617B19440CB900A2F96B /* DivvyStation.m in Sources */,
 				0EB161551943D30200A2F96B /* AppDelegate.m in Sources */,
 				0EB161511943D30200A2F96B /* main.m in Sources */,
 			);
