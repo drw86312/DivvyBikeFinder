@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E85B191194629D500DE5E6C /* BikeTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E85B190194629D500DE5E6C /* BikeTableViewCell.m */; };
 		0EB161451943D30200A2F96B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161441943D30200A2F96B /* Foundation.framework */; };
 		0EB161471943D30200A2F96B /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161461943D30200A2F96B /* CoreGraphics.framework */; };
 		0EB161491943D30200A2F96B /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161481943D30200A2F96B /* UIKit.framework */; };
@@ -37,6 +38,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0E85B18F194629D500DE5E6C /* BikeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BikeTableViewCell.h; sourceTree = "<group>"; };
+		0E85B190194629D500DE5E6C /* BikeTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BikeTableViewCell.m; sourceTree = "<group>"; };
 		0EB161411943D30200A2F96B /* DivvyBikeFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DivvyBikeFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0EB161441943D30200A2F96B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		0EB161461943D30200A2F96B /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -126,6 +129,8 @@
 				0EB161531943D30200A2F96B /* AppDelegate.h */,
 				0EB161541943D30200A2F96B /* AppDelegate.m */,
 				0EB161561943D30200A2F96B /* Main.storyboard */,
+				0E85B18F194629D500DE5E6C /* BikeTableViewCell.h */,
+				0E85B190194629D500DE5E6C /* BikeTableViewCell.m */,
 				0EB161591943D30200A2F96B /* ViewController.h */,
 				0EB1615A1943D30200A2F96B /* ViewController.m */,
 				0EB1617919440CB900A2F96B /* DivvyStation.h */,
@@ -262,6 +267,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0E85B191194629D500DE5E6C /* BikeTableViewCell.m in Sources */,
 				0EB1615B1943D30200A2F96B /* ViewController.m in Sources */,
 				0EB1617B19440CB900A2F96B /* DivvyStation.m in Sources */,
 				0EB161551943D30200A2F96B /* AppDelegate.m in Sources */,
@@ -470,6 +476,7 @@
 				0EB161751943D30200A2F96B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0EB161761943D30200A2F96B /* Build configuration list for PBXNativeTarget "DivvyBikeFinderTests" */ = {
 			isa = XCConfigurationList;
@@ -478,6 +485,7 @@
 				0EB161781943D30200A2F96B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

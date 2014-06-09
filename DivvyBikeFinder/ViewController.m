@@ -9,6 +9,7 @@
 #import "ViewController.h"
 #import "DivvyStation.h"
 #import <QuartzCore/QuartzCore.h>
+#import "BikeTableViewCell.h"
 
 @interface ViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UITableViewDataSource, UITableViewDelegate>
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
@@ -17,6 +18,7 @@
 @property CLLocation *userLocation;
 @property NSArray *divvyStations;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (weak, nonatomic) IBOutlet UIButton *locationButtonOutlet;
 
 @end
 
@@ -30,13 +32,13 @@
     [self.locationManager startUpdatingLocation];
     self.locationManager.delegate = self;
     [self createTimer];
+    self.locationButtonOutlet.titleLabel.numberOfLines = 2;
 }
 
 #pragma mark - Location manager methods
 
 -(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
-    NSLog(@"I ran");
     for (CLLocation *location in locations) {
         if (location.verticalAccuracy < 1000 && location.horizontalAccuracy < 1000) {
             [self.locationManager stopUpdatingLocation];
@@ -179,10 +181,12 @@
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     DivvyStation *divvyStation = [self.divvyStations objectAtIndex:indexPath.row];
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
-    cell.textLabel.text = divvyStation.stationName;
+    BikeTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
+    cell.stationLabel.text = divvyStation.stationName;
+    cell.bikesLabel.text = [NSString stringWithFormat:@"Bikes\n%@", divvyStation.availableBikes.description];
+    cell.docksLabel.text = [NSString stringWithFormat:@"Docks\n%@", divvyStation.availableDocks.description];
     NSString *milesFromUser = [NSString stringWithFormat:@"%.02f miles", divvyStation.distanceFromUser * 0.000621371];
-    cell.detailTextLabel.text = milesFromUser;
+    cell.distanceLabel.text = milesFromUser;
     return cell;
 }
 
