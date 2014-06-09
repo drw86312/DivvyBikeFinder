@@ -10,11 +10,13 @@
 #import "DivvyStation.h"
 #import <QuartzCore/QuartzCore.h>
 
-@interface ViewController () <CLLocationManagerDelegate>
+@interface ViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UITableViewDataSource, UITableViewDelegate>
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
 @property NSTimer *timer;
 @property CLLocationManager *locationManager;
 @property CLLocation *userLocation;
+@property NSArray *divvyStations;
+@property (weak, nonatomic) IBOutlet UITableView *tableView;
 
 @end
 
@@ -22,11 +24,11 @@
 
 - (void)viewDidLoad
 {
-    self.locationManager = [[CLLocationManager alloc] init];
-    self.locationManager.delegate = self;
-
     [super viewDidLoad];
-    [self getJSON];
+
+    self.locationManager = [[CLLocationManager alloc] init];
+    [self.locationManager startUpdatingLocation];
+    self.locationManager.delegate = self;
     [self createTimer];
 }
 
@@ -34,22 +36,17 @@
 
 -(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
+    NSLog(@"I ran");
     for (CLLocation *location in locations) {
         if (location.verticalAccuracy < 1000 && location.horizontalAccuracy < 1000) {
             [self.locationManager stopUpdatingLocation];
-            CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(location.coordinate.latitude, location.coordinate.longitude);
-            MKCoordinateSpan span = MKCoordinateSpanMake(0.03, 0.03);
-            MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
             self.userLocation = location;
-            [self.mapView setRegion:region animated:YES];
-            break;
-        }
-        else
-        {
-            CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(41.89, -87.66);
-            MKCoordinateSpan span = MKCoordinateSpanMake(0.15, 0.23);
+            CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.userLocation.coordinate.latitude, self.userLocation.coordinate.longitude);
+            MKCoordinateSpan span = MKCoordinateSpanMake(.03, .03);
             MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
             [self.mapView setRegion:region animated:YES];
+            [self getJSON];
+            break;
         }
     }
 }
@@ -58,14 +55,15 @@
 
 - (IBAction)onRefreshButtonPressed:(id)sender
 {
-    [self getJSON];
     [self createTimer];
+    [self.locationManager startUpdatingLocation];
 }
 
 #pragma  mark - Helper methods
 
 -(void)getJSON
 {
+    NSMutableArray *tempArray = [[NSMutableArray alloc] init];
     NSString *urlString = @"http://www.divvybikes.com/stations/json";
     NSURL *url = [NSURL URLWithString:urlString];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
@@ -103,25 +101,55 @@
                  divvyStation.statusKey = [NSNumber numberWithInt:key];
                  int identifier = [[dictionary objectForKey:@"id"] intValue];
                  divvyStation.identifier = [NSNumber numberWithInt:identifier];
+                 divvyStation.coordinate = CLLocationCoordinate2DMake(divvyStation.latitude.floatValue, divvyStation.longitude.floatValue);
+
+                 CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:divvyStation.latitude.floatValue longitude:divvyStation.longitude.floatValue];
+                 divvyStation.distanceFromUser = [stationLocation distanceFromLocation:self.userLocation];
 
                  self.stationAnnotation = [[MKPointAnnotation alloc] init];
-                 self.stationAnnotation.coordinate = CLLocationCoordinate2DMake(divvyStation.latitude.floatValue, divvyStation.longitude.floatValue);
+                 self.stationAnnotation.coordinate = divvyStation.coordinate;
                  self.stationAnnotation.title = divvyStation.stationName;
                  self.stationAnnotation.subtitle = [NSString stringWithFormat:@"Bikes: %@     Docks: %@", divvyStation.availableBikes, divvyStation.availableDocks];
 
+                 [tempArray addObject:divvyStation];
                  [self.mapView addAnnotation:self.stationAnnotation];
-             }
-         }];
+        }
+        NSSortDescriptor *distanceDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distanceFromUser" ascending:YES];
+        NSArray *sortDescriptors = @[distanceDescriptor];
+        NSArray *divvyStationsArray = [NSArray arrayWithArray:tempArray];
+        self.divvyStations = [divvyStationsArray sortedArrayUsingDescriptors:sortDescriptors];
+        [self.tableView reloadData];
+    }];
 }
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
 {
-    MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
-
-    pin.image = [UIImage imageNamed:@"Divvy-FB"];
-    pin.canShowCallout = YES;
-
-    return pin;
+    if ([annotation isKindOfClass:[DivvyStation class]])
+    {
+        DivvyStation *divvyStation = (DivvyStation *)annotation;
+        if (divvyStation.availableBikes.intValue < 1) {
+                MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
+                pin.canShowCallout = YES;
+                pin.image = [UIImage imageNamed:@"nobikes"];
+                NSLog(@"no bikes");
+                return pin;
+                NSLog(@"I ran");
+        }
+        else if (divvyStation.availableDocks.intValue < 1) {
+                MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
+                pin.canShowCallout = YES;
+                pin.image = [UIImage imageNamed:@"dock"];
+                NSLog(@"no docks");
+                return pin;
+        }
+        else {
+            MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
+            pin.canShowCallout = YES;
+            pin.image = [UIImage imageNamed:@"Divvy-FB"];
+            return pin;
+        }
+    }
+    return nil;
 }
 
 #pragma mark - Timer methods
@@ -141,9 +169,21 @@
     NSLog(@"Error: %@", error);
 }
 
+#pragma mark - Tableview methods
 
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.divvyStations.count;
+}
 
-
-
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    DivvyStation *divvyStation = [self.divvyStations objectAtIndex:indexPath.row];
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
+    cell.textLabel.text = divvyStation.stationName;
+    NSString *milesFromUser = [NSString stringWithFormat:@"%.02f miles", divvyStation.distanceFromUser * 0.000621371];
+    cell.detailTextLabel.text = milesFromUser;
+    return cell;
+}
 
 @end

@@ -7,8 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <MapKit/MapKit.h>
 
-@interface DivvyStation : NSObject
+
+@interface DivvyStation : NSObject <MKAnnotation>
+
+@property (nonatomic) CLLocationCoordinate2D coordinate;
+@property (nonatomic, assign) CLLocationDistance distanceFromUser;
 
 @property NSNumber *identifier;
 @property NSString *stationName;
