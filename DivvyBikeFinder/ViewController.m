@@ -10,6 +10,7 @@
 #import "DivvyStation.h"
 #import <QuartzCore/QuartzCore.h>
 #import "BikeTableViewCell.h"
+#import <AddressBookUI/AddressBookUI.h>
 
 @interface ViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UITableViewDataSource, UITableViewDelegate>
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
@@ -19,6 +20,9 @@
 @property NSArray *divvyStations;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UIButton *locationButtonOutlet;
+@property (weak, nonatomic) IBOutlet UISearchBar *fromSearchField;
+@property (weak, nonatomic) IBOutlet UISearchBar *destinationSearchField;
+@property NSString *userLocationString;
 
 @end
 
@@ -33,6 +37,7 @@
     self.locationManager.delegate = self;
     [self createTimer];
     self.locationButtonOutlet.titleLabel.numberOfLines = 2;
+    self.navigationItem.title = @"Divvy Bike Finder";
 }
 
 #pragma mark - Location manager methods
@@ -43,6 +48,7 @@
         if (location.verticalAccuracy < 1000 && location.horizontalAccuracy < 1000) {
             [self.locationManager stopUpdatingLocation];
             self.userLocation = location;
+            [self getUserLocationString];
             CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.userLocation.coordinate.latitude, self.userLocation.coordinate.longitude);
             MKCoordinateSpan span = MKCoordinateSpanMake(.03, .03);
             MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
@@ -59,6 +65,10 @@
 {
     [self createTimer];
     [self.locationManager startUpdatingLocation];
+}
+- (IBAction)onUseCurrentLocationPressed:(id)sender
+{
+    self.fromSearchField.text = self.userLocationString;
 }
 
 #pragma  mark - Helper methods
@@ -152,6 +162,18 @@
         }
     }
     return nil;
+}
+
+- (void)getUserLocationString
+{
+    CLGeocoder *geocoder = [[CLGeocoder alloc] init];
+
+    [geocoder reverseGeocodeLocation:self.userLocation completionHandler:^(NSArray *placemarks, NSError *error) {
+        for (CLPlacemark *placemark in placemarks) {
+            self.userLocationString = ABCreateStringWithAddressDictionary(placemark.addressDictionary, NO);
+            NSLog(@"%@", self.userLocationString);
+        }
+    }];
 }
 
 #pragma mark - Timer methods

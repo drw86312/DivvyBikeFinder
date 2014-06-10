@@ -79,23 +79,36 @@
                                     <outlet property="delegate" destination="vXZ-lx-hvc" id="wy4-sV-HMh"/>
                                 </connections>
                             </tableView>
-                            <searchBar contentMode="redraw" fixedFrame="YES" placeholder="From" translatesAutoresizingMaskIntoConstraints="NO" id="DDh-M4-NYD">
+                            <searchBar contentMode="redraw" fixedFrame="YES" text="" placeholder="From" translatesAutoresizingMaskIntoConstraints="NO" id="DDh-M4-NYD">
                                 <rect key="frame" x="0.0" y="65" width="262" height="44"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                 <textInputTraits key="textInputTraits"/>
                             </searchBar>
                             <searchBar contentMode="redraw" fixedFrame="YES" placeholder="Destination" translatesAutoresizingMaskIntoConstraints="NO" id="hcO-Oq-44y">
-                                <rect key="frame" x="0.0" y="109" width="320" height="44"/>
+                                <rect key="frame" x="0.0" y="109" width="262" height="44"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                 <textInputTraits key="textInputTraits"/>
                             </searchBar>
                             <button opaque="NO" contentMode="center" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="characterWrap" translatesAutoresizingMaskIntoConstraints="NO" id="ON7-pg-YCn">
-                                <rect key="frame" x="262" y="64" width="58" height="45"/>
+                                <rect key="frame" x="262" y="64" width="60" height="45"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="11"/>
                                 <state key="normal" title="Current Location">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="onUseCurrentLocationPressed:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="d8G-cL-a1j"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="101-Fk-Edf">
+                                <rect key="frame" x="262" y="109" width="58" height="44"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                                <state key="normal" title="GO">
+                                    <color key="titleColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                             </button>
@@ -110,6 +123,8 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="destinationSearchField" destination="hcO-Oq-44y" id="ML2-j8-4Uq"/>
+                        <outlet property="fromSearchField" destination="DDh-M4-NYD" id="V79-4c-eap"/>
                         <outlet property="locationButtonOutlet" destination="ON7-pg-YCn" id="dJA-ka-Qny"/>
                         <outlet property="mapView" destination="aOZ-Zl-Pil" id="6vr-ks-uDA"/>
                         <outlet property="tableView" destination="Hzw-FT-8Aq" id="L0J-q8-ZMB"/>

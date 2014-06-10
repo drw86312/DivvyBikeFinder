@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0E85B191194629D500DE5E6C /* BikeTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E85B190194629D500DE5E6C /* BikeTableViewCell.m */; };
+		0E85B1931946F24700DE5E6C /* AddressBookUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E85B1921946F24700DE5E6C /* AddressBookUI.framework */; };
 		0EB161451943D30200A2F96B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161441943D30200A2F96B /* Foundation.framework */; };
 		0EB161471943D30200A2F96B /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161461943D30200A2F96B /* CoreGraphics.framework */; };
 		0EB161491943D30200A2F96B /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161481943D30200A2F96B /* UIKit.framework */; };
@@ -40,6 +41,7 @@
 /* Begin PBXFileReference section */
 		0E85B18F194629D500DE5E6C /* BikeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BikeTableViewCell.h; sourceTree = "<group>"; };
 		0E85B190194629D500DE5E6C /* BikeTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BikeTableViewCell.m; sourceTree = "<group>"; };
+		0E85B1921946F24700DE5E6C /* AddressBookUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBookUI.framework; path = System/Library/Frameworks/AddressBookUI.framework; sourceTree = SDKROOT; };
 		0EB161411943D30200A2F96B /* DivvyBikeFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DivvyBikeFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0EB161441943D30200A2F96B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		0EB161461943D30200A2F96B /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -70,6 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0E85B1931946F24700DE5E6C /* AddressBookUI.framework in Frameworks */,
 				0EB1617F194426F200A2F96B /* QuartzCore.framework in Frameworks */,
 				0EB1617D194417C000A2F96B /* MapKit.framework in Frameworks */,
 				0EB161471943D30200A2F96B /* CoreGraphics.framework in Frameworks */,
@@ -113,6 +116,7 @@
 		0EB161431943D30200A2F96B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0E85B1921946F24700DE5E6C /* AddressBookUI.framework */,
 				0EB1617E194426F200A2F96B /* QuartzCore.framework */,
 				0EB1617C194417C000A2F96B /* MapKit.framework */,
 				0EB161441943D30200A2F96B /* Foundation.framework */,
