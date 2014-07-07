@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E4A5B4D196B30CB00273EA6 /* DivvyBikeAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B4C196B30CB00273EA6 /* DivvyBikeAnnotation.m */; };
+		0E4A5B50196B30E600273EA6 /* NoBikesAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B4F196B30E600273EA6 /* NoBikesAnnotation.m */; };
+		0E4A5B53196B30F900273EA6 /* NoDocksAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B52196B30F900273EA6 /* NoDocksAnnotation.m */; };
+		0E4A5B56196B370C00273EA6 /* InitialViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B55196B370C00273EA6 /* InitialViewController.m */; };
+		0E4A5B59196B462600273EA6 /* StationDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B58196B462600273EA6 /* StationDetailViewController.m */; };
 		0E85B191194629D500DE5E6C /* BikeTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E85B190194629D500DE5E6C /* BikeTableViewCell.m */; };
 		0E85B1931946F24700DE5E6C /* AddressBookUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E85B1921946F24700DE5E6C /* AddressBookUI.framework */; };
 		0EB161451943D30200A2F96B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161441943D30200A2F96B /* Foundation.framework */; };
@@ -39,6 +44,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0E4A5B4B196B30CB00273EA6 /* DivvyBikeAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DivvyBikeAnnotation.h; sourceTree = "<group>"; };
+		0E4A5B4C196B30CB00273EA6 /* DivvyBikeAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DivvyBikeAnnotation.m; sourceTree = "<group>"; };
+		0E4A5B4E196B30E600273EA6 /* NoBikesAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoBikesAnnotation.h; sourceTree = "<group>"; };
+		0E4A5B4F196B30E600273EA6 /* NoBikesAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoBikesAnnotation.m; sourceTree = "<group>"; };
+		0E4A5B51196B30F900273EA6 /* NoDocksAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoDocksAnnotation.h; sourceTree = "<group>"; };
+		0E4A5B52196B30F900273EA6 /* NoDocksAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoDocksAnnotation.m; sourceTree = "<group>"; };
+		0E4A5B54196B370C00273EA6 /* InitialViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InitialViewController.h; sourceTree = "<group>"; };
+		0E4A5B55196B370C00273EA6 /* InitialViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InitialViewController.m; sourceTree = "<group>"; };
+		0E4A5B57196B462600273EA6 /* StationDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StationDetailViewController.h; sourceTree = "<group>"; };
+		0E4A5B58196B462600273EA6 /* StationDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StationDetailViewController.m; sourceTree = "<group>"; };
 		0E85B18F194629D500DE5E6C /* BikeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BikeTableViewCell.h; sourceTree = "<group>"; };
 		0E85B190194629D500DE5E6C /* BikeTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BikeTableViewCell.m; sourceTree = "<group>"; };
 		0E85B1921946F24700DE5E6C /* AddressBookUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBookUI.framework; path = System/Library/Frameworks/AddressBookUI.framework; sourceTree = SDKROOT; };
@@ -133,12 +148,22 @@
 				0EB161531943D30200A2F96B /* AppDelegate.h */,
 				0EB161541943D30200A2F96B /* AppDelegate.m */,
 				0EB161561943D30200A2F96B /* Main.storyboard */,
+				0E4A5B54196B370C00273EA6 /* InitialViewController.h */,
+				0E4A5B55196B370C00273EA6 /* InitialViewController.m */,
 				0E85B18F194629D500DE5E6C /* BikeTableViewCell.h */,
 				0E85B190194629D500DE5E6C /* BikeTableViewCell.m */,
 				0EB161591943D30200A2F96B /* ViewController.h */,
 				0EB1615A1943D30200A2F96B /* ViewController.m */,
+				0E4A5B57196B462600273EA6 /* StationDetailViewController.h */,
+				0E4A5B58196B462600273EA6 /* StationDetailViewController.m */,
 				0EB1617919440CB900A2F96B /* DivvyStation.h */,
 				0EB1617A19440CB900A2F96B /* DivvyStation.m */,
+				0E4A5B4B196B30CB00273EA6 /* DivvyBikeAnnotation.h */,
+				0E4A5B4C196B30CB00273EA6 /* DivvyBikeAnnotation.m */,
+				0E4A5B4E196B30E600273EA6 /* NoBikesAnnotation.h */,
+				0E4A5B4F196B30E600273EA6 /* NoBikesAnnotation.m */,
+				0E4A5B51196B30F900273EA6 /* NoDocksAnnotation.h */,
+				0E4A5B52196B30F900273EA6 /* NoDocksAnnotation.m */,
 				0EB1615C1943D30200A2F96B /* Images.xcassets */,
 				0EB1614B1943D30200A2F96B /* Supporting Files */,
 			);
@@ -271,10 +296,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0E4A5B56196B370C00273EA6 /* InitialViewController.m in Sources */,
 				0E85B191194629D500DE5E6C /* BikeTableViewCell.m in Sources */,
 				0EB1615B1943D30200A2F96B /* ViewController.m in Sources */,
+				0E4A5B53196B30F900273EA6 /* NoDocksAnnotation.m in Sources */,
 				0EB1617B19440CB900A2F96B /* DivvyStation.m in Sources */,
 				0EB161551943D30200A2F96B /* AppDelegate.m in Sources */,
+				0E4A5B4D196B30CB00273EA6 /* DivvyBikeAnnotation.m in Sources */,
+				0E4A5B50196B30E600273EA6 /* NoBikesAnnotation.m in Sources */,
+				0E4A5B59196B462600273EA6 /* StationDetailViewController.m in Sources */,
 				0EB161511943D30200A2F96B /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

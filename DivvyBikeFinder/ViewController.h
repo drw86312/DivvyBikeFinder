@@ -11,6 +11,6 @@
 
 @interface ViewController : UIViewController
 
-@property MKPointAnnotation *stationAnnotation;
+//@property MKPointAnnotation *stationAnnotation;
 
 @end
