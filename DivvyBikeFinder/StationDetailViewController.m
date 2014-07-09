@@ -7,43 +7,55 @@
 //
 
 #import "StationDetailViewController.h"
+#import <MapKit/MapKit.h>
 
-@interface StationDetailViewController ()
+@interface StationDetailViewController () <CLLocationManagerDelegate, MKMapViewDelegate>
+
+@property CLLocationManager *locationManager;
+@property (weak, nonatomic) IBOutlet MKMapView *mapView;
 
 @end
 
 @implementation StationDetailViewController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-}
+
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
+
+    self.locationManager = [[CLLocationManager alloc] init];
+    [self.locationManager startUpdatingLocation];
+    self.locationManager.delegate = self;
+    [self makeStationDetailView];
 }
 
-- (void)didReceiveMemoryWarning
+-(void)makeStationDetailView
 {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    UIView *backgroundView = [[UIView alloc] initWithFrame:CGRectMake(self.view.frame.origin.x + 10, self.view.frame.origin.x + 75, self.view.frame.size.width - 20, 125)];
+    backgroundView.layer.borderWidth = 1.0f;
+    backgroundView.layer.borderColor = [[UIColor redColor] CGColor];
+    backgroundView.layer.cornerRadius = 5.0f;
+    [self.view addSubview:backgroundView];
 }
 
-/*
-#pragma mark - Navigation
 
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+-(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+    for (CLLocation *location in locations) {
+        if (location.verticalAccuracy < 1000 && location.horizontalAccuracy < 1000) {
+            [self.locationManager stopUpdatingLocation];
+            self.userLocationFromSourceVC = location;
+            CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.userLocationFromSourceVC.coordinate.latitude, self.userLocationFromSourceVC.coordinate.longitude);
+            MKCoordinateSpan span = MKCoordinateSpanMake(.005, .005);
+            MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
+            self.mapView.showsUserLocation = YES;
+            [self.mapView setRegion:region animated:YES];
+            break;
+        }
+    }
 }
-*/
+
+
 
 @end

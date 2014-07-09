@@ -7,11 +7,27 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E0FD84C196CA40A00A26E2B /* DestinationAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0FD84B196CA40A00A26E2B /* DestinationAnnotation.m */; };
 		0E4A5B4D196B30CB00273EA6 /* DivvyBikeAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B4C196B30CB00273EA6 /* DivvyBikeAnnotation.m */; };
 		0E4A5B50196B30E600273EA6 /* NoBikesAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B4F196B30E600273EA6 /* NoBikesAnnotation.m */; };
 		0E4A5B53196B30F900273EA6 /* NoDocksAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B52196B30F900273EA6 /* NoDocksAnnotation.m */; };
 		0E4A5B56196B370C00273EA6 /* InitialViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B55196B370C00273EA6 /* InitialViewController.m */; };
 		0E4A5B59196B462600273EA6 /* StationDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B58196B462600273EA6 /* StationDetailViewController.m */; };
+		0E4A5B62196B4E4D00273EA6 /* MapViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B61196B4E4D00273EA6 /* MapViewController.m */; };
+		0E4A5B68196BA51800273EA6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161441943D30200A2F96B /* Foundation.framework */; };
+		0E4A5B69196BA51800273EA6 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161461943D30200A2F96B /* CoreGraphics.framework */; };
+		0E4A5B6A196BA51800273EA6 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161481943D30200A2F96B /* UIKit.framework */; };
+		0E4A5B70196BA51800273EA6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0E4A5B6E196BA51800273EA6 /* InfoPlist.strings */; };
+		0E4A5B72196BA51800273EA6 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B71196BA51800273EA6 /* main.m */; };
+		0E4A5B76196BA51800273EA6 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B75196BA51800273EA6 /* AppDelegate.m */; };
+		0E4A5B79196BA51800273EA6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0E4A5B77196BA51800273EA6 /* Main.storyboard */; };
+		0E4A5B7C196BA51800273EA6 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B7B196BA51800273EA6 /* ViewController.m */; };
+		0E4A5B7E196BA51800273EA6 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0E4A5B7D196BA51800273EA6 /* Images.xcassets */; };
+		0E4A5B84196BA51800273EA6 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161631943D30200A2F96B /* XCTest.framework */; };
+		0E4A5B85196BA51800273EA6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161441943D30200A2F96B /* Foundation.framework */; };
+		0E4A5B86196BA51800273EA6 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161481943D30200A2F96B /* UIKit.framework */; };
+		0E4A5B8E196BA51800273EA6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0E4A5B8C196BA51800273EA6 /* InfoPlist.strings */; };
+		0E4A5B90196BA51800273EA6 /* CodeChallengeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B8F196BA51800273EA6 /* CodeChallengeTests.m */; };
 		0E85B191194629D500DE5E6C /* BikeTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E85B190194629D500DE5E6C /* BikeTableViewCell.m */; };
 		0E85B1931946F24700DE5E6C /* AddressBookUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E85B1921946F24700DE5E6C /* AddressBookUI.framework */; };
 		0EB161451943D30200A2F96B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161441943D30200A2F96B /* Foundation.framework */; };
@@ -21,7 +37,6 @@
 		0EB161511943D30200A2F96B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0EB161501943D30200A2F96B /* main.m */; };
 		0EB161551943D30200A2F96B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0EB161541943D30200A2F96B /* AppDelegate.m */; };
 		0EB161581943D30200A2F96B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0EB161561943D30200A2F96B /* Main.storyboard */; };
-		0EB1615B1943D30200A2F96B /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0EB1615A1943D30200A2F96B /* ViewController.m */; };
 		0EB1615D1943D30200A2F96B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0EB1615C1943D30200A2F96B /* Images.xcassets */; };
 		0EB161641943D30200A2F96B /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161631943D30200A2F96B /* XCTest.framework */; };
 		0EB161651943D30200A2F96B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161441943D30200A2F96B /* Foundation.framework */; };
@@ -34,6 +49,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		0E4A5B87196BA51800273EA6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0EB161391943D30200A2F96B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0E4A5B66196BA51800273EA6;
+			remoteInfo = CodeChallenge;
+		};
 		0EB161671943D30200A2F96B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0EB161391943D30200A2F96B /* Project object */;
@@ -44,6 +66,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0E0FD84A196CA40A00A26E2B /* DestinationAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DestinationAnnotation.h; path = ../DestinationAnnotation.h; sourceTree = "<group>"; };
+		0E0FD84B196CA40A00A26E2B /* DestinationAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DestinationAnnotation.m; path = ../DestinationAnnotation.m; sourceTree = "<group>"; };
 		0E4A5B4B196B30CB00273EA6 /* DivvyBikeAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DivvyBikeAnnotation.h; sourceTree = "<group>"; };
 		0E4A5B4C196B30CB00273EA6 /* DivvyBikeAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DivvyBikeAnnotation.m; sourceTree = "<group>"; };
 		0E4A5B4E196B30E600273EA6 /* NoBikesAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoBikesAnnotation.h; sourceTree = "<group>"; };
@@ -54,6 +78,23 @@
 		0E4A5B55196B370C00273EA6 /* InitialViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InitialViewController.m; sourceTree = "<group>"; };
 		0E4A5B57196B462600273EA6 /* StationDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StationDetailViewController.h; sourceTree = "<group>"; };
 		0E4A5B58196B462600273EA6 /* StationDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StationDetailViewController.m; sourceTree = "<group>"; };
+		0E4A5B60196B4E4D00273EA6 /* MapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapViewController.h; sourceTree = "<group>"; };
+		0E4A5B61196B4E4D00273EA6 /* MapViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MapViewController.m; sourceTree = "<group>"; };
+		0E4A5B67196BA51800273EA6 /* CodeChallenge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CodeChallenge.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0E4A5B6D196BA51800273EA6 /* CodeChallenge-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CodeChallenge-Info.plist"; sourceTree = "<group>"; };
+		0E4A5B6F196BA51800273EA6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		0E4A5B71196BA51800273EA6 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		0E4A5B73196BA51800273EA6 /* CodeChallenge-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CodeChallenge-Prefix.pch"; sourceTree = "<group>"; };
+		0E4A5B74196BA51800273EA6 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		0E4A5B75196BA51800273EA6 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		0E4A5B78196BA51800273EA6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		0E4A5B7A196BA51800273EA6 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		0E4A5B7B196BA51800273EA6 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		0E4A5B7D196BA51800273EA6 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		0E4A5B83196BA51800273EA6 /* CodeChallengeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CodeChallengeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0E4A5B8B196BA51800273EA6 /* CodeChallengeTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CodeChallengeTests-Info.plist"; sourceTree = "<group>"; };
+		0E4A5B8D196BA51800273EA6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		0E4A5B8F196BA51800273EA6 /* CodeChallengeTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CodeChallengeTests.m; sourceTree = "<group>"; };
 		0E85B18F194629D500DE5E6C /* BikeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BikeTableViewCell.h; sourceTree = "<group>"; };
 		0E85B190194629D500DE5E6C /* BikeTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BikeTableViewCell.m; sourceTree = "<group>"; };
 		0E85B1921946F24700DE5E6C /* AddressBookUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBookUI.framework; path = System/Library/Frameworks/AddressBookUI.framework; sourceTree = SDKROOT; };
@@ -68,8 +109,6 @@
 		0EB161531943D30200A2F96B /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0EB161541943D30200A2F96B /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		0EB161571943D30200A2F96B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		0EB161591943D30200A2F96B /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		0EB1615A1943D30200A2F96B /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		0EB1615C1943D30200A2F96B /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		0EB161621943D30200A2F96B /* DivvyBikeFinderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DivvyBikeFinderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0EB161631943D30200A2F96B /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
@@ -83,6 +122,26 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		0E4A5B64196BA51800273EA6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0E4A5B69196BA51800273EA6 /* CoreGraphics.framework in Frameworks */,
+				0E4A5B6A196BA51800273EA6 /* UIKit.framework in Frameworks */,
+				0E4A5B68196BA51800273EA6 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0E4A5B80196BA51800273EA6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0E4A5B84196BA51800273EA6 /* XCTest.framework in Frameworks */,
+				0E4A5B86196BA51800273EA6 /* UIKit.framework in Frameworks */,
+				0E4A5B85196BA51800273EA6 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		0EB1613E1943D30200A2F96B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -109,11 +168,71 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0E0FD849196CA3DA00A26E2B /* Annotations */ = {
+			isa = PBXGroup;
+			children = (
+				0E0FD84A196CA40A00A26E2B /* DestinationAnnotation.h */,
+				0E0FD84B196CA40A00A26E2B /* DestinationAnnotation.m */,
+				0E4A5B4B196B30CB00273EA6 /* DivvyBikeAnnotation.h */,
+				0E4A5B4C196B30CB00273EA6 /* DivvyBikeAnnotation.m */,
+				0E4A5B4E196B30E600273EA6 /* NoBikesAnnotation.h */,
+				0E4A5B4F196B30E600273EA6 /* NoBikesAnnotation.m */,
+				0E4A5B51196B30F900273EA6 /* NoDocksAnnotation.h */,
+				0E4A5B52196B30F900273EA6 /* NoDocksAnnotation.m */,
+			);
+			name = Annotations;
+			sourceTree = "<group>";
+		};
+		0E4A5B6B196BA51800273EA6 /* CodeChallenge */ = {
+			isa = PBXGroup;
+			children = (
+				0E4A5B74196BA51800273EA6 /* AppDelegate.h */,
+				0E4A5B75196BA51800273EA6 /* AppDelegate.m */,
+				0E4A5B77196BA51800273EA6 /* Main.storyboard */,
+				0E4A5B7A196BA51800273EA6 /* ViewController.h */,
+				0E4A5B7B196BA51800273EA6 /* ViewController.m */,
+				0E4A5B7D196BA51800273EA6 /* Images.xcassets */,
+				0E4A5B6C196BA51800273EA6 /* Supporting Files */,
+			);
+			path = CodeChallenge;
+			sourceTree = "<group>";
+		};
+		0E4A5B6C196BA51800273EA6 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				0E4A5B6D196BA51800273EA6 /* CodeChallenge-Info.plist */,
+				0E4A5B6E196BA51800273EA6 /* InfoPlist.strings */,
+				0E4A5B71196BA51800273EA6 /* main.m */,
+				0E4A5B73196BA51800273EA6 /* CodeChallenge-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		0E4A5B89196BA51800273EA6 /* CodeChallengeTests */ = {
+			isa = PBXGroup;
+			children = (
+				0E4A5B8F196BA51800273EA6 /* CodeChallengeTests.m */,
+				0E4A5B8A196BA51800273EA6 /* Supporting Files */,
+			);
+			path = CodeChallengeTests;
+			sourceTree = "<group>";
+		};
+		0E4A5B8A196BA51800273EA6 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				0E4A5B8B196BA51800273EA6 /* CodeChallengeTests-Info.plist */,
+				0E4A5B8C196BA51800273EA6 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		0EB161381943D30200A2F96B = {
 			isa = PBXGroup;
 			children = (
 				0EB1614A1943D30200A2F96B /* DivvyBikeFinder */,
 				0EB161691943D30200A2F96B /* DivvyBikeFinderTests */,
+				0E4A5B6B196BA51800273EA6 /* CodeChallenge */,
+				0E4A5B89196BA51800273EA6 /* CodeChallengeTests */,
 				0EB161431943D30200A2F96B /* Frameworks */,
 				0EB161421943D30200A2F96B /* Products */,
 			);
@@ -124,6 +243,8 @@
 			children = (
 				0EB161411943D30200A2F96B /* DivvyBikeFinder.app */,
 				0EB161621943D30200A2F96B /* DivvyBikeFinderTests.xctest */,
+				0E4A5B67196BA51800273EA6 /* CodeChallenge.app */,
+				0E4A5B83196BA51800273EA6 /* CodeChallengeTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -152,18 +273,13 @@
 				0E4A5B55196B370C00273EA6 /* InitialViewController.m */,
 				0E85B18F194629D500DE5E6C /* BikeTableViewCell.h */,
 				0E85B190194629D500DE5E6C /* BikeTableViewCell.m */,
-				0EB161591943D30200A2F96B /* ViewController.h */,
-				0EB1615A1943D30200A2F96B /* ViewController.m */,
+				0E4A5B60196B4E4D00273EA6 /* MapViewController.h */,
+				0E4A5B61196B4E4D00273EA6 /* MapViewController.m */,
 				0E4A5B57196B462600273EA6 /* StationDetailViewController.h */,
 				0E4A5B58196B462600273EA6 /* StationDetailViewController.m */,
 				0EB1617919440CB900A2F96B /* DivvyStation.h */,
 				0EB1617A19440CB900A2F96B /* DivvyStation.m */,
-				0E4A5B4B196B30CB00273EA6 /* DivvyBikeAnnotation.h */,
-				0E4A5B4C196B30CB00273EA6 /* DivvyBikeAnnotation.m */,
-				0E4A5B4E196B30E600273EA6 /* NoBikesAnnotation.h */,
-				0E4A5B4F196B30E600273EA6 /* NoBikesAnnotation.m */,
-				0E4A5B51196B30F900273EA6 /* NoDocksAnnotation.h */,
-				0E4A5B52196B30F900273EA6 /* NoDocksAnnotation.m */,
+				0E0FD849196CA3DA00A26E2B /* Annotations */,
 				0EB1615C1943D30200A2F96B /* Images.xcassets */,
 				0EB1614B1943D30200A2F96B /* Supporting Files */,
 			);
@@ -202,6 +318,41 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		0E4A5B66196BA51800273EA6 /* CodeChallenge */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0E4A5B91196BA51800273EA6 /* Build configuration list for PBXNativeTarget "CodeChallenge" */;
+			buildPhases = (
+				0E4A5B63196BA51800273EA6 /* Sources */,
+				0E4A5B64196BA51800273EA6 /* Frameworks */,
+				0E4A5B65196BA51800273EA6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CodeChallenge;
+			productName = CodeChallenge;
+			productReference = 0E4A5B67196BA51800273EA6 /* CodeChallenge.app */;
+			productType = "com.apple.product-type.application";
+		};
+		0E4A5B82196BA51800273EA6 /* CodeChallengeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0E4A5B94196BA51800273EA6 /* Build configuration list for PBXNativeTarget "CodeChallengeTests" */;
+			buildPhases = (
+				0E4A5B7F196BA51800273EA6 /* Sources */,
+				0E4A5B80196BA51800273EA6 /* Frameworks */,
+				0E4A5B81196BA51800273EA6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0E4A5B88196BA51800273EA6 /* PBXTargetDependency */,
+			);
+			name = CodeChallengeTests;
+			productName = CodeChallengeTests;
+			productReference = 0E4A5B83196BA51800273EA6 /* CodeChallengeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		0EB161401943D30200A2F96B /* DivvyBikeFinder */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0EB161731943D30200A2F96B /* Build configuration list for PBXNativeTarget "DivvyBikeFinder" */;
@@ -246,6 +397,9 @@
 				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = "Mobile Makers";
 				TargetAttributes = {
+					0E4A5B82196BA51800273EA6 = {
+						TestTargetID = 0EB161401943D30200A2F96B;
+					};
 					0EB161611943D30200A2F96B = {
 						TestTargetID = 0EB161401943D30200A2F96B;
 					};
@@ -266,11 +420,31 @@
 			targets = (
 				0EB161401943D30200A2F96B /* DivvyBikeFinder */,
 				0EB161611943D30200A2F96B /* DivvyBikeFinderTests */,
+				0E4A5B66196BA51800273EA6 /* CodeChallenge */,
+				0E4A5B82196BA51800273EA6 /* CodeChallengeTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		0E4A5B65196BA51800273EA6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0E4A5B7E196BA51800273EA6 /* Images.xcassets in Resources */,
+				0E4A5B70196BA51800273EA6 /* InfoPlist.strings in Resources */,
+				0E4A5B79196BA51800273EA6 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0E4A5B81196BA51800273EA6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0E4A5B8E196BA51800273EA6 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		0EB1613F1943D30200A2F96B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -292,20 +466,39 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		0E4A5B63196BA51800273EA6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0E4A5B7C196BA51800273EA6 /* ViewController.m in Sources */,
+				0E4A5B76196BA51800273EA6 /* AppDelegate.m in Sources */,
+				0E4A5B72196BA51800273EA6 /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0E4A5B7F196BA51800273EA6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0E4A5B90196BA51800273EA6 /* CodeChallengeTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		0EB1613D1943D30200A2F96B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				0E4A5B56196B370C00273EA6 /* InitialViewController.m in Sources */,
 				0E85B191194629D500DE5E6C /* BikeTableViewCell.m in Sources */,
-				0EB1615B1943D30200A2F96B /* ViewController.m in Sources */,
 				0E4A5B53196B30F900273EA6 /* NoDocksAnnotation.m in Sources */,
 				0EB1617B19440CB900A2F96B /* DivvyStation.m in Sources */,
 				0EB161551943D30200A2F96B /* AppDelegate.m in Sources */,
 				0E4A5B4D196B30CB00273EA6 /* DivvyBikeAnnotation.m in Sources */,
 				0E4A5B50196B30E600273EA6 /* NoBikesAnnotation.m in Sources */,
+				0E0FD84C196CA40A00A26E2B /* DestinationAnnotation.m in Sources */,
 				0E4A5B59196B462600273EA6 /* StationDetailViewController.m in Sources */,
 				0EB161511943D30200A2F96B /* main.m in Sources */,
+				0E4A5B62196B4E4D00273EA6 /* MapViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,6 +513,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		0E4A5B88196BA51800273EA6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0E4A5B66196BA51800273EA6 /* CodeChallenge */;
+			targetProxy = 0E4A5B87196BA51800273EA6 /* PBXContainerItemProxy */;
+		};
 		0EB161681943D30200A2F96B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 0EB161401943D30200A2F96B /* DivvyBikeFinder */;
@@ -328,6 +526,30 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		0E4A5B6E196BA51800273EA6 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0E4A5B6F196BA51800273EA6 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		0E4A5B77196BA51800273EA6 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0E4A5B78196BA51800273EA6 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		0E4A5B8C196BA51800273EA6 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0E4A5B8D196BA51800273EA6 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
 		0EB1614D1943D30200A2F96B /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -355,6 +577,76 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		0E4A5B92196BA51800273EA6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "CodeChallenge/CodeChallenge-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "CodeChallenge/CodeChallenge-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		0E4A5B93196BA51800273EA6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "CodeChallenge/CodeChallenge-Prefix.pch";
+				INFOPLIST_FILE = "CodeChallenge/CodeChallenge-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		0E4A5B95196BA51800273EA6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/DivvyBikeFinder.app/DivvyBikeFinder";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "CodeChallenge/CodeChallenge-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "CodeChallengeTests/CodeChallengeTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		0E4A5B96196BA51800273EA6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/DivvyBikeFinder.app/DivvyBikeFinder";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "CodeChallenge/CodeChallenge-Prefix.pch";
+				INFOPLIST_FILE = "CodeChallengeTests/CodeChallengeTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
 		0EB161711943D30200A2F96B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -494,6 +786,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		0E4A5B91196BA51800273EA6 /* Build configuration list for PBXNativeTarget "CodeChallenge" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0E4A5B92196BA51800273EA6 /* Debug */,
+				0E4A5B93196BA51800273EA6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0E4A5B94196BA51800273EA6 /* Build configuration list for PBXNativeTarget "CodeChallengeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0E4A5B95196BA51800273EA6 /* Debug */,
+				0E4A5B96196BA51800273EA6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		0EB1613C1943D30200A2F96B /* Build configuration list for PBXProject "DivvyBikeFinder" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

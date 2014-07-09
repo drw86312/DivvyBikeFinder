@@ -7,7 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "DivvyStation.h"
+#import <MapKit/MapKit.h>
 
 @interface StationDetailViewController : UIViewController
+
+@property DivvyStation *stationFromSourceVC;
+@property CLLocation *userLocationFromSourceVC;
+@property NSString *userLocationStringFromSource;
 
 @end
