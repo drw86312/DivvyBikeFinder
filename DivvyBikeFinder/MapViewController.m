@@ -23,6 +23,8 @@
 @property CLLocationManager *locationManager;
 @property CLLocation *userLocation;
 @property NSArray *divvyStations;
+@property NSArray *stationsNearOrigin;
+@property NSArray *stationsNearDestination;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UIButton *locationButtonOutlet;
 @property (weak, nonatomic) IBOutlet UISearchBar *fromSearchField;
@@ -31,6 +33,7 @@
 @property NSString *userDestinationString;
 @property (weak, nonatomic) IBOutlet UIButton *currentLocationButtonOutlet;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *segmentedControl;
+@property BOOL searchEnabled;
 
 @end
 
@@ -45,7 +48,8 @@
     self.locationManager = [[CLLocationManager alloc] init];
     [self.locationManager startUpdatingLocation];
     self.locationManager.delegate = self;
-    [self createTimer];
+    self.searchEnabled = NO;
+//    [self createTimer];
 }
 
 #pragma mark - Location manager methods
@@ -72,8 +76,14 @@
 
 - (IBAction)onRefreshButtonPressed:(id)sender
 {
-    [self createTimer];
+    [self.mapView removeAnnotations:self.mapView.annotations];
+    self.searchEnabled = NO;
+//    [self createTimer];
     [self.locationManager startUpdatingLocation];
+
+    if (self.searchEnabled) {
+        NSLog(@"Search is enabled");
+    }
 }
 - (IBAction)onUseCurrentLocationPressed:(id)sender
 {
@@ -84,9 +94,13 @@
 -(void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
     [self.mapView removeAnnotations:self.mapView.annotations];
+    self.searchEnabled = YES;
     self.userDestinationString = self.destinationSearchField.text;
-    [self getDestinationFromName];
     [self.destinationSearchField endEditing:YES];
+
+    self.destinationSearchField.text = nil;
+    self.fromSearchField.text = nil;
+    [self getDestinationFromName];
 }
 
 -(void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
@@ -227,6 +241,8 @@
             CLLocation *destinationLocation = [[CLLocation alloc] initWithLatitude:mapItem.placemark.coordinate.latitude longitude:mapItem.placemark.coordinate.longitude];
             CGFloat distanceToDestination = [destinationLocation distanceFromLocation:self.userLocation];
 
+            [self findDivvyStations:destinationLocation];
+
             DestinationAnnotation *destinationAnnotation = [[DestinationAnnotation alloc] init];
             destinationAnnotation.coordinate = mapItem.placemark.coordinate;
             destinationAnnotation.title = mapItem.name;
@@ -238,7 +254,6 @@
         else {
             [self getDestinationFromAddress];
         }
-
     }];
 }
 
@@ -255,6 +270,8 @@
             CLLocation *destinationLocation = [[CLLocation alloc] initWithLatitude:placemark.coordinate.latitude longitude:placemark.coordinate.longitude];
             CGFloat distanceToDestination = [destinationLocation distanceFromLocation:self.userLocation];
 
+            [self findDivvyStations:destinationLocation];
+
             DestinationAnnotation *destinationAnnotation = [[DestinationAnnotation alloc] init];
             destinationAnnotation.coordinate = placemark.coordinate;
             destinationAnnotation.title = placemark.name;
@@ -263,7 +280,71 @@
             [self.mapView addAnnotation:destinationAnnotation];
             [self redrawMapViewWithCurrentLocation:self.userLocation.coordinate andDestination:destinationLocation.coordinate];
         }
+        else {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Sorry" message:[NSString stringWithFormat:@"No results found matching %@", self.userDestinationString] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+            [alert show];
+            self.searchEnabled = NO;
+        }
     }];
+}
+
+-(void)findDivvyStations:(CLLocation *)destinationLocation
+{
+    // Find three nearest Divvy Stations to user, provided they have available bikes, and add to stationsNearOriginArray.
+    NSInteger counter = 0;
+    NSMutableArray *tempArray = [NSMutableArray new];
+    while (counter < 3) {
+        DivvyStation *divvyStation = [self.divvyStations objectAtIndex:counter];
+        if (divvyStation.availableBikes > 0) {
+            [tempArray addObject:divvyStation];
+
+            DivvyBikeAnnotation *divvyBikesPin = [[DivvyBikeAnnotation alloc] init];
+            divvyBikesPin.coordinate = divvyStation.coordinate;
+            [self.mapView addAnnotation:divvyBikesPin];
+        }
+        counter += 1;
+    }
+    self.stationsNearOrigin = [NSArray arrayWithArray:tempArray];
+
+    // Find three nearest Divvy Stations to the user's destination, provided they have available docks, and add to stationsNearDestinationArray.
+
+    // Assign the distanceFromDestination property to each station in the divvyStations array.
+    NSMutableArray *tempArray2 = [NSMutableArray new];
+    for (DivvyStation *divvyStation in self.divvyStations) {
+        CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:divvyStation.latitude.floatValue longitude:divvyStation.longitude.floatValue];
+        divvyStation.distanceFromDestination = [destinationLocation distanceFromLocation:stationLocation];
+        [tempArray2 addObject:divvyStation];
+    }
+
+    // Sort the temporary array by distance to destination
+    NSSortDescriptor *distanceDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distanceFromDestination" ascending:YES];
+    NSArray *sortDescriptors = @[distanceDescriptor];
+    NSArray *divvyStationsArray = [tempArray2 sortedArrayUsingDescriptors:sortDescriptors];
+
+    // Find first three stations closest to the user's destination, provided docks are available.
+    NSInteger counter2 = 0;
+    NSMutableArray *tempArray3 = [NSMutableArray new];
+    while (counter2 < 3) {
+        DivvyStation *divvyStation = [divvyStationsArray objectAtIndex:counter2];
+        if (divvyStation.availableDocks > 0) {
+            [tempArray3 addObject:divvyStation];
+
+            DivvyBikeAnnotation *divvyBikesPin = [[DivvyBikeAnnotation alloc] init];
+            divvyBikesPin.coordinate = divvyStation.coordinate;
+            [self.mapView addAnnotation:divvyBikesPin];
+        }
+        counter2 += 1;
+    }
+    self.stationsNearDestination = [NSArray arrayWithArray:tempArray3];
+
+
+    if (self.stationsNearDestination.count > 0 && self.stationsNearOrigin.count > 0) {
+        [self.tableView reloadData];
+    }
+    else {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Sorry" message:@"Unable to locate nearby Divvy Bike stations" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        [alert show];
+    }
 }
 
 -(void)redrawMapViewWithCurrentLocation:(CLLocationCoordinate2D)userLocation andDestination:(CLLocationCoordinate2D)desinationLocation
@@ -283,8 +364,8 @@
         region.center.longitude = topLeftCoord.longitude + (bottomRightCoord.longitude - topLeftCoord.longitude) * 0.5;
 
         // Adding edge map
-        region.span.latitudeDelta = fabs(topLeftCoord.latitude - bottomRightCoord.latitude) * 1.3;
-        region.span.longitudeDelta = fabs(bottomRightCoord.longitude - topLeftCoord.longitude) * 1.3;
+        region.span.latitudeDelta = fabs(topLeftCoord.latitude - bottomRightCoord.latitude) * 1.9;
+        region.span.longitudeDelta = fabs(bottomRightCoord.longitude - topLeftCoord.longitude) * 1.9;
 
         region = [self.mapView regionThatFits:region];
         [self.mapView setRegion:region animated:YES];
@@ -292,15 +373,15 @@
 
 #pragma mark - Timer methods
 
--(void)createTimer
-{
-    self.timer = [NSTimer scheduledTimerWithTimeInterval:60.0 target:self selector:@selector(timer:) userInfo:nil repeats:YES];
-}
-
--(void)timer:(NSTimer *)timer
-{
-    [self getJSON];
-}
+//-(void)createTimer
+//{
+//    self.timer = [NSTimer scheduledTimerWithTimeInterval:60.0 target:self selector:@selector(timer:) userInfo:nil repeats:YES];
+//}
+//
+//-(void)timer:(NSTimer *)timer
+//{
+//    [self getJSON];
+//}
 
 -(void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
 {
@@ -309,46 +390,122 @@
 
 #pragma mark - Tableview methods
 
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    if (self.searchEnabled) {
+        return 2;
+    }
+    else {
+        return 1;
+    }
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    if (section == 0) {
+        return @"Stations Near You";
+    }
+    else {
+        return @"Stations Near Your Destination";
+    }
+}
+
+
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return self.divvyStations.count;
+    if (self.searchEnabled) {
+        if (section == 0) {
+            return self.stationsNearOrigin.count;
+        }
+        else if (section == 1) {
+            return self.stationsNearDestination.count;
+        }
+    }
+    else {
+        return self.divvyStations.count;
+    }
+
+    return 0;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    DivvyStation *divvyStation = [self.divvyStations objectAtIndex:indexPath.row];
-    BikeTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
-    cell.backgroundColor = [UIColor blackColor];
+    if (self.searchEnabled) {
+        NSLog(@"I ran");
 
-    cell.stationLabel.text = divvyStation.stationName;
-    cell.stationLabel.textColor = [UIColor whiteColor];
+        BikeTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
 
-    cell.bikesLabel.text = [NSString stringWithFormat:@"Bikes\n%@", divvyStation.availableBikes.description];
-    cell.bikesLabel.textColor = [UIColor whiteColor];
+        if (indexPath.section == 0) {
+            DivvyStation *divvyStation = [self.stationsNearOrigin objectAtIndex:indexPath.row];
+            cell.backgroundColor = [UIColor blackColor];
 
-    cell.docksLabel.text = [NSString stringWithFormat:@"Docks\n%@", divvyStation.availableDocks.description];
-    cell.docksLabel.textColor = [UIColor whiteColor];
+            cell.stationLabel.text = divvyStation.stationName;
+            cell.stationLabel.textColor = [UIColor whiteColor];
 
-    NSString *milesFromUser = [NSString stringWithFormat:@"%.02f miles", divvyStation.distanceFromUser * 0.000621371];
-    cell.distanceLabel.text = milesFromUser;
+            cell.bikesLabel.text = [NSString stringWithFormat:@"Bikes\n%@", divvyStation.availableBikes.description];
+            cell.bikesLabel.textColor = [UIColor whiteColor];
 
+            cell.docksLabel.text = [NSString stringWithFormat:@"Docks\n%@", divvyStation.availableDocks.description];
+            cell.docksLabel.textColor = [UIColor whiteColor];
 
-    if (divvyStation.availableBikes.floatValue < 1) {
-        cell.bikesLabel.textColor = [UIColor redColor];
+            NSString *milesFromUser = [NSString stringWithFormat:@"%.02f miles", divvyStation.distanceFromUser * 0.000621371];
+            cell.distanceLabel.text = milesFromUser;
+            }
+
+        else {
+            DivvyStation *divvyStation = [self.stationsNearDestination objectAtIndex:indexPath.row];
+
+            cell.backgroundColor = [UIColor blackColor];
+
+            cell.stationLabel.text = divvyStation.stationName;
+            cell.stationLabel.textColor = [UIColor whiteColor];
+
+            cell.bikesLabel.text = [NSString stringWithFormat:@"Bikes\n%@", divvyStation.availableBikes.description];
+            cell.bikesLabel.textColor = [UIColor whiteColor];
+
+            cell.docksLabel.text = [NSString stringWithFormat:@"Docks\n%@", divvyStation.availableDocks.description];
+            cell.docksLabel.textColor = [UIColor whiteColor];
+
+            NSString *milesFromUser = [NSString stringWithFormat:@"%.02f miles from %@", divvyStation.distanceFromDestination * 0.000621371, self.userDestinationString];
+            cell.distanceLabel.text = milesFromUser;
+        }
+        return cell;
     }
-    else
-    {
+
+    else {
+        DivvyStation *divvyStation = [self.divvyStations objectAtIndex:indexPath.row];
+        BikeTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
+        cell.backgroundColor = [UIColor blackColor];
+
+        cell.stationLabel.text = divvyStation.stationName;
+        cell.stationLabel.textColor = [UIColor whiteColor];
+
+        cell.bikesLabel.text = [NSString stringWithFormat:@"Bikes\n%@", divvyStation.availableBikes.description];
         cell.bikesLabel.textColor = [UIColor whiteColor];
-    }
-    if (divvyStation.availableDocks.floatValue < 1) {
-        cell.docksLabel.textColor = [UIColor redColor];
-    }
-    else
-    {
+
+        cell.docksLabel.text = [NSString stringWithFormat:@"Docks\n%@", divvyStation.availableDocks.description];
         cell.docksLabel.textColor = [UIColor whiteColor];
-    }
-    return cell;
+
+        NSString *milesFromUser = [NSString stringWithFormat:@"%.02f miles", divvyStation.distanceFromUser * 0.000621371];
+        cell.distanceLabel.text = milesFromUser;
+
+            if (divvyStation.availableBikes.floatValue < 1) {
+                cell.bikesLabel.textColor = [UIColor redColor];
+            }
+            else {
+                cell.bikesLabel.textColor = [UIColor whiteColor];
+            }
+            if (divvyStation.availableDocks.floatValue < 1) {
+                cell.docksLabel.textColor = [UIColor redColor];
+            }
+            else {
+            cell.docksLabel.textColor = [UIColor whiteColor];
+            }
+        return cell;
+        }
+    return nil;
 }
+
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
@@ -365,12 +522,10 @@
 {
     if ([sender selectedSegmentIndex] == 0) {
         self.mapView.hidden = NO;
-        self.currentLocationButtonOutlet.hidden = NO;
         self.tableView.hidden = YES;
     }
     else
     {
-        self.currentLocationButtonOutlet.hidden = YES;
         self.mapView.hidden = YES;
         self.tableView.hidden = NO;
     }
@@ -392,7 +547,7 @@
     self.navigationItem.title = @"Divvy Bike Finder";
 
     //Current location button
-    self.currentLocationButtonOutlet.titleLabel.textColor = [UIColor blueColor];
+    [self.currentLocationButtonOutlet setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
     self.currentLocationButtonOutlet.backgroundColor = [UIColor clearColor];
     self.currentLocationButtonOutlet.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
 

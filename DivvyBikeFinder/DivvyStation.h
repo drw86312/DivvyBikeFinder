@@ -14,6 +14,7 @@
 
 @property (nonatomic) CLLocationCoordinate2D coordinate;
 @property (nonatomic, assign) CLLocationDistance distanceFromUser;
+@property (nonatomic, assign) CLLocationDistance distanceFromDestination;
 
 @property NSNumber *identifier;
 @property NSString *stationName;
