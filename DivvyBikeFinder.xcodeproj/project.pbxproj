@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0E0FD84C196CA40A00A26E2B /* DestinationAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0FD84B196CA40A00A26E2B /* DestinationAnnotation.m */; };
+		0E1E759419809A2A00357F31 /* SearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E1E759319809A2A00357F31 /* SearchViewController.m */; };
 		0E4A5B4D196B30CB00273EA6 /* DivvyBikeAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B4C196B30CB00273EA6 /* DivvyBikeAnnotation.m */; };
 		0E4A5B50196B30E600273EA6 /* NoBikesAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B4F196B30E600273EA6 /* NoBikesAnnotation.m */; };
 		0E4A5B53196B30F900273EA6 /* NoDocksAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B52196B30F900273EA6 /* NoDocksAnnotation.m */; };
@@ -30,6 +31,7 @@
 		0E4A5B90196BA51800273EA6 /* CodeChallengeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B8F196BA51800273EA6 /* CodeChallengeTests.m */; };
 		0E85B191194629D500DE5E6C /* BikeTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E85B190194629D500DE5E6C /* BikeTableViewCell.m */; };
 		0E85B1931946F24700DE5E6C /* AddressBookUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E85B1921946F24700DE5E6C /* AddressBookUI.framework */; };
+		0E918D7C1982039E006041B2 /* TripTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E918D7B1982039E006041B2 /* TripTableViewCell.m */; };
 		0EB161451943D30200A2F96B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161441943D30200A2F96B /* Foundation.framework */; };
 		0EB161471943D30200A2F96B /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161461943D30200A2F96B /* CoreGraphics.framework */; };
 		0EB161491943D30200A2F96B /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EB161481943D30200A2F96B /* UIKit.framework */; };
@@ -68,6 +70,8 @@
 /* Begin PBXFileReference section */
 		0E0FD84A196CA40A00A26E2B /* DestinationAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DestinationAnnotation.h; path = ../DestinationAnnotation.h; sourceTree = "<group>"; };
 		0E0FD84B196CA40A00A26E2B /* DestinationAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DestinationAnnotation.m; path = ../DestinationAnnotation.m; sourceTree = "<group>"; };
+		0E1E759219809A2A00357F31 /* SearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchViewController.h; sourceTree = "<group>"; };
+		0E1E759319809A2A00357F31 /* SearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchViewController.m; sourceTree = "<group>"; };
 		0E4A5B4B196B30CB00273EA6 /* DivvyBikeAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DivvyBikeAnnotation.h; sourceTree = "<group>"; };
 		0E4A5B4C196B30CB00273EA6 /* DivvyBikeAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DivvyBikeAnnotation.m; sourceTree = "<group>"; };
 		0E4A5B4E196B30E600273EA6 /* NoBikesAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoBikesAnnotation.h; sourceTree = "<group>"; };
@@ -98,6 +102,8 @@
 		0E85B18F194629D500DE5E6C /* BikeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BikeTableViewCell.h; sourceTree = "<group>"; };
 		0E85B190194629D500DE5E6C /* BikeTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BikeTableViewCell.m; sourceTree = "<group>"; };
 		0E85B1921946F24700DE5E6C /* AddressBookUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBookUI.framework; path = System/Library/Frameworks/AddressBookUI.framework; sourceTree = SDKROOT; };
+		0E918D7A1982039E006041B2 /* TripTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TripTableViewCell.h; sourceTree = "<group>"; };
+		0E918D7B1982039E006041B2 /* TripTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TripTableViewCell.m; sourceTree = "<group>"; };
 		0EB161411943D30200A2F96B /* DivvyBikeFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DivvyBikeFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0EB161441943D30200A2F96B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		0EB161461943D30200A2F96B /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -269,12 +275,16 @@
 				0EB161531943D30200A2F96B /* AppDelegate.h */,
 				0EB161541943D30200A2F96B /* AppDelegate.m */,
 				0EB161561943D30200A2F96B /* Main.storyboard */,
+				0E918D7A1982039E006041B2 /* TripTableViewCell.h */,
+				0E918D7B1982039E006041B2 /* TripTableViewCell.m */,
 				0E4A5B54196B370C00273EA6 /* InitialViewController.h */,
 				0E4A5B55196B370C00273EA6 /* InitialViewController.m */,
 				0E85B18F194629D500DE5E6C /* BikeTableViewCell.h */,
 				0E85B190194629D500DE5E6C /* BikeTableViewCell.m */,
 				0E4A5B60196B4E4D00273EA6 /* MapViewController.h */,
 				0E4A5B61196B4E4D00273EA6 /* MapViewController.m */,
+				0E1E759219809A2A00357F31 /* SearchViewController.h */,
+				0E1E759319809A2A00357F31 /* SearchViewController.m */,
 				0E4A5B57196B462600273EA6 /* StationDetailViewController.h */,
 				0E4A5B58196B462600273EA6 /* StationDetailViewController.m */,
 				0EB1617919440CB900A2F96B /* DivvyStation.h */,
@@ -496,8 +506,10 @@
 				0E4A5B4D196B30CB00273EA6 /* DivvyBikeAnnotation.m in Sources */,
 				0E4A5B50196B30E600273EA6 /* NoBikesAnnotation.m in Sources */,
 				0E0FD84C196CA40A00A26E2B /* DestinationAnnotation.m in Sources */,
+				0E918D7C1982039E006041B2 /* TripTableViewCell.m in Sources */,
 				0E4A5B59196B462600273EA6 /* StationDetailViewController.m in Sources */,
 				0EB161511943D30200A2F96B /* main.m in Sources */,
+				0E1E759419809A2A00357F31 /* SearchViewController.m in Sources */,
 				0E4A5B62196B4E4D00273EA6 /* MapViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
