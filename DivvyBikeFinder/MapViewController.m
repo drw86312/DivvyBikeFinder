@@ -16,6 +16,7 @@
 #import "NoBikesAnnotation.h"
 #import "StationDetailViewController.h"
 #import "SearchViewController.h"
+#import "UIColor+DesignColors.h"
 
 @interface MapViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate>
 
@@ -28,6 +29,9 @@
 @property NSString *userLocationString;
 @property NSString *userDestinationString;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *segmentedControl;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *searchButtonOutlet;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *refreshButtonOutlet;
 
 @end
 
@@ -36,11 +40,17 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+
+    // Don't enable these buttons until, Divvy API call has completed.
+    self.searchButtonOutlet.enabled = NO;
+    self.refreshButtonOutlet.enabled = NO;
+
     [self setStyle];
 
     self.locationManager = [[CLLocationManager alloc] init];
     [self.locationManager startUpdatingLocation];
     self.locationManager.delegate = self;
+    self.activityIndicator.hidden = YES;
 }
 
 #pragma mark - Location manager methods
@@ -52,7 +62,7 @@
             [self.locationManager stopUpdatingLocation];
             self.userLocation = location;
             CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.userLocation.coordinate.latitude, self.userLocation.coordinate.longitude);
-            MKCoordinateSpan span = MKCoordinateSpanMake(.03, .03);
+            MKCoordinateSpan span = MKCoordinateSpanMake(.025, .025);
             MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
             self.mapView.showsUserLocation = YES;
             [self.mapView setRegion:region animated:YES];
@@ -75,6 +85,9 @@
 
 -(void)getJSON
 {
+    self.activityIndicator.hidden = NO;
+    [self.activityIndicator startAnimating];
+
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
     NSString *urlString = @"http://www.divvybikes.com/stations/json";
     NSURL *url = [NSURL URLWithString:urlString];
@@ -82,6 +95,14 @@
 
     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError)
      {
+         if (connectionError) {
+             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Unable to Connect to Divvy" message:@"Try again later" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+             [alert show];
+             self.refreshButtonOutlet.enabled = YES;
+         }
+
+         else {
+
          NSDictionary *dictionary  = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&connectionError];
 
          NSArray *stationsArray = [dictionary objectForKey:@"stationBeanList"];
@@ -144,7 +165,12 @@
          NSArray *divvyStationsArray = [NSArray arrayWithArray:tempArray];
          self.divvyStations = [divvyStationsArray sortedArrayUsingDescriptors:sortDescriptors];
          [self.tableView reloadData];
-     }];
+        }
+    self.activityIndicator.hidden = YES;
+    [self.activityIndicator stopAnimating];
+    self.searchButtonOutlet.enabled = YES;
+    self.refreshButtonOutlet.enabled = YES;
+    }];
 }
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
@@ -179,15 +205,6 @@
 
 #pragma mark - Timer methods
 
-//-(void)createTimer
-//{
-//    self.timer = [NSTimer scheduledTimerWithTimeInterval:60.0 target:self selector:@selector(timer:) userInfo:nil repeats:YES];
-//}
-//
-//-(void)timer:(NSTimer *)timer
-//{
-//    [self getJSON];
-//}
 
 -(void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
 {
@@ -207,7 +224,7 @@
         DivvyStation *divvyStation = [self.divvyStations objectAtIndex:indexPath.row];
         BikeTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
 
-        cell.backgroundColor = [UIColor blackColor];
+        cell.backgroundColor = [UIColor divvyColor];
 
         cell.stationLabel.text = divvyStation.stationName;
         cell.stationLabel.textColor = [UIColor whiteColor];
@@ -239,19 +256,12 @@
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    if ([segue.identifier isEqualToString:@"search"]) {
-        SearchViewController *nextViewController = segue.destinationViewController;
-        nextViewController.divvyStations = self.divvyStations;
-    }
-    
-    else {
     NSIndexPath *selectedIndexPath = self.tableView.indexPathForSelectedRow;
     DivvyStation *station = [self.divvyStations objectAtIndex:selectedIndexPath.row];
     StationDetailViewController *detailViewController = segue.destinationViewController;
     detailViewController.stationFromSourceVC = station;
     detailViewController.userLocationFromSourceVC = self.userLocation;
     detailViewController.userLocationStringFromSource = self.userLocationString;
-    }
 }
 
 #pragma  mark - Toggle logic methods
@@ -280,16 +290,27 @@
 
     //Set backgroundview
     self.view.backgroundColor = [UIColor whiteColor];
-
-    self.navigationItem.title = @"Divvy Bike Finder";
+    self.navigationItem.title = @"Divvy & Conquer";
 
     //Segmented control
-    self.segmentedControl.backgroundColor = [UIColor blueColor];
+    self.segmentedControl.backgroundColor = [UIColor divvyColor];
     self.segmentedControl.tintColor = [UIColor whiteColor];
-    self.segmentedControl.layer.borderColor = [[UIColor blueColor] CGColor];
+    self.segmentedControl.layer.borderColor = [[UIColor divvyColor] CGColor];
     self.segmentedControl.layer.borderWidth = 1.0f;
     self.segmentedControl.layer.cornerRadius = 5.0f;
     self.segmentedControl.alpha = .8f;
+
+    // Activity indicator
+    self.activityIndicator.color = [UIColor divvyColor];
+
+    // Search button
+    self.searchButtonOutlet.tintColor = [UIColor divvyColor];
+
+    // Refresh button
+    self.refreshButtonOutlet.tintColor = [UIColor divvyColor];
+
+    //Tab bar
+    [self.tabBarController.tabBar setSelectedImageTintColor:[UIColor divvyColor]];
 }
 
 @end

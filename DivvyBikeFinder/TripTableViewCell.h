@@ -13,6 +13,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *tripLabel;
 @property (weak, nonatomic) IBOutlet UILabel *distanceLabel;
 @property (weak, nonatomic) IBOutlet UILabel *etaLabel;
+@property (weak, nonatomic) IBOutlet UILabel *titleLabel;
 
 
 

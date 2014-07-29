@@ -19,7 +19,6 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [self performSegueWithIdentifier:@"next" sender:self];
     
 }
 
