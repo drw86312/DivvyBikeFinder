@@ -7,8 +7,16 @@
 //
 
 #import "StationDetailViewController.h"
+#import "DivvyBikeAnnotation.h"
 #import "UIColor+DesignColors.h"
 #import <MapKit/MapKit.h>
+#import "YelpLocation.h"
+#import "FoodAnnotation.h"
+#import "DrinkAnnotation.h"
+#import "ShopAnnotation.h"
+#import "MusicAnnotation.h"
+#import "SightseeAnnotation.h"
+#import "TDOAuth.h"
 
 @interface StationDetailViewController () <CLLocationManagerDelegate, MKMapViewDelegate>
 
@@ -16,6 +24,17 @@
 @property UIView *backgroundView;
 @property NSMutableArray *buttonsArray;
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
+@property NSArray *yelpLocations;
+@property NSInteger counter;
+@property NSInteger counter2;
+@property UIActivityIndicatorView *activityIndicator;
+@property id request;
+@property BOOL foodSearch;
+@property BOOL drinkSearch;
+@property BOOL shopSearch;
+@property BOOL sightseeSearch;
+@property BOOL musicSearch;
+
 
 @end
 
@@ -28,8 +47,10 @@
     [super viewDidLoad];
 
     self.locationManager = [[CLLocationManager alloc] init];
-    [self.locationManager startUpdatingLocation];
+//    [self.locationManager startUpdatingLocation];
     self.locationManager.delegate = self;
+    [self disableSearchBooleans];
+    [self setMapViewandPlacePin];
     [self makeStationDetailView];
 }
 
@@ -39,7 +60,7 @@
     CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
     CGFloat navBarHeight = self.navigationController.navigationBar.frame.size.height;
 
-    CGFloat backgroundViewHeight = 120.0f;
+    CGFloat backgroundViewHeight = 100.0f;
     CGFloat verticalOffset = 5.0f;
     CGFloat horizontalOffset = 5.0f;
 
@@ -63,9 +84,19 @@
     addressLabel.textColor = [UIColor divvyColor];
     [addressLabel setFont:[UIFont fontWithName:@"Helvetica Neue" size:15]];
 
-    NSLog(@"City: %@", self.stationFromSourceVC.city);
     [self.backgroundView addSubview:addressLabel];
 
+    // Create the activity indicator
+    CGFloat indicatorWidth = 50.0f;
+    CGFloat indicatorHeight = 50.0f;
+
+    self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    self.activityIndicator.frame = CGRectMake((self.view.frame.size.width/2) - (indicatorWidth/2), (self.view.frame.size.height/2) - (indicatorHeight/2), indicatorWidth, indicatorHeight);
+    self.activityIndicator.color = [UIColor divvyColor];
+    self.activityIndicator.hidden = YES;
+    [self.view addSubview:self.activityIndicator];
+
+    // Make buttons
     [self makeExploreButtons];
 }
 
@@ -89,7 +120,7 @@
     CGFloat verticalOffset = self.backgroundView.frame.origin.y + self.backgroundView.frame.size.height + spacing;
     CGFloat horizontalOffset = 10.0f;
     CGFloat buttonWidth = (self.backgroundView.frame.size.width - ((self.buttonsArray.count - 1) * spacing))/ self.buttonsArray.count;
-    CGFloat buttonHeight = buttonWidth;
+    CGFloat buttonHeight = 40.0f;
 
     for (UIButton *button in self.buttonsArray) {
         button.frame = CGRectMake(horizontalOffset, verticalOffset, buttonWidth, buttonHeight);
@@ -106,7 +137,7 @@
     [button2 setTitle:@"Drink" forState:UIControlStateNormal];
     [button3 setTitle:@"Shop" forState:UIControlStateNormal];
     [button4 setTitle:@"Sightsee" forState:UIControlStateNormal];
-    [button5 setTitle:@"Transit" forState:UIControlStateNormal];
+    [button5 setTitle:@"Music" forState:UIControlStateNormal];
 
     [button1 addTarget:self
                action:@selector(button1Selected:)
@@ -130,36 +161,60 @@
 
 }
 
+#pragma mark - Explore buttons
+
+// When one of these buttons is pushed...1) remove mapview annotations 2) set search boolean to YES 3) disable user interaction of all the buttons, 4) perform API call with relevent search term.
 -(void)button1Selected:(id)sender
 {
-    NSLog(@"Food button selected");
+    NSLog(@"Food");
+    [self.mapView removeAnnotations:self.mapView.annotations];
+    [self setMapViewandPlacePin];
+    self.foodSearch = YES;
     [self disableButtons];
+    [self makeYelpAPICallwithTerm:@"restaurant" andSortType:@0];
 }
 
 -(void)button2Selected:(id)sender
 {
-    NSLog(@"Drink button selected");
+    NSLog(@"Drink");
+    [self.mapView removeAnnotations:self.mapView.annotations];
+    [self setMapViewandPlacePin];
+    self.drinkSearch = YES;
     [self disableButtons];
+    [self makeYelpAPICallwithTerm:@"bar" andSortType:@0];
 }
 
 -(void)button3Selected:(id)sender
 {
-    NSLog(@"Shop button selected");
+    NSLog(@"Shop");
+    [self.mapView removeAnnotations:self.mapView.annotations];
+    [self setMapViewandPlacePin];
+    self.shopSearch = YES;
     [self disableButtons];
+    [self makeYelpAPICallwithTerm:@"shop" andSortType:@0];
 }
 
 -(void)button4Selected:(id)sender
 {
-    NSLog(@"Sightsee button selected");
+    NSLog(@"Sightsee");
+    [self.mapView removeAnnotations:self.mapView.annotations];
+    [self setMapViewandPlacePin];
+    self.sightseeSearch = YES;
     [self disableButtons];
+    [self makeYelpAPICallwithTerm:@"attractions" andSortType:@0];
 }
 
 -(void)button5Selected:(id)sender
 {
-    NSLog(@"Transit button selected");
+    NSLog(@"Music");
+    [self.mapView removeAnnotations:self.mapView.annotations];
+    [self setMapViewandPlacePin];
+    self.musicSearch = YES;
     [self disableButtons];
+    [self makeYelpAPICallwithTerm:@"music" andSortType:@0];
 }
 
+#pragma mark - map/location manager methods
 
 -(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
@@ -177,6 +232,320 @@
     }
 }
 
+-(void)setMapViewandPlacePin
+{
+    // Set MapView around Divvy Station
+    CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.stationFromSourceVC.latitude.floatValue, self.stationFromSourceVC.longitude.floatValue);
+    MKCoordinateSpan span = MKCoordinateSpanMake(.008, .008);
+    MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
+    self.mapView.showsUserLocation = YES;
+    [self.mapView setRegion:region animated:YES];
+
+    // Place Divvy pin annotation
+    DivvyBikeAnnotation *divvyBikePin = [[DivvyBikeAnnotation alloc] init];
+    divvyBikePin.coordinate = self.stationFromSourceVC.coordinate;
+    divvyBikePin.title = self.stationFromSourceVC.stationName;
+    divvyBikePin.subtitle = [NSString stringWithFormat:@"%.01f miles away", self.stationFromSourceVC.distanceFromUser * 0.000621371];
+    [self.mapView addAnnotation:divvyBikePin];
+}
+
+- (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
+{
+    if ([annotation isKindOfClass:MKUserLocation.class]) {
+        return nil;
+    }
+    else if ([annotation isKindOfClass:[DivvyBikeAnnotation class]])
+    {
+        MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
+        pin.canShowCallout = YES;
+        pin.image = [UIImage imageNamed:@"Divvy-FB"];
+        return pin;
+    }
+    else if ([annotation isKindOfClass:[FoodAnnotation class]])
+    {
+        MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
+        pin.canShowCallout = YES;
+        return pin;
+    }
+    else if ([annotation isKindOfClass:[DrinkAnnotation class]])
+    {
+        MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
+        pin.canShowCallout = YES;
+        return pin;
+    }
+    else if ([annotation isKindOfClass:[ShopAnnotation class]])
+    {
+        MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
+        pin.canShowCallout = YES;
+        return pin;
+    }
+    else if ([annotation isKindOfClass:[SightseeAnnotation class]])
+    {
+        MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
+        pin.canShowCallout = YES;
+        return pin;
+    }
+    else if ([annotation isKindOfClass:[MusicAnnotation class]])
+    {
+        MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
+        pin.canShowCallout = YES;
+        return pin;
+    }
+    else {
+        return nil;
+    }
+}
+
+#pragma mark - Yelp API call method
+-(void)makeYelpAPICallwithTerm:(NSString *)term andSortType:(NSNumber *) sortType
+{
+    // Start the activity indicator
+    self.activityIndicator.hidden = NO;
+    [self.activityIndicator startAnimating];
+
+    // Sort type 0 - is a sort by best match
+    NSLog(@"Station Latitude: %f", self.stationFromSourceVC.latitude.floatValue);
+    NSLog(@"Station Longitude: %f", self.stationFromSourceVC.longitude.floatValue);
+    NSLog(@"Search term: %@", term);
+    NSLog(@"Sort type: %@", sortType);
+
+    self.request = [TDOAuth URLRequestForPath:@"/v2/search" GETParameters:@{@"term": term, @"ll": [NSString stringWithFormat:@"%@,%@", self.stationFromSourceVC.latitude, self.stationFromSourceVC.longitude], @"limit" : @20, @"sort" : sortType}
+                                         host:@"api.yelp.com"
+                                  consumerKey:@"LdaQSTTYqZuYXrta5vVAgw"
+                               consumerSecret:@"k6KpVPXHSykD8aQXSXqdi7GboMY"
+                                  accessToken:@"VK1B3yDVd9bDc9wNY68TXMM-bt0AWgE-"
+                                  tokenSecret:@"sZfenXvsqvtynhp5H5eqfNYZKao"];
+
+    [NSURLConnection sendAsynchronousRequest:self.request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+
+        // If poor connection...
+        if (connectionError) {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Unable to retrieve data due to poor network connection" message:nil delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+            [alert show];
+            [self disableSearchBooleans];
+            [self enableButtons];
+
+            // Stop the activity indicator
+            self.activityIndicator.hidden = YES;
+            [self.activityIndicator stopAnimating];
+        }
+
+        else
+        {
+            NSLog(@"Yelp data returned");
+            NSDictionary *dictionary  = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&connectionError];
+
+            NSMutableArray *arrayOfYelpLocationObjects = [NSMutableArray new];
+            NSArray *yelpLocations = [dictionary objectForKey:@"businesses"];
+
+            for (NSDictionary *dictionary in yelpLocations)
+            {
+                YelpLocation *yelpLocation = [[YelpLocation alloc] init];
+                yelpLocation.name = [dictionary objectForKey:@"name"];
+                yelpLocation.address = [NSString stringWithFormat:@"%@ %@ %@ %@", [[[dictionary objectForKey:@"location"] objectForKey:@"address"] firstObject], [[dictionary objectForKey:@"location"] objectForKey:@"city"], [[dictionary objectForKey:@"location"] objectForKey:@"state_code"], [[dictionary objectForKey:@"location"] objectForKey:@"postal_code"]];
+                yelpLocation.telephone = [dictionary objectForKey:@"phone"];
+                yelpLocation.businessMobileURL = [dictionary objectForKey:@"mobile_url"];
+                yelpLocation.businessURL = [dictionary objectForKey:@"url"];
+                yelpLocation.businessImageURL = [dictionary objectForKey:@"image_url"];
+
+                if (!yelpLocation.businessImageURL) {
+                    NSURL *placeholderURL = [[NSBundle mainBundle] URLForResource:@"building" withExtension:@"png"];
+                    NSString *placeholderURLString = [NSString stringWithContentsOfURL:placeholderURL encoding:NSASCIIStringEncoding error:nil];
+                    yelpLocation.businessImageURL = placeholderURLString;
+                }
+                else {
+                    yelpLocation.businessImageURL = [dictionary objectForKey:@"image_url"];
+                }
+
+                yelpLocation.businessRatingImageURL = [dictionary objectForKey:@"rating_img_url_small"];
+                yelpLocation.aboutBusiness = [dictionary objectForKey:@"snippet_text"];
+                yelpLocation.distanceFromStation = [[dictionary objectForKey:@"distance"] floatValue];
+
+                if ([[dictionary objectForKey:@"categories"] count] == 3) {
+                    yelpLocation.categories = [[[dictionary objectForKey:@"categories"] objectAtIndex:0] objectAtIndex:0];
+                    yelpLocation.offers = [NSString stringWithFormat:@"%@, %@", [[[dictionary objectForKey:@"categories"] objectAtIndex:1] objectAtIndex:0], [[[dictionary objectForKey:@"categories"] objectAtIndex:2] objectAtIndex:0]];
+                }
+                else if ([[dictionary objectForKey:@"categories"] count] == 2) {
+                    yelpLocation.categories = [[[dictionary objectForKey:@"categories"] objectAtIndex:0] objectAtIndex:0];
+                    yelpLocation.offers = [NSString stringWithFormat:@"%@", [[[dictionary objectForKey:@"categories"] objectAtIndex:1] objectAtIndex:0]];
+                }
+                else if ([[dictionary objectForKey:@"categories"] count] == 1) {
+                    yelpLocation.categories = [[[dictionary objectForKey:@"categories"] objectAtIndex:0] objectAtIndex:0];
+                    yelpLocation.offers = @"n/a";
+                }
+                else {
+                    yelpLocation.categories = @"n/a";
+                    yelpLocation.offers = @"n/a";
+                }
+
+                yelpLocation.yelpID = [dictionary objectForKey:@"id"];
+                [arrayOfYelpLocationObjects addObject:yelpLocation];
+            }
+
+            // Populate the yelpLocations iVar array.
+            self.yelpLocations = [NSArray arrayWithArray:arrayOfYelpLocationObjects];
+
+            // If no YelpLocations are returned, display alert.
+            if (self.yelpLocations.count < 1) {
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"No results found in this area" message:nil delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                [alert show];
+                [self disableSearchBooleans];
+                [self enableButtons];
+
+                // Stop the activity indicator
+                self.activityIndicator.hidden = YES;
+                [self.activityIndicator stopAnimating];
+            }
+
+            // Otherwise, proceed with geocoding the locations.
+            else {
+                [self getYelpLocationLatandLong:self.yelpLocations];
+            }
+        }
+    }];
+}
+
+-(void)getYelpLocationLatandLong:(NSArray *)yelpLocations
+{
+    // Create language query array
+    NSLog(@"Number of YelpLocations returned: %lu", (unsigned long)yelpLocations.count);
+    NSMutableArray *languageQueryArray = [[NSMutableArray alloc] init];
+
+    // Set counter to 0
+    self.counter = 0;
+    for (YelpLocation *yelpLocation in yelpLocations) {
+
+        CLGeocoder *geocoder = [[CLGeocoder alloc] init];
+        [geocoder geocodeAddressString:yelpLocation.address
+                     completionHandler:^(NSArray* placemarks, NSError* error){
+
+                         // Increment counter every time a yelpLocation address is evaluated.
+                         self.counter += 1;
+
+                            // If placemark is found, assign lat and long. properties to yelpLocation object
+                            if (placemarks.count > 0) {
+                                NSLog(@"Result found");
+                                MKPlacemark *placemark = [placemarks firstObject];
+                                yelpLocation.latitude = placemark.location.coordinate.latitude;
+                                yelpLocation.longitude = placemark.location.coordinate.longitude;
+                            }
+
+                            // Otherwise, add the yelpLocation to the array to be used in the natural language query
+                            else {
+                                [languageQueryArray addObject:yelpLocation];
+                            }
+
+                        // When the counter equals the number of yelpLocations returned, all locations have been evaluated. Now perform natural language query on any bars for which placemarks were not found.
+                         if (self.counter == yelpLocations.count) {
+
+                             // If languageQueryArray has at least one object, perform the natural language query method, else, skip to the set pins method.
+                             if (languageQueryArray.count > 0) {
+                                 NSLog(@"Performing language query on %lu locations", (unsigned long)languageQueryArray.count);
+                                 [self performLanguageQuery:languageQueryArray];
+                                }
+                             else {
+                                 NSLog(@"Setting yelp pins after address geocode");
+                                 [self setYelpPinAnnotations];
+                                }
+                         }
+                }];
+        }
+}
+
+-(void)performLanguageQuery:(NSMutableArray *)queryArray
+{
+    self.counter2 = 0;
+
+    for (YelpLocation *yelpLocation in queryArray) {
+
+            // Perform natural lanuage query on yelpLocation's name property.
+            MKLocalSearchRequest *request = [[MKLocalSearchRequest alloc] init];
+            request.naturalLanguageQuery = yelpLocation.name;
+            request.region = MKCoordinateRegionMake(self.stationFromSourceVC.coordinate, MKCoordinateSpanMake(.3, .3));
+            MKLocalSearch *search = [[MKLocalSearch alloc] initWithRequest:request];
+
+            [search startWithCompletionHandler:^(MKLocalSearchResponse *response, NSError *error) {
+                // Increment counter every time a YelpBar address is evaluated.
+                self.counter2 += 1;
+                NSLog(@"Counter2: %ld", (long)self.counter2);
+
+                NSArray *mapItems = response.mapItems;
+
+                // If there are mapItems returned from query, then set the lat/long properties of YelpLocation and add the MKPointAnnotation to the map.
+                if (mapItems.count > 0) {
+                    NSLog(@"Result found");
+                    MKMapItem *mapItem = [mapItems firstObject];
+                    yelpLocation.latitude = mapItem.placemark.coordinate.latitude;
+                    yelpLocation.longitude = mapItem.placemark.coordinate.longitude;
+                }
+
+                else {
+                    NSLog(@"Could not find location for: %@", yelpLocation.name);
+                }
+
+                // When the second counter equals the number of yelpLocations in queryArray, all yelpLocations have been evaluated
+                if (self.counter2 == queryArray.count) {
+                    NSLog(@"Setting yelp pins after natural language query");
+                    [self setYelpPinAnnotations];
+                }
+        }];
+    }
+}
+
+-(void)setYelpPinAnnotations
+{
+    for (YelpLocation *yelpLocation in self.yelpLocations) {
+        if (self.foodSearch) {
+            FoodAnnotation *foodannotation = [[FoodAnnotation alloc] init];
+            foodannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
+            foodannotation.title = yelpLocation.name;
+            foodannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+            [self.mapView addAnnotation:foodannotation];
+        }
+        else if (self.drinkSearch) {
+            DrinkAnnotation *drinkannotation = [[DrinkAnnotation alloc] init];
+            drinkannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
+            drinkannotation.title = yelpLocation.name;
+            drinkannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+            [self.mapView addAnnotation:drinkannotation];
+        }
+        else if (self.shopSearch) {
+            ShopAnnotation *shopannotation = [[ShopAnnotation alloc] init];
+            shopannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
+            shopannotation.title = yelpLocation.name;
+            shopannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+            [self.mapView addAnnotation:shopannotation];
+        }
+        else if (self.sightseeSearch) {
+            SightseeAnnotation *sightseeannotation = [[SightseeAnnotation alloc] init];
+            sightseeannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
+            sightseeannotation.title = yelpLocation.name;
+            sightseeannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+            [self.mapView addAnnotation:sightseeannotation];
+        }
+        else {
+            MusicAnnotation *musicsannotation = [[MusicAnnotation alloc] init];
+            musicsannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
+            musicsannotation.title = yelpLocation.name;
+            musicsannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+            [self.mapView addAnnotation:musicsannotation];
+        }
+    }
+
+    // Set all search booleans back to NO and enable user interaction of the buttons.
+    [self disableSearchBooleans];
+    [self enableButtons];
+
+    // Stop the activity indicator
+    self.activityIndicator.hidden = YES;
+    [self.activityIndicator stopAnimating];
+
+    NSLog(@"Set pins method completed");
+}
+
+
+
+#pragma mark - helper methods
 
 -(void)disableButtons
 {
@@ -191,6 +560,20 @@
         button.enabled = YES;
     }
 }
+
+-(void)disableSearchBooleans
+{
+    self.foodSearch = NO;
+    self.drinkSearch = NO;
+    self.shopSearch = NO;
+    self.sightseeSearch = NO;
+    self.musicSearch = NO;
+}
+
+
+
+
+
 
 
 @end

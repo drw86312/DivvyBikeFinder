@@ -114,11 +114,6 @@
                                     <action selector="onSegmentControlToggle:" destination="vXZ-lx-hvc" eventType="valueChanged" id="o4o-OC-AaY"/>
                                 </connections>
                             </segmentedControl>
-                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="c1b-c3-vEJ">
-                                <rect key="frame" x="141" y="266" width="37" height="37"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="color" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                            </activityIndicatorView>
                         </subviews>
                         <constraints>
                             <constraint firstItem="Hzw-FT-8Aq" firstAttribute="top" secondItem="kh9-bI-dsS" secondAttribute="top" constant="109" id="AIX-ye-vxK"/>
@@ -133,7 +128,6 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="activityIndicator" destination="c1b-c3-vEJ" id="0Tc-ue-I3k"/>
                         <outlet property="mapView" destination="aOZ-Zl-Pil" id="6vr-ks-uDA"/>
                         <outlet property="refreshButtonOutlet" destination="20U-QD-wIm" id="5js-ze-gip"/>
                         <outlet property="segmentedControl" destination="7ce-mU-iTv" id="9wg-BS-l6H"/>
@@ -354,11 +348,6 @@
                                     <action selector="onSegmentControlToggle:" destination="1wR-ee-ML0" eventType="valueChanged" id="een-08-gn8"/>
                                 </connections>
                             </segmentedControl>
-                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="Vgx-9z-ajg">
-                                <rect key="frame" x="150" y="257" width="37" height="37"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="color" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
@@ -368,7 +357,6 @@
                     </view>
                     <navigationItem key="navigationItem" id="pCs-uh-7tN"/>
                     <connections>
-                        <outlet property="activityIndicator" destination="Vgx-9z-ajg" id="T7B-Pr-gxV"/>
                         <outlet property="cancelButtonOutlet" destination="hHo-s4-Rzo" id="yPB-Od-6Yk"/>
                         <outlet property="currentLocationButtonOutlet" destination="boZ-PI-7u5" id="vZh-1r-FOS"/>
                         <outlet property="destinationTextFieldOutlet" destination="QAZ-Tn-lv8" id="xcJ-lY-yuf"/>
@@ -415,7 +403,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="LYT-P9-qDb">
-                                <rect key="frame" x="0.0" y="254" width="320" height="314"/>
+                                <rect key="frame" x="0.0" y="219" width="320" height="300"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <connections>
                                     <outlet property="delegate" destination="RtJ-Wb-8KW" id="98y-s1-rGt"/>

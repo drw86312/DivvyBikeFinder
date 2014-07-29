@@ -38,7 +38,7 @@
 @property MKRoute *bikeRoute;
 @property MKRoute *walkRoute1;
 @property MKRoute *walkroute2;
-@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
+@property UIActivityIndicatorView *activityIndicator;
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UIButton *currentLocationButtonOutlet;
@@ -61,6 +61,15 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    // Create the activity indicator
+    CGFloat indicatorWidth = 50.0f;
+    CGFloat indicatorHeight = 50.0f;
+
+    self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    self.activityIndicator.frame = CGRectMake((self.view.frame.size.width/2) - (indicatorWidth/2), (self.view.frame.size.height/2) - (indicatorHeight/2), indicatorWidth, indicatorHeight);
+    self.activityIndicator.hidden = YES;
+    [self.view addSubview:self.activityIndicator];
 
     // Instantiate a location for the city of Chicago (used for handling cases when users are not in Chicago)
     self.chicago = [[CLLocation alloc] initWithLatitude:41.891813 longitude:-87.647343];
@@ -549,12 +558,15 @@
         directionsRequest2.source = stationNearOriginMapItem;
         directionsRequest2.destination = stationNearDestinationMapItem;
         directionsRequest2.transportType =MKDirectionsTransportTypeWalking;
+        directionsRequest2.requestsAlternateRoutes = YES;
 
         MKDirections *directions2 = [[MKDirections alloc] initWithRequest:directionsRequest2];
 
         [directions2 calculateDirectionsWithCompletionHandler:^(MKDirectionsResponse *response, NSError *error) {
 
             NSArray *routeItems2 = response.routes;
+            NSLog(@"Num of routes: %lu", (unsigned long)routeItems2.count);
+
             self.bikeRoute = [routeItems2 firstObject];
             self.bikerouteSteps = self.bikeRoute.steps;
 
@@ -872,6 +884,11 @@
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
         return 0.0f;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 

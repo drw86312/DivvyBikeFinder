@@ -11,6 +11,14 @@
 		0E056B9519848664001BD53D /* UIColor+DesignColors.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E056B9419848664001BD53D /* UIColor+DesignColors.m */; };
 		0E08198D1986F3AB00CBF509 /* TimerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E08198C1986F3AB00CBF509 /* TimerViewController.m */; };
 		0E08198F19872D7100CBF509 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E08198E19872D7100CBF509 /* AudioToolbox.framework */; };
+		0E08199319881BED00CBF509 /* TDOAuth.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E08199219881BED00CBF509 /* TDOAuth.m */; };
+		0E081996198824E500CBF509 /* YelpLocation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E081995198824E500CBF509 /* YelpLocation.m */; };
+		0E0819981988295000CBF509 /* building.png in Resources */ = {isa = PBXBuildFile; fileRef = 0E0819971988295000CBF509 /* building.png */; };
+		0E08199B1988307300CBF509 /* FoodAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E08199A1988307300CBF509 /* FoodAnnotation.m */; };
+		0E08199E1988309300CBF509 /* DrinkAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E08199D1988309300CBF509 /* DrinkAnnotation.m */; };
+		0E0819A1198830AB00CBF509 /* ShopAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0819A0198830AB00CBF509 /* ShopAnnotation.m */; };
+		0E0819A4198830BC00CBF509 /* SightseeAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0819A3198830BC00CBF509 /* SightseeAnnotation.m */; };
+		0E0819A7198830CC00CBF509 /* MusicAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0819A6198830CC00CBF509 /* MusicAnnotation.m */; };
 		0E0FD84C196CA40A00A26E2B /* DestinationAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0FD84B196CA40A00A26E2B /* DestinationAnnotation.m */; };
 		0E1E759419809A2A00357F31 /* SearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E1E759319809A2A00357F31 /* SearchViewController.m */; };
 		0E4A5B4D196B30CB00273EA6 /* DivvyBikeAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B4C196B30CB00273EA6 /* DivvyBikeAnnotation.m */; };
@@ -79,6 +87,21 @@
 		0E08198B1986F3AB00CBF509 /* TimerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TimerViewController.h; sourceTree = "<group>"; };
 		0E08198C1986F3AB00CBF509 /* TimerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TimerViewController.m; sourceTree = "<group>"; };
 		0E08198E19872D7100CBF509 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		0E08199119881BED00CBF509 /* TDOAuth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TDOAuth.h; sourceTree = "<group>"; };
+		0E08199219881BED00CBF509 /* TDOAuth.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TDOAuth.m; sourceTree = "<group>"; };
+		0E081994198824E500CBF509 /* YelpLocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YelpLocation.h; sourceTree = "<group>"; };
+		0E081995198824E500CBF509 /* YelpLocation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YelpLocation.m; sourceTree = "<group>"; };
+		0E0819971988295000CBF509 /* building.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = building.png; sourceTree = "<group>"; };
+		0E0819991988307300CBF509 /* FoodAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FoodAnnotation.h; sourceTree = "<group>"; };
+		0E08199A1988307300CBF509 /* FoodAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FoodAnnotation.m; sourceTree = "<group>"; };
+		0E08199C1988309300CBF509 /* DrinkAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrinkAnnotation.h; sourceTree = "<group>"; };
+		0E08199D1988309300CBF509 /* DrinkAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrinkAnnotation.m; sourceTree = "<group>"; };
+		0E08199F198830AB00CBF509 /* ShopAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShopAnnotation.h; sourceTree = "<group>"; };
+		0E0819A0198830AB00CBF509 /* ShopAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShopAnnotation.m; sourceTree = "<group>"; };
+		0E0819A2198830BC00CBF509 /* SightseeAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SightseeAnnotation.h; sourceTree = "<group>"; };
+		0E0819A3198830BC00CBF509 /* SightseeAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SightseeAnnotation.m; sourceTree = "<group>"; };
+		0E0819A5198830CC00CBF509 /* MusicAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicAnnotation.h; sourceTree = "<group>"; };
+		0E0819A6198830CC00CBF509 /* MusicAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MusicAnnotation.m; sourceTree = "<group>"; };
 		0E0FD84A196CA40A00A26E2B /* DestinationAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DestinationAnnotation.h; path = ../DestinationAnnotation.h; sourceTree = "<group>"; };
 		0E0FD84B196CA40A00A26E2B /* DestinationAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DestinationAnnotation.m; path = ../DestinationAnnotation.m; sourceTree = "<group>"; };
 		0E1E759219809A2A00357F31 /* SearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchViewController.h; sourceTree = "<group>"; };
@@ -202,6 +225,8 @@
 		0E0819891985AC1500CBF509 /* Model Objects */ = {
 			isa = PBXGroup;
 			children = (
+				0E081994198824E500CBF509 /* YelpLocation.h */,
+				0E081995198824E500CBF509 /* YelpLocation.m */,
 				0EB1617919440CB900A2F96B /* DivvyStation.h */,
 				0EB1617A19440CB900A2F96B /* DivvyStation.m */,
 			);
@@ -217,6 +242,15 @@
 			name = Design;
 			sourceTree = "<group>";
 		};
+		0E08199019881BBE00CBF509 /* OAuth */ = {
+			isa = PBXGroup;
+			children = (
+				0E08199119881BED00CBF509 /* TDOAuth.h */,
+				0E08199219881BED00CBF509 /* TDOAuth.m */,
+			);
+			name = OAuth;
+			sourceTree = "<group>";
+		};
 		0E0FD849196CA3DA00A26E2B /* Annotations */ = {
 			isa = PBXGroup;
 			children = (
@@ -228,6 +262,16 @@
 				0E4A5B4F196B30E600273EA6 /* NoBikesAnnotation.m */,
 				0E4A5B51196B30F900273EA6 /* NoDocksAnnotation.h */,
 				0E4A5B52196B30F900273EA6 /* NoDocksAnnotation.m */,
+				0E0819991988307300CBF509 /* FoodAnnotation.h */,
+				0E08199A1988307300CBF509 /* FoodAnnotation.m */,
+				0E08199C1988309300CBF509 /* DrinkAnnotation.h */,
+				0E08199D1988309300CBF509 /* DrinkAnnotation.m */,
+				0E08199F198830AB00CBF509 /* ShopAnnotation.h */,
+				0E0819A0198830AB00CBF509 /* ShopAnnotation.m */,
+				0E0819A2198830BC00CBF509 /* SightseeAnnotation.h */,
+				0E0819A3198830BC00CBF509 /* SightseeAnnotation.m */,
+				0E0819A5198830CC00CBF509 /* MusicAnnotation.h */,
+				0E0819A6198830CC00CBF509 /* MusicAnnotation.m */,
 			);
 			name = Annotations;
 			sourceTree = "<group>";
@@ -329,11 +373,13 @@
 				0E08198C1986F3AB00CBF509 /* TimerViewController.m */,
 				0E4A5B57196B462600273EA6 /* StationDetailViewController.h */,
 				0E4A5B58196B462600273EA6 /* StationDetailViewController.m */,
+				0E0819971988295000CBF509 /* building.png */,
+				0EB1615C1943D30200A2F96B /* Images.xcassets */,
+				0E08199019881BBE00CBF509 /* OAuth */,
 				0E08198A1985AC3300CBF509 /* Design */,
 				0E0819891985AC1500CBF509 /* Model Objects */,
 				0E0819881985ABE100CBF509 /* TableView Cells */,
 				0E0FD849196CA3DA00A26E2B /* Annotations */,
-				0EB1615C1943D30200A2F96B /* Images.xcassets */,
 				0EB1614B1943D30200A2F96B /* Supporting Files */,
 			);
 			path = DivvyBikeFinder;
@@ -503,6 +549,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0EB1615D1943D30200A2F96B /* Images.xcassets in Resources */,
+				0E0819981988295000CBF509 /* building.png in Resources */,
 				0EB1614F1943D30200A2F96B /* InfoPlist.strings in Resources */,
 				0EB161581943D30200A2F96B /* Main.storyboard in Resources */,
 			);
@@ -543,19 +590,26 @@
 			files = (
 				0E08198D1986F3AB00CBF509 /* TimerViewController.m in Sources */,
 				0E4A5B56196B370C00273EA6 /* InitialViewController.m in Sources */,
+				0E08199319881BED00CBF509 /* TDOAuth.m in Sources */,
 				0E85B191194629D500DE5E6C /* BikeTableViewCell.m in Sources */,
 				0E4A5B53196B30F900273EA6 /* NoDocksAnnotation.m in Sources */,
+				0E08199B1988307300CBF509 /* FoodAnnotation.m in Sources */,
 				0E056B8F198312FF001BD53D /* RouteTableViewCell.m in Sources */,
 				0E056B9519848664001BD53D /* UIColor+DesignColors.m in Sources */,
 				0EB1617B19440CB900A2F96B /* DivvyStation.m in Sources */,
+				0E081996198824E500CBF509 /* YelpLocation.m in Sources */,
+				0E0819A1198830AB00CBF509 /* ShopAnnotation.m in Sources */,
 				0EB161551943D30200A2F96B /* AppDelegate.m in Sources */,
 				0E4A5B4D196B30CB00273EA6 /* DivvyBikeAnnotation.m in Sources */,
+				0E0819A7198830CC00CBF509 /* MusicAnnotation.m in Sources */,
 				0E4A5B50196B30E600273EA6 /* NoBikesAnnotation.m in Sources */,
 				0E0FD84C196CA40A00A26E2B /* DestinationAnnotation.m in Sources */,
 				0E918D7C1982039E006041B2 /* TripTableViewCell.m in Sources */,
+				0E08199E1988309300CBF509 /* DrinkAnnotation.m in Sources */,
 				0E4A5B59196B462600273EA6 /* StationDetailViewController.m in Sources */,
 				0EB161511943D30200A2F96B /* main.m in Sources */,
 				0E1E759419809A2A00357F31 /* SearchViewController.m in Sources */,
+				0E0819A4198830BC00CBF509 /* SightseeAnnotation.m in Sources */,
 				0E4A5B62196B4E4D00273EA6 /* MapViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

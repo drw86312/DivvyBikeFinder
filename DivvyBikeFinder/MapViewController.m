@@ -28,8 +28,8 @@
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property NSString *userLocationString;
 @property NSString *userDestinationString;
+@property UIActivityIndicatorView *activityIndicator;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *segmentedControl;
-@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *searchButtonOutlet;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *refreshButtonOutlet;
 
@@ -41,6 +41,15 @@
 {
     [super viewDidLoad];
 
+    // Create the activity indicator
+    CGFloat indicatorWidth = 50.0f;
+    CGFloat indicatorHeight = 50.0f;
+
+    self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    self.activityIndicator.frame = CGRectMake((self.view.frame.size.width/2) - (indicatorWidth/2), (self.view.frame.size.height/2) - (indicatorHeight/2), indicatorWidth, indicatorHeight);
+    self.activityIndicator.hidden = YES;
+    [self.view addSubview:self.activityIndicator];
+
     // Don't enable these buttons until, Divvy API call has completed.
     self.searchButtonOutlet.enabled = NO;
     self.refreshButtonOutlet.enabled = NO;
@@ -50,7 +59,6 @@
     self.locationManager = [[CLLocationManager alloc] init];
     [self.locationManager startUpdatingLocation];
     self.locationManager.delegate = self;
-    self.activityIndicator.hidden = YES;
 }
 
 #pragma mark - Location manager methods
@@ -253,6 +261,10 @@
         return cell;
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
