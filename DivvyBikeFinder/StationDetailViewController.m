@@ -24,6 +24,7 @@
 @property UIView *backgroundView;
 @property NSMutableArray *buttonsArray;
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
+@property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property NSArray *yelpLocations;
 @property NSInteger counter;
 @property NSInteger counter2;
@@ -166,7 +167,6 @@
 // When one of these buttons is pushed...1) remove mapview annotations 2) set search boolean to YES 3) disable user interaction of all the buttons, 4) perform API call with relevent search term.
 -(void)button1Selected:(id)sender
 {
-    NSLog(@"Food");
     [self.mapView removeAnnotations:self.mapView.annotations];
     [self setMapViewandPlacePin];
     self.foodSearch = YES;
@@ -176,7 +176,6 @@
 
 -(void)button2Selected:(id)sender
 {
-    NSLog(@"Drink");
     [self.mapView removeAnnotations:self.mapView.annotations];
     [self setMapViewandPlacePin];
     self.drinkSearch = YES;
@@ -186,7 +185,6 @@
 
 -(void)button3Selected:(id)sender
 {
-    NSLog(@"Shop");
     [self.mapView removeAnnotations:self.mapView.annotations];
     [self setMapViewandPlacePin];
     self.shopSearch = YES;
@@ -196,7 +194,6 @@
 
 -(void)button4Selected:(id)sender
 {
-    NSLog(@"Sightsee");
     [self.mapView removeAnnotations:self.mapView.annotations];
     [self setMapViewandPlacePin];
     self.sightseeSearch = YES;
@@ -206,7 +203,6 @@
 
 -(void)button5Selected:(id)sender
 {
-    NSLog(@"Music");
     [self.mapView removeAnnotations:self.mapView.annotations];
     [self setMapViewandPlacePin];
     self.musicSearch = YES;
@@ -236,17 +232,18 @@
 {
     // Set MapView around Divvy Station
     CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.stationFromSourceVC.latitude.floatValue, self.stationFromSourceVC.longitude.floatValue);
-    MKCoordinateSpan span = MKCoordinateSpanMake(.008, .008);
+    MKCoordinateSpan span = MKCoordinateSpanMake(.01, .01);
     MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
     self.mapView.showsUserLocation = YES;
     [self.mapView setRegion:region animated:YES];
 
     // Place Divvy pin annotation
-    DivvyBikeAnnotation *divvyBikePin = [[DivvyBikeAnnotation alloc] init];
-    divvyBikePin.coordinate = self.stationFromSourceVC.coordinate;
-    divvyBikePin.title = self.stationFromSourceVC.stationName;
-    divvyBikePin.subtitle = [NSString stringWithFormat:@"%.01f miles away", self.stationFromSourceVC.distanceFromUser * 0.000621371];
-    [self.mapView addAnnotation:divvyBikePin];
+    DivvyBikeAnnotation *divvyAnnotation = [[DivvyBikeAnnotation alloc] init];
+    divvyAnnotation.coordinate = self.stationFromSourceVC.coordinate;
+    divvyAnnotation.title = self.stationFromSourceVC.stationName;
+    divvyAnnotation.subtitle = [NSString stringWithFormat:@"%.01f miles away", self.stationFromSourceVC.distanceFromUser * 0.000621371];
+    divvyAnnotation.imageName = @"Divvy";
+    [self.mapView addAnnotation:divvyAnnotation];
 }
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
@@ -286,6 +283,8 @@
             annotationView.annotation = annotation;
         }
         annotationView.image = [UIImage imageNamed:foodAnnotation.imageName];
+        annotationView.tintColor = [UIColor greenColor];
+
         return annotationView;
     }
 
@@ -303,6 +302,8 @@
             annotationView.annotation = annotation;
         }
         annotationView.image = [UIImage imageNamed:drinkAnnotation.imageName];
+        annotationView.tintColor = [UIColor redColor];
+
         return annotationView;
     }
 
@@ -320,6 +321,8 @@
             annotationView.annotation = annotation;
         }
         annotationView.image = [UIImage imageNamed:shopAnnotation.imageName];
+        annotationView.tintColor = [UIColor blueColor];
+
         return annotationView;
     }
 
@@ -337,6 +340,8 @@
             annotationView.annotation = annotation;
         }
         annotationView.image = [UIImage imageNamed:sightseeAnnotation.imageName];
+        annotationView.tintColor = [UIColor yellowColor];
+
         return annotationView;
     }
 
@@ -354,6 +359,8 @@
             annotationView.annotation = annotation;
         }
         annotationView.image = [UIImage imageNamed:musicAnnotation.imageName];
+        annotationView.tintColor = [UIColor orangeColor];
+
         return annotationView;
     }
     else {
@@ -449,6 +456,7 @@
 
             // Populate the yelpLocations iVar array.
             self.yelpLocations = [NSArray arrayWithArray:arrayOfYelpLocationObjects];
+            NSLog(@"Number of YelpLocations returned: %lu", (unsigned long)self.yelpLocations.count);
 
             // If no YelpLocations are returned, display alert.
             if (self.yelpLocations.count < 1) {
@@ -473,7 +481,6 @@
 -(void)getYelpLocationLatandLong:(NSArray *)yelpLocations
 {
     // Create language query array
-    NSLog(@"Number of YelpLocations returned: %lu", (unsigned long)yelpLocations.count);
     NSMutableArray *languageQueryArray = [[NSMutableArray alloc] init];
 
     // Set counter to 0
@@ -532,8 +539,6 @@
             [search startWithCompletionHandler:^(MKLocalSearchResponse *response, NSError *error) {
                 // Increment counter every time a YelpBar address is evaluated.
                 self.counter2 += 1;
-                NSLog(@"Counter2: %ld", (long)self.counter2);
-
                 NSArray *mapItems = response.mapItems;
 
                 // If there are mapItems returned from query, then set the lat/long properties of YelpLocation and add the MKPointAnnotation to the map.
@@ -581,7 +586,7 @@
             shopannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
             shopannotation.title = yelpLocation.name;
             shopannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
-            shopannotation.imageName = @"drink";
+            shopannotation.imageName = @"shop";
             [self.mapView addAnnotation:shopannotation];
         }
         else if (self.sightseeSearch) {
@@ -589,7 +594,7 @@
             sightseeannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
             sightseeannotation.title = yelpLocation.name;
             sightseeannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
-            sightseeannotation.imageName = @"drink";
+            sightseeannotation.imageName = @"sightsee";
             [self.mapView addAnnotation:sightseeannotation];
         }
         else {
@@ -597,7 +602,7 @@
             musicsannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
             musicsannotation.title = yelpLocation.name;
             musicsannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
-            musicsannotation.imageName = @"drink";
+            musicsannotation.imageName = @"music";
             [self.mapView addAnnotation:musicsannotation];
         }
     }
@@ -612,8 +617,6 @@
 
     NSLog(@"Set pins method completed");
 }
-
-
 
 #pragma mark - helper methods
 
@@ -639,10 +642,6 @@
     self.sightseeSearch = NO;
     self.musicSearch = NO;
 }
-
-
-
-
 
 
 
