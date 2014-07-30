@@ -10,4 +10,7 @@
 
 @interface FoodAnnotation : MKPointAnnotation
 
+@property(nonatomic, strong) NSString *imageName;
+
+
 @end

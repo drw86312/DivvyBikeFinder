@@ -17,6 +17,7 @@
 #import "UIColor+DesignColors.h"
 #import <CoreGraphics/CoreGraphics.h>
 #import <QuartzCore/QuartzCore.h>
+#import "StationDetailViewController.h"
 
 @interface SearchViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate>
 
@@ -452,9 +453,14 @@
         DivvyStation *divvyStation = [divvyStationsArray1 objectAtIndex:counter];
         if (divvyStation.availableBikes.floatValue > 0) {
             [tempArray1 addObject:divvyStation];
-            DivvyBikeAnnotation *divvyBikesPin = [[DivvyBikeAnnotation alloc] init];
-            divvyBikesPin.coordinate = divvyStation.coordinate;
-            [self.mapView addAnnotation:divvyBikesPin];
+
+            // Add the Divvy bike annotation to the mapview
+            DivvyBikeAnnotation *annotation = [[DivvyBikeAnnotation alloc] init];
+            annotation.title = divvyStation.stationName;
+            annotation.subtitle = [NSString stringWithFormat:@"%.01f miles from %@", divvyStation.distanceFromDestination * 0.000621371, self.userLocationString];
+            annotation.coordinate = divvyStation.coordinate;
+            annotation.imageName = @"Divvy";
+            [self.mapView addAnnotation:annotation];
         }
         counter += 1;
     }
@@ -483,9 +489,13 @@
         if (divvyStation.availableDocks.floatValue > 0) {
             [tempArray3 addObject:divvyStation];
 
-            DivvyBikeAnnotation *divvyBikesPin = [[DivvyBikeAnnotation alloc] init];
-            divvyBikesPin.coordinate = divvyStation.coordinate;
-            [self.mapView addAnnotation:divvyBikesPin];
+            // Add the Divvy bike annotation to the mapview
+            DivvyBikeAnnotation *annotation = [[DivvyBikeAnnotation alloc] init];
+            annotation.title = divvyStation.stationName;
+            annotation.subtitle = [NSString stringWithFormat:@"%.01f miles from %@", divvyStation.distanceFromDestination * 0.000621371, self.userDestinationString];
+            annotation.coordinate = divvyStation.coordinate;
+            annotation.imageName = @"Divvy";
+            [self.mapView addAnnotation:annotation];
         }
         counter2 += 1;
     }
@@ -891,6 +901,26 @@
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    NSIndexPath *selectedIndexPath = self.tableView.indexPathForSelectedRow;
+
+    if (selectedIndexPath.section == 1) {
+        DivvyStation *station = [self.stationsNearOrigin firstObject];
+        StationDetailViewController *detailViewController = segue.destinationViewController;
+        detailViewController.stationFromSourceVC = station;
+        detailViewController.userLocationFromSourceVC = self.userLocation;
+        detailViewController.userLocationStringFromSource = self.userLocationString;
+    }
+    else if (selectedIndexPath.section == 2) {
+        DivvyStation *station = [self.stationsNearDestination firstObject];
+        StationDetailViewController *detailViewController = segue.destinationViewController;
+        detailViewController.stationFromSourceVC = station;
+        detailViewController.userLocationFromSourceVC = self.userLocation;
+        detailViewController.userLocationStringFromSource = self.userLocationString;
+        }
+}
+
 
 #pragma mark - mapview methods
 
@@ -899,14 +929,28 @@
     if ([annotation isKindOfClass:MKUserLocation.class]) {
         return nil;
     }
-    else if ([annotation isKindOfClass:[DivvyBikeAnnotation class]])
-    {
-        MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
-        pin.canShowCallout = YES;
-        pin.image = [UIImage imageNamed:@"Divvy-FB"];
-        return pin;
+    
+    else if ([annotation isKindOfClass:[DivvyBikeAnnotation class]]) {
+        DivvyBikeAnnotation *divvyAnnotation = annotation;
+        static NSString *annotationIdentifier = @"MyAnnotation";
+        MKAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:annotationIdentifier];
+            if (!annotationView) {
+                annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:annotationIdentifier];
+                annotationView.canShowCallout = YES;
+                annotationView.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+            }
+            else {
+                annotationView.annotation = annotation;
+            }
+
+            annotationView.image = [UIImage imageNamed:divvyAnnotation.imageName];
+
+        return annotationView;
     }
-    return nil;
+
+    else {
+        return nil;
+    }
 }
 
 - (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id<MKOverlay>)overlay

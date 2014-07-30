@@ -254,42 +254,107 @@
     if ([annotation isKindOfClass:MKUserLocation.class]) {
         return nil;
     }
-    else if ([annotation isKindOfClass:[DivvyBikeAnnotation class]])
-    {
-        MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
-        pin.canShowCallout = YES;
-        pin.image = [UIImage imageNamed:@"Divvy-FB"];
-        return pin;
+
+    else if ([annotation isKindOfClass:[DivvyBikeAnnotation class]]) {
+        DivvyBikeAnnotation *divvyAnnotation = annotation;
+        static NSString *annotationIdentifier = @"MyAnnotation";
+        MKAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:annotationIdentifier];
+
+        if (!annotationView) {
+            annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:annotationIdentifier];
+            annotationView.canShowCallout = YES;
+            annotationView.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+        }
+        else {
+            annotationView.annotation = annotation;
+        }
+        annotationView.image = [UIImage imageNamed:divvyAnnotation.imageName];
+        return annotationView;
     }
-    else if ([annotation isKindOfClass:[FoodAnnotation class]])
-    {
-        MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
-        pin.canShowCallout = YES;
-        return pin;
+
+    else if ([annotation isKindOfClass:[FoodAnnotation class]]) {
+        FoodAnnotation *foodAnnotation = annotation;
+        static NSString *annotationIdentifier = @"MyAnnotation";
+        MKAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:annotationIdentifier];
+
+        if (!annotationView) {
+            annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:annotationIdentifier];
+            annotationView.canShowCallout = YES;
+            annotationView.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+        }
+        else {
+            annotationView.annotation = annotation;
+        }
+        annotationView.image = [UIImage imageNamed:foodAnnotation.imageName];
+        return annotationView;
     }
-    else if ([annotation isKindOfClass:[DrinkAnnotation class]])
-    {
-        MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
-        pin.canShowCallout = YES;
-        return pin;
+
+    else if ([annotation isKindOfClass:[DrinkAnnotation class]]) {
+        DrinkAnnotation *drinkAnnotation = annotation;
+        static NSString *annotationIdentifier = @"MyAnnotation";
+        MKAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:annotationIdentifier];
+
+        if (!annotationView) {
+            annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:annotationIdentifier];
+            annotationView.canShowCallout = YES;
+            annotationView.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+        }
+        else {
+            annotationView.annotation = annotation;
+        }
+        annotationView.image = [UIImage imageNamed:drinkAnnotation.imageName];
+        return annotationView;
     }
-    else if ([annotation isKindOfClass:[ShopAnnotation class]])
-    {
-        MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
-        pin.canShowCallout = YES;
-        return pin;
+
+    else if ([annotation isKindOfClass:[ShopAnnotation class]]) {
+        ShopAnnotation *shopAnnotation = annotation;
+        static NSString *annotationIdentifier = @"MyAnnotation";
+        MKAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:annotationIdentifier];
+
+        if (!annotationView) {
+            annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:annotationIdentifier];
+            annotationView.canShowCallout = YES;
+            annotationView.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+        }
+        else {
+            annotationView.annotation = annotation;
+        }
+        annotationView.image = [UIImage imageNamed:shopAnnotation.imageName];
+        return annotationView;
     }
-    else if ([annotation isKindOfClass:[SightseeAnnotation class]])
-    {
-        MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
-        pin.canShowCallout = YES;
-        return pin;
+
+    else if ([annotation isKindOfClass:[SightseeAnnotation class]]) {
+        SightseeAnnotation *sightseeAnnotation = annotation;
+        static NSString *annotationIdentifier = @"MyAnnotation";
+        MKAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:annotationIdentifier];
+
+        if (!annotationView) {
+            annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:annotationIdentifier];
+            annotationView.canShowCallout = YES;
+            annotationView.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+        }
+        else {
+            annotationView.annotation = annotation;
+        }
+        annotationView.image = [UIImage imageNamed:sightseeAnnotation.imageName];
+        return annotationView;
     }
-    else if ([annotation isKindOfClass:[MusicAnnotation class]])
-    {
-        MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
-        pin.canShowCallout = YES;
-        return pin;
+
+    else if ([annotation isKindOfClass:[MusicAnnotation class]]) {
+        MusicAnnotation *musicAnnotation = annotation;
+        static NSString *annotationIdentifier = @"MyAnnotation";
+        MKAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:annotationIdentifier];
+
+        if (!annotationView) {
+            annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:annotationIdentifier];
+            annotationView.canShowCallout = YES;
+            annotationView.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+        }
+        else {
+            annotationView.annotation = annotation;
+        }
+        annotationView.image = [UIImage imageNamed:musicAnnotation.imageName];
+        return annotationView;
     }
     else {
         return nil;
@@ -500,6 +565,7 @@
             foodannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
             foodannotation.title = yelpLocation.name;
             foodannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+            foodannotation.imageName = @"food";
             [self.mapView addAnnotation:foodannotation];
         }
         else if (self.drinkSearch) {
@@ -507,6 +573,7 @@
             drinkannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
             drinkannotation.title = yelpLocation.name;
             drinkannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+            drinkannotation.imageName = @"drink";
             [self.mapView addAnnotation:drinkannotation];
         }
         else if (self.shopSearch) {
@@ -514,6 +581,7 @@
             shopannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
             shopannotation.title = yelpLocation.name;
             shopannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+            shopannotation.imageName = @"drink";
             [self.mapView addAnnotation:shopannotation];
         }
         else if (self.sightseeSearch) {
@@ -521,6 +589,7 @@
             sightseeannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
             sightseeannotation.title = yelpLocation.name;
             sightseeannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+            sightseeannotation.imageName = @"drink";
             [self.mapView addAnnotation:sightseeannotation];
         }
         else {
@@ -528,6 +597,7 @@
             musicsannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
             musicsannotation.title = yelpLocation.name;
             musicsannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+            musicsannotation.imageName = @"drink";
             [self.mapView addAnnotation:musicsannotation];
         }
     }

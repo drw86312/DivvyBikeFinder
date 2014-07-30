@@ -199,11 +199,11 @@
                                             <outlet property="tripLabel" destination="CQA-vi-S1X" id="zH1-fk-Kv2"/>
                                         </connections>
                                     </tableViewCell>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="cell" rowHeight="90" id="ENp-lc-eBr" customClass="BikeTableViewCell">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="cell" rowHeight="90" id="ENp-lc-eBr" customClass="BikeTableViewCell">
                                         <rect key="frame" x="0.0" y="206" width="320" height="90"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="ENp-lc-eBr" id="5PS-M3-cMd">
-                                            <rect key="frame" x="0.0" y="0.0" width="320" height="89"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="287" height="89"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Station name" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="301" translatesAutoresizingMaskIntoConstraints="NO" id="qlV-Ga-2Um">
@@ -246,6 +246,7 @@
                                             <outlet property="docksLabel" destination="Ajr-Xb-LSc" id="ZqV-Bw-IYg"/>
                                             <outlet property="stationLabel" destination="qlV-Ga-2Um" id="R6E-b0-GJE"/>
                                             <outlet property="titleLabel" destination="8gb-b1-q1r" id="Ikg-yI-mwC"/>
+                                            <segue destination="RtJ-Wb-8KW" kind="push" identifier="station" id="z8f-3P-bly"/>
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="routecell" rowHeight="45" id="c7z-fh-aYk" customClass="RouteTableViewCell">
@@ -534,4 +535,7 @@
         <simulatedOrientationMetrics key="orientation"/>
         <simulatedScreenMetrics key="destination" type="retina4"/>
     </simulatedMetricsContainer>
+    <inferredMetricsTieBreakers>
+        <segue reference="z8f-3P-bly"/>
+    </inferredMetricsTieBreakers>
 </document>

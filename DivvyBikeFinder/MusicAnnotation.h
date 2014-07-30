@@ -10,4 +10,6 @@
 
 @interface MusicAnnotation : MKPointAnnotation
 
+@property(nonatomic, strong) NSString *imageName;
+
 @end

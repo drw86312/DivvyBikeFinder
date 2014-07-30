@@ -10,4 +10,6 @@
 
 @interface SightseeAnnotation : MKPointAnnotation
 
+@property(nonatomic, strong) NSString *imageName;
+
 @end

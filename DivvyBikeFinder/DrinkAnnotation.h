@@ -10,4 +10,6 @@
 
 @interface DrinkAnnotation : MKPointAnnotation
 
+@property(nonatomic, strong) NSString *imageName;
+
 @end

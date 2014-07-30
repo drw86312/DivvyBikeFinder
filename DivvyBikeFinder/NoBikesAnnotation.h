@@ -8,6 +8,8 @@
 
 #import <MapKit/MapKit.h>
 
-@interface NoBikesAnnotation : MKPointAnnotation <MKAnnotation, MKMapViewDelegate>
+@interface NoBikesAnnotation : MKPointAnnotation
+
+@property(nonatomic, strong) NSString *imageName;
 
 @end

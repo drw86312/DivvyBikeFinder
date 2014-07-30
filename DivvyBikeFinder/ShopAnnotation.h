@@ -10,4 +10,6 @@
 
 @interface ShopAnnotation : MKPointAnnotation
 
+@property(nonatomic, strong) NSString *imageName;
+
 @end

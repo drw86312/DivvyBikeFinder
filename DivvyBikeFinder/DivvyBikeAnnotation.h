@@ -8,6 +8,9 @@
 
 #import <MapKit/MapKit.h>
 
-@interface DivvyBikeAnnotation : MKPointAnnotation <MKAnnotation, MKMapViewDelegate>
+@interface DivvyBikeAnnotation : MKPointAnnotation
+
+@property(nonatomic, strong) NSString *imageName;
+
 
 @end
