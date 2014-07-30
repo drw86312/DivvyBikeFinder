@@ -7,7 +7,6 @@
 //
 
 #import "AppDelegate.h"
-#import "TimerViewController.h"
 
 @implementation AppDelegate
 
