@@ -25,6 +25,7 @@
 @property CLLocationManager *locationManager;
 @property CLLocation *userLocation;
 @property NSArray *divvyStations;
+@property DivvyStation *selectedStation;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property NSString *userLocationString;
 @property NSString *userDestinationString;
@@ -271,6 +272,22 @@
     }
 }
 
+- (void)mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view
+calloutAccessoryControlTapped:(UIControl *)control
+{
+    [self performSegueWithIdentifier:@"segue" sender:self];
+}
+
+-(void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKPinAnnotationView *)view
+{
+    for (DivvyStation *station in self.divvyStations)
+    {
+        if ([view.annotation.title isEqualToString:station.stationName]) {
+            self.selectedStation = station;
+        }
+    }
+}
+
 
 #pragma mark - Timer methods
 
@@ -325,12 +342,12 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
+    self.selectedStation = [self.divvyStations objectAtIndex:indexPath.row];
 }
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    NSIndexPath *selectedIndexPath = self.tableView.indexPathForSelectedRow;
-    DivvyStation *station = [self.divvyStations objectAtIndex:selectedIndexPath.row];
+    DivvyStation *station = self.selectedStation;
     StationDetailViewController *detailViewController = segue.destinationViewController;
     detailViewController.stationFromSourceVC = station;
     detailViewController.userLocationFromSourceVC = self.userLocation;

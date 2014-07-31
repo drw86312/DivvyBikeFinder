@@ -39,6 +39,7 @@
 @property MKRoute *bikeRoute;
 @property MKRoute *walkRoute1;
 @property MKRoute *walkroute2;
+@property DivvyStation *selectedStation;
 @property UIActivityIndicatorView *activityIndicator;
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
@@ -898,29 +899,23 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    if (indexPath.section == 1) {
+        self.selectedStation = [self.stationsNearOrigin firstObject];
+    }
+    else if (indexPath.section == 2) {
+        self.selectedStation = [self.stationsNearDestination firstObject];
+    }
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    NSIndexPath *selectedIndexPath = self.tableView.indexPathForSelectedRow;
-
-    if (selectedIndexPath.section == 1) {
-        DivvyStation *station = [self.stationsNearOrigin firstObject];
-        StationDetailViewController *detailViewController = segue.destinationViewController;
-        detailViewController.stationFromSourceVC = station;
-        detailViewController.userLocationFromSourceVC = self.userLocation;
-        detailViewController.userLocationStringFromSource = self.userLocationString;
-    }
-    else if (selectedIndexPath.section == 2) {
-        DivvyStation *station = [self.stationsNearDestination firstObject];
-        StationDetailViewController *detailViewController = segue.destinationViewController;
-        detailViewController.stationFromSourceVC = station;
-        detailViewController.userLocationFromSourceVC = self.userLocation;
-        detailViewController.userLocationStringFromSource = self.userLocationString;
-        }
+    DivvyStation *station = self.selectedStation;
+    StationDetailViewController *detailViewController = segue.destinationViewController;
+    detailViewController.stationFromSourceVC = station;
+    detailViewController.userLocationFromSourceVC = self.userLocation;
+    detailViewController.userLocationStringFromSource = self.userLocationString;
 }
-
 
 #pragma mark - mapview methods
 
@@ -975,6 +970,22 @@
     }
 }
 
+- (void)mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view
+calloutAccessoryControlTapped:(UIControl *)control
+{
+    [self performSegueWithIdentifier:@"station" sender:self];
+}
+
+-(void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKPinAnnotationView *)view
+{
+    if ([[[self.stationsNearOrigin firstObject] stationName] isEqual:view.annotation.title]) {
+        self.selectedStation = [self.stationsNearOrigin firstObject];
+    }
+    else if ([[[self.stationsNearDestination firstObject] stationName] isEqual:view.annotation.title]) {
+        self.selectedStation = [self.stationsNearDestination firstObject];
+    }
+}
+
 #pragma mark - Segmented Control methods
 
 - (void)segmentChanged:(id)sender
@@ -991,6 +1002,8 @@
         self.tableView.hidden = NO;
         self.mapContainerView.hidden = YES;
         self.toggleIndex = 1;
+        self.segmentedControl.alpha = 1.0f;
+
         self.segmentedControl.layer.borderColor = [[UIColor whiteColor] CGColor];
     }
 }

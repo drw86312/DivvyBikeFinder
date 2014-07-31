@@ -27,6 +27,8 @@
 @property NSMutableArray *buttonsArray;
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (weak, nonatomic) IBOutlet UIView *blockerView;
+@property UISegmentedControl *segmentedControl;
 @property NSString *neighborhood1;
 @property NSString *neighborhood2;
 @property UILabel *neighborhoodsLabel;
@@ -58,7 +60,11 @@
     [self makeStationDetailView];
     [self findNeighborhoods];
 
+    self.navigationItem.title = self.stationFromSourceVC.stationName;
     self.tableView.separatorColor = [UIColor walkRouteColor];
+
+    self.view.backgroundColor = [UIColor divvyColor];
+    self.blockerView.backgroundColor = [UIColor divvyColor];
 }
 
 -(void)makeStationDetailView
@@ -66,11 +72,12 @@
     // Find status and navigation bar heights and set spacing between views
     CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
     CGFloat navBarHeight = self.navigationController.navigationBar.frame.size.height;
-    CGFloat backgroundViewHeight = 75.0f;
-    CGFloat spacing = 5.0f;
+    CGFloat backgroundViewHeight = 60.0f;
+    CGFloat spacing = 10.0f;
 
     // Create a background view to hold station details
     self.backgroundView = [[UIView alloc] initWithFrame:CGRectMake(self.view.frame.origin.x, navBarHeight + statusBarHeight, self.view.frame.size.width, backgroundViewHeight)];
+    self.backgroundView.backgroundColor = [UIColor clearColor];
     [self.view addSubview:self.backgroundView];
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -78,13 +85,13 @@
     // Add the station label
     CGFloat verticalOffset = spacing;
     CGFloat horizontalOffset = spacing;
-    CGFloat stationLabelWidth = 200.0f;
-    CGFloat stationLabelHeight = 50.0f;
+    CGFloat stationLabelWidth = 195.0f;
+    CGFloat stationLabelHeight = 30.0f;
 
     UILabel *stationLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, stationLabelWidth, stationLabelHeight)];
-    stationLabel.text = [NSString stringWithFormat:@"%@", self.stationFromSourceVC.stationName];
-    stationLabel.textColor = [UIColor divvyColor];
-    [stationLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:17]];
+    stationLabel.text = [NSString stringWithFormat:@"Bikes: %@ Docks: %@", self.stationFromSourceVC.availableBikes, self.stationFromSourceVC.availableDocks];
+    stationLabel.textColor = [UIColor whiteColor];
+    [stationLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:21]];
     stationLabel.numberOfLines = 0;
     [self.backgroundView addSubview:stationLabel];
 
@@ -94,28 +101,16 @@
 
     // Add the neighborhoods label - must be a property as its text gets set in the findNeighborhoods method.
     CGFloat neighborhoodsLabelWidth = self.view.frame.size.width - (horizontalOffset + spacing);
-    CGFloat neighborhoodsLabelHeight = 50.0f;
+    CGFloat neighborhoodsLabelHeight = 60.0f;
 
-    self.neighborhoodsLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, neighborhoodsLabelWidth , neighborhoodsLabelHeight)];
+    self.neighborhoodsLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, 0.0, neighborhoodsLabelWidth , neighborhoodsLabelHeight)];
     self.neighborhoodsLabel.numberOfLines = 0;
     self.neighborhoodsLabel.textAlignment = NSTextAlignmentRight;
-    self.neighborhoodsLabel.textColor = [UIColor divvyColor];
+    self.neighborhoodsLabel.textColor = [UIColor whiteColor];
     [self.neighborhoodsLabel setFont:[UIFont fontWithName:@"Helvetica" size:12]];
     [self.backgroundView addSubview:self.neighborhoodsLabel];
 
     verticalOffset = verticalOffset + stationLabel.frame.size.height;
-    horizontalOffset = spacing;
-
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-    CGFloat addressLabelHeight = 20.0f;
-
-    UILabel *addressLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, self.view.frame.size.width - (2 * spacing), addressLabelHeight)];
-    addressLabel.text = [NSString stringWithFormat:@"%@ Chicago IL", self.stationFromSourceVC.location];
-    addressLabel.textColor = [UIColor divvyColor];
-    [addressLabel setFont:[UIFont fontWithName:@"Helvetica Neue" size:15]];
-
-    [self.backgroundView addSubview:addressLabel];
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -129,14 +124,13 @@
     self.activityIndicator.hidden = YES;
     [self.view addSubview:self.activityIndicator];
 
-
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Make buttons
-    [self makeExploreButtons];
+    [self makeExploreButtonsandSegmentedControl];
 }
 
--(void)makeExploreButtons
+-(void)makeExploreButtonsandSegmentedControl
 {
     self.buttonsArray = [NSMutableArray new];
 
@@ -161,10 +155,12 @@
     for (UIButton *button in self.buttonsArray) {
         button.frame = CGRectMake(horizontalOffset, verticalOffset, buttonWidth, buttonHeight);
         button.layer.cornerRadius = 5.0f;
-        button.backgroundColor = [UIColor divvyColor];
-        button.titleLabel.textColor = [UIColor whiteColor];
-        [button setTintColor:[UIColor divvyColor]];
-        button.titleLabel.font = [UIFont systemFontOfSize:12.0f];
+        button.layer.borderWidth = 1.0f;
+        button.layer.borderColor = [[UIColor walkRouteColor] CGColor];
+        button.backgroundColor = [UIColor whiteColor];
+        [button setTitleColor:[UIColor walkRouteColor] forState:UIControlStateNormal];
+        button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:15.0];
+
         horizontalOffset += button.frame.size.width + spacing;
         [self.view addSubview:button];
     }
@@ -172,7 +168,7 @@
     [button1 setTitle:@"Eat" forState:UIControlStateNormal];
     [button2 setTitle:@"Drink" forState:UIControlStateNormal];
     [button3 setTitle:@"Shop" forState:UIControlStateNormal];
-    [button4 setTitle:@"Sightsee" forState:UIControlStateNormal];
+    [button4 setTitle:@"Sights" forState:UIControlStateNormal];
     [button5 setTitle:@"Music" forState:UIControlStateNormal];
 
     [button1 addTarget:self
@@ -195,6 +191,41 @@
                 action:@selector(button5Selected:)
       forControlEvents:UIControlEventTouchUpInside];
 
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    // Create segmented control
+    CGFloat segmentedControlHeight = 30.0f;
+    CGFloat segmentedControlWidth = 280.0f;
+    verticalOffset += button1.frame.size.height + (2 *spacing);
+    horizontalOffset = (self.view.frame.size.width/2) - (segmentedControlWidth/2);
+
+    self.segmentedControl = [[UISegmentedControl alloc] initWithItems:@[@"Map",@"List"]];
+    self.segmentedControl.frame = CGRectMake(horizontalOffset, verticalOffset, segmentedControlWidth, segmentedControlHeight);
+    [self.segmentedControl setSelectedSegmentIndex:0];
+    [self.segmentedControl addTarget:self action:@selector(segmentChanged:) forControlEvents:UIControlEventValueChanged];
+    self.segmentedControl.hidden = YES;
+    self.segmentedControl.backgroundColor = [UIColor walkRouteColor];
+    self.segmentedControl.tintColor = [UIColor whiteColor];
+    self.segmentedControl.layer.borderWidth = 1.0f;
+    self.segmentedControl.layer.borderColor = [[UIColor walkRouteColor] CGColor];
+    self.segmentedControl.layer.cornerRadius = 5.0f;
+    self.segmentedControl.alpha = .8f;
+    [self.view addSubview:self.segmentedControl];
+}
+
+-(void)segmentChanged:(UISegmentedControl *)segment
+{
+    if (segment.selectedSegmentIndex == 0) {
+        self.mapView.hidden = NO;
+        self.tableView.hidden = YES;
+        self.segmentedControl.alpha = 0.8f;
+    }
+    else
+    {
+        self.mapView.hidden = YES;
+        self.tableView.hidden = NO;
+        self.segmentedControl.alpha = 1.0f;
+    }
 }
 
 #pragma mark - Explore buttons
@@ -418,28 +449,38 @@
 
     cell.locationName.text = yelpLocation.name;
     cell.locationName.numberOfLines = 0;
+    [cell.locationName sizeToFit];
     [cell.locationName setFont:[UIFont fontWithName:@"Helvetica-Bold" size:20]];
     cell.locationName.textColor = [UIColor walkRouteColor];
 
     cell.distanceFromStation.text = [NSString stringWithFormat:@"%.01f miles from Divvy Station", yelpLocation.distanceFromStation * 0.000621371];
-    [cell.distanceFromStation setFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
+    [cell.distanceFromStation setFont:[UIFont fontWithName:@"Helvetica" size:12]];
     cell.distanceFromStation.textColor = [UIColor walkRouteColor];
 
-    [cell.neighborhoodLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:15]];
+    [cell.neighborhoodLabel setFont:[UIFont fontWithName:@"Helvetica" size:15]];
     cell.neighborhoodLabel.textColor = [UIColor walkRouteColor];
     cell.neighborhoodLabel.numberOfLines = 0;
 
-    if (yelpLocation.neighborhood == nil) {
-        cell.neighborhoodLabel.text = @"Area: N/A";
+    [cell.neighborhoodLabel setFont:[UIFont fontWithName:@"Helvetica" size:15]];
+    cell.neighborhoodLabel.textColor = [UIColor walkRouteColor];
+    cell.neighborhoodLabel.numberOfLines = 0;
+    if (yelpLocation.neighborhood == nil && yelpLocation.offers == nil) {
+        cell.neighborhoodLabel.text = @"Area: N/A\nOffers: N/A";
+    }
+    else if (yelpLocation.neighborhood && yelpLocation.offers) {
+        cell.neighborhoodLabel.text = [NSString stringWithFormat:@"Area: %@\nOffers: %@", yelpLocation.neighborhood, yelpLocation.offers];
+    }
+    else if (yelpLocation.neighborhood) {
+        cell.neighborhoodLabel.text = [NSString stringWithFormat:@"Area: %@\nOffers: N/A", yelpLocation.neighborhood];
     }
     else {
-        cell.neighborhoodLabel.text = [NSString stringWithFormat:@"Area: %@", yelpLocation.neighborhood];
+        cell.neighborhoodLabel.text = [NSString stringWithFormat:@"Area: N/A\nOffers: %@", yelpLocation.offers];
     }
+
 
     [cell.locationImageView sd_setImageWithURL:[NSURL URLWithString:yelpLocation.businessImageURL]
                       placeholderImage:[UIImage imageNamed:@"building"]];
     cell.imageView.clipsToBounds = YES;
-
     [cell.ratingImageView sd_setImageWithURL:[NSURL URLWithString:yelpLocation.businessRatingImageURL]
                               placeholderImage:[UIImage imageNamed:@"building"]];
     cell.imageView.clipsToBounds = YES;
@@ -532,11 +573,11 @@
                 }
                 else if ([[dictionary objectForKey:@"categories"] count] == 1) {
                     yelpLocation.categories = [[[dictionary objectForKey:@"categories"] objectAtIndex:0] objectAtIndex:0];
-                    yelpLocation.offers = @"n/a";
+                    yelpLocation.offers = @"N/A";
                 }
                 else {
-                    yelpLocation.categories = @"n/a";
-                    yelpLocation.offers = @"n/a";
+                    yelpLocation.categories = @"N/A";
+                    yelpLocation.offers = @"N/A";
                 }
 
                 yelpLocation.yelpID = [dictionary objectForKey:@"id"];
@@ -637,8 +678,6 @@
 
             self.neighborhood2 = secondMostOccurring;
 
-            NSLog(@"Most Occuring Hood: %@", self.neighborhood1);
-            NSLog(@"SecondMost Occuring Hood: %@", self.neighborhood2);
             self.neighborhoodsLabel.text = [NSString stringWithFormat:@"Neighborhoods\n%@\n%@", self.neighborhood1, self.neighborhood2];
 
         }
@@ -778,6 +817,7 @@
     [self disableSearchBooleans];
     [self enableButtons];
     [self.tableView reloadData];
+    self.segmentedControl.hidden = NO;
 
     // Stop the activity indicator
     self.activityIndicator.hidden = YES;
