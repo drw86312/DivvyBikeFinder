@@ -25,5 +25,6 @@
 @property NSString *aboutBusiness;
 @property NSString *categories;
 @property NSString *offers;
+@property NSString *neighborhood;
 
 @end
