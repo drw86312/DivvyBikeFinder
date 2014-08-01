@@ -11,5 +11,6 @@
 @interface NoBikesAnnotation : MKPointAnnotation
 
 @property(nonatomic, strong) NSString *imageName;
+@property(nonatomic, strong) UIColor *backgroundColor;
 
 @end

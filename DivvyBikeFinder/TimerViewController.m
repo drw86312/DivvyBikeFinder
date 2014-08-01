@@ -19,13 +19,11 @@
 @property NSDate *initialTime;
 @property NSDate *deadline;
 @property NSTimeInterval timeInterval;
-
 @property BOOL startButtonSelected;
 
 @end
 
 @implementation TimerViewController
-
 
 -(void)viewDidLoad
 {
@@ -41,7 +39,6 @@
     // Create the views
     [self createViews];
 }
-
 
 - (void)applicationWillEnterInBackGround{
     NSLog(@"Application entered background");
@@ -90,21 +87,22 @@
     // Find status and navigation bar heights
     CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
     CGFloat navBarHeight = self.navigationController.navigationBar.frame.size.height;
+//    CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
 
     // Set frame values for drawing views
     CGFloat verticalOffset = statusBarHeight + navBarHeight + 10.0f;
     CGFloat horizontalOffset = 10.0f;
     CGFloat startButtonWidth = self.view.frame.size.width - 20.0f;
-    CGFloat startButtonHeight = 60.0f;
+    CGFloat startButtonHeight = 122.0f;
 
     // Create and style the timer label
     self.timerLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, startButtonWidth, startButtonHeight)];
     self.timerLabel.textAlignment = NSTextAlignmentCenter;
     self.timerLabel.text = [NSString stringWithFormat:@"00:00"];
     self.timerLabel.textColor = [UIColor divvyColor];
-    self.timerLabel.layer.borderWidth = 1.0f;
+    self.timerLabel.layer.borderWidth = 2.0f;
     self.timerLabel.layer.borderColor = [[UIColor divvyColor] CGColor];
-    self.timerLabel.font = [UIFont systemFontOfSize:30.0f];
+    self.timerLabel.font = [UIFont systemFontOfSize:90.0f];
     [self.view addSubview:self.timerLabel];
 
     verticalOffset += self.timerLabel.frame.size.height + 10.0f;
@@ -147,14 +145,15 @@
     // Set button width and spacing
     CGFloat spacing = 5.0f;
     CGFloat buttonWidth = (startButtonWidth - ((self.buttonsArray.count -1) * spacing)) / self.buttonsArray.count;
+    CGFloat buttonHeight = buttonWidth;
 
     // Iterate through all the buttons, place them on the view and style them.
     for (UIButton *button in self.buttonsArray) {
-        button.frame = CGRectMake(horizontalOffset, verticalOffset, buttonWidth, startButtonHeight);
+        button.frame = CGRectMake(horizontalOffset, verticalOffset, buttonWidth, buttonHeight);
         button.layer.cornerRadius = 5.0f;
-        button.layer.borderWidth = 1.0f;
+        button.layer.borderWidth = 2.0f;
         button.layer.borderColor = [[UIColor walkRouteColor] CGColor];
-        button.titleLabel.font = [UIFont systemFontOfSize:20.0f];
+        button.titleLabel.font = [UIFont systemFontOfSize:24.0f];
         button.titleLabel.numberOfLines = 0;
         [button setTitleColor:[UIColor walkRouteColor] forState:UIControlStateNormal];
         button.titleLabel.textAlignment = NSTextAlignmentCenter;
@@ -163,14 +162,14 @@
         horizontalOffset += button.frame.size.width + spacing;
     }
 
-    verticalOffset += startButtonHeight + 10.0f;
+    verticalOffset += buttonHeight + 10.0f;
     horizontalOffset = 10.0f;
 
     // Create and style the "Start" button
     self.startButton = [[UIButton alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, startButtonWidth, startButtonHeight)];
     [self.startButton setBackgroundColor:[UIColor divvyColor]];
     self.startButton.layer.cornerRadius = 5.0f;
-    self.startButton.titleLabel.font = [UIFont systemFontOfSize:30.0f];
+    self.startButton.titleLabel.font = [UIFont systemFontOfSize:65.0f];
     [self.startButton setTitle:@"Start" forState:UIControlStateNormal];
     [self.startButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     self.startButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
@@ -206,7 +205,7 @@
         // Style the timer label
         self.timerLabel.text = [NSString stringWithFormat:@"00:00"];
         self.timerLabel.textColor = [UIColor divvyColor];
-        self.timerLabel.layer.borderWidth = 1.0f;
+        self.timerLabel.layer.borderWidth = 2.0f;
         self.timerLabel.layer.borderColor = [[UIColor divvyColor] CGColor];
         self.timerLabel.backgroundColor = [UIColor whiteColor];
     }
@@ -227,7 +226,7 @@
         [self.startButton setTitle:@"Cancel" forState:UIControlStateNormal];
         [self.startButton setTitleColor:[UIColor divvyColor] forState:UIControlStateNormal];
         self.startButton.backgroundColor = [UIColor whiteColor];
-        self.startButton.layer.borderWidth = 1.0f;
+        self.startButton.layer.borderWidth = 2.0f;
         self.startButton.layer.borderColor = [[UIColor divvyColor] CGColor];
 
         // Style timer label
@@ -250,6 +249,7 @@
     [self.startButton setTitle:@"Start" forState:UIControlStateNormal];
     [self.startButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [self.startButton setBackgroundColor:[UIColor divvyColor]];
+    self.startButton.layer.borderWidth = 2.0f;
 }
 
 -(void)button2Selected:(id)sender
@@ -263,6 +263,7 @@
     [self.startButton setTitle:@"Start" forState:UIControlStateNormal];
     [self.startButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [self.startButton setBackgroundColor:[UIColor divvyColor]];
+    self.startButton.layer.borderWidth = 2.0f;
 }
 
 -(void)button3Selected:(id)sender
@@ -276,6 +277,7 @@
     [self.startButton setTitle:@"Start" forState:UIControlStateNormal];
     [self.startButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [self.startButton setBackgroundColor:[UIColor divvyColor]];
+    self.startButton.layer.borderWidth = 2.0f;
 }
 
 -(void)button4Selected:(id)sender
@@ -289,8 +291,8 @@
     [self.startButton setTitle:@"Start" forState:UIControlStateNormal];
     [self.startButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [self.startButton setBackgroundColor:[UIColor divvyColor]];
+    self.startButton.layer.borderWidth = 2.0f;
 }
-
 
 # pragma mark - timer methods
 
@@ -334,8 +336,7 @@
         [self.startButton setTitle:@"Times Up!" forState:UIControlStateNormal];
         [self.startButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         [self.startButton setBackgroundColor:[UIColor walkRouteColor]];
-        self.startButton.layer.borderWidth = 1.0f;
-        self.startButton.layer.borderColor = [[UIColor walkRouteColor] CGColor];
+        self.startButton.layer.borderWidth = 0.0f;
     }
 }
 

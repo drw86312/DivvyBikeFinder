@@ -9,6 +9,7 @@
 #import "StationDetailViewController.h"
 #import "DivvyBikeAnnotation.h"
 #import "UIColor+DesignColors.h"
+#import "WebviewViewController.h"
 #import <MapKit/MapKit.h>
 #import "YelpLocation.h"
 #import "FoodAnnotation.h"
@@ -18,6 +19,8 @@
 #import "SightseeAnnotation.h"
 #import "UIImageView+WebCache.h"
 #import "YelpTableViewCell.h"
+#import <CoreGraphics/CoreGraphics.h>
+#import <QuartzCore/QuartzCore.h>
 #import "TDOAuth.h"
 
 @interface StationDetailViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UITableViewDataSource, UITableViewDelegate>
@@ -28,7 +31,11 @@
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UIView *blockerView;
+@property UIView *mapContainerView;
+@property YelpLocation *selectedYelpLocation;
 @property UISegmentedControl *segmentedControl;
+@property NSString *searchTerm;
+@property NSNumber *sortType;
 @property NSString *neighborhood1;
 @property NSString *neighborhood2;
 @property UILabel *neighborhoodsLabel;
@@ -36,6 +43,9 @@
 @property NSInteger counter;
 @property NSInteger counter2;
 @property UIActivityIndicatorView *activityIndicator;
+@property UITapGestureRecognizer *tapToOpenMapContainer;
+@property UITapGestureRecognizer *tapToCloseMapContainer;
+@property UIImageView *mapYelpImage;
 @property id request;
 @property BOOL foodSearch;
 @property BOOL drinkSearch;
@@ -195,8 +205,8 @@
 
     // Create segmented control
     CGFloat segmentedControlHeight = 30.0f;
-    CGFloat segmentedControlWidth = 280.0f;
-    verticalOffset += button1.frame.size.height + (2 *spacing);
+    CGFloat segmentedControlWidth = 290.0f;
+    verticalOffset += button1.frame.size.height + (2 *spacing + 2);
     horizontalOffset = (self.view.frame.size.width/2) - (segmentedControlWidth/2);
 
     self.segmentedControl = [[UISegmentedControl alloc] initWithItems:@[@"Map",@"List"]];
@@ -210,7 +220,25 @@
     self.segmentedControl.layer.borderColor = [[UIColor walkRouteColor] CGColor];
     self.segmentedControl.layer.cornerRadius = 5.0f;
     self.segmentedControl.alpha = .8f;
+    UIFont *font = [UIFont boldSystemFontOfSize:17.0f];
+    NSDictionary *attributes = @{NSFontAttributeName: font};
+    [self.segmentedControl setTitleTextAttributes:attributes forState:UIControlStateNormal];
     [self.view addSubview:self.segmentedControl];
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    // Create Yelp Imageview
+    CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
+    CGFloat imageViewHeight = 25.0f;
+    CGFloat imageViewWidth = 50.0f;
+    verticalOffset = self.view.frame.size.height - tabBarHeight - imageViewHeight -10.0f;
+    horizontalOffset = self.view.frame.origin.x + 10.0f;
+
+    self.mapYelpImage = [[UIImageView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, imageViewWidth, imageViewHeight)];
+    self.mapYelpImage.hidden = NO;
+    self.mapYelpImage.image = [UIImage imageNamed:@"yelp"];
+    self.mapYelpImage.alpha = .7f;
+    [self.view addSubview:self.mapYelpImage];
 }
 
 -(void)segmentChanged:(UISegmentedControl *)segment
@@ -218,12 +246,16 @@
     if (segment.selectedSegmentIndex == 0) {
         self.mapView.hidden = NO;
         self.tableView.hidden = YES;
+        self.mapContainerView.hidden = NO;
+        self.mapYelpImage.hidden = NO;
         self.segmentedControl.alpha = 0.8f;
     }
     else
     {
         self.mapView.hidden = YES;
         self.tableView.hidden = NO;
+        self.mapContainerView.hidden = YES;
+        self.mapYelpImage.hidden = YES;
         self.segmentedControl.alpha = 1.0f;
     }
 }
@@ -233,47 +265,117 @@
 // When one of these buttons is pushed...1) remove mapview annotations 2) set search boolean to YES 3) disable user interaction of all the buttons, 4) perform API call with relevent search term.
 -(void)button1Selected:(id)sender
 {
+    NSLog(@"Food search");
+    // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
+    [self disableSearchBooleans];
+    self.foodSearch = YES;
+
+    // Specify proper search parameters...
+    self.searchTerm = @"restaurant";
+    self.sortType = @0;
+
+    // Remove old map annotations, but add back the Divvy Bike annotation
     [self.mapView removeAnnotations:self.mapView.annotations];
     [self setMapViewandPlacePin];
-    self.foodSearch = YES;
+    [self clearContainerView];
+
+    // Disable UI while search occurs
     [self disableButtons];
-    [self makeYelpAPICallwithTerm:@"restaurant" andSortType:@0];
+
+    // Make Yelp call with the proper parameters
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
 }
 
 -(void)button2Selected:(id)sender
 {
+    NSLog(@"Bar search");
+    // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
+    [self disableSearchBooleans];
+    self.drinkSearch = YES;
+
+    // Specify proper search parameters...
+    self.searchTerm = @"bar";
+    self.sortType = @0;
+
+    // Remove old map annotations, but add back the Divvy Bike annotation
     [self.mapView removeAnnotations:self.mapView.annotations];
     [self setMapViewandPlacePin];
-    self.drinkSearch = YES;
+    [self clearContainerView];
+
+    // Disable UI while search occurs
     [self disableButtons];
-    [self makeYelpAPICallwithTerm:@"bar" andSortType:@0];
+
+    // Make Yelp call with the proper parameters
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
 }
 
 -(void)button3Selected:(id)sender
 {
+    NSLog(@"Shopping search");
+    // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
+    [self disableSearchBooleans];
+    self.shopSearch = YES;
+
+    // Specify proper search parameters...
+    self.searchTerm = @"shop";
+    self.sortType = @0;
+
+    // Remove old map annotations, but add back the Divvy Bike annotation
     [self.mapView removeAnnotations:self.mapView.annotations];
     [self setMapViewandPlacePin];
-    self.shopSearch = YES;
+    [self clearContainerView];
+
+    // Disable UI while search occurs
     [self disableButtons];
-    [self makeYelpAPICallwithTerm:@"shop" andSortType:@0];
+
+    // Make Yelp call with the proper parameters
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
 }
 
 -(void)button4Selected:(id)sender
 {
+    NSLog(@"Sightsee search");
+    // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
+    [self disableSearchBooleans];
+    self.sightseeSearch = YES;
+
+    // Specify proper search parameters...
+    self.searchTerm = @"attractions";
+    self.sortType = @0;
+
+    // Remove old map annotations, but add back the Divvy Bike annotation, remove map continer views
     [self.mapView removeAnnotations:self.mapView.annotations];
     [self setMapViewandPlacePin];
-    self.sightseeSearch = YES;
+    [self clearContainerView];
+
+    // Disable UI while search occurs
     [self disableButtons];
-    [self makeYelpAPICallwithTerm:@"attractions" andSortType:@0];
+
+    // Make Yelp call with the proper parameters
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
 }
 
 -(void)button5Selected:(id)sender
 {
+    NSLog(@"Live music search");
+    // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
+    [self disableSearchBooleans];
+    self.musicSearch = YES;
+
+    // Specify proper search parameters...
+    self.searchTerm = @"music";
+    self.sortType = @0;
+
+    // Remove old map annotations, but add back the Divvy Bike annotation
     [self.mapView removeAnnotations:self.mapView.annotations];
     [self setMapViewandPlacePin];
-    self.musicSearch = YES;
+    [self clearContainerView];
+
+    // Disable UI while search occurs
     [self disableButtons];
-    [self makeYelpAPICallwithTerm:@"music" andSortType:@0];
+
+    // Make Yelp call with the proper parameters
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
 }
 
 #pragma mark - map/location manager methods
@@ -441,22 +543,32 @@
     return self.yelpLocations.count;
 }
 
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    YelpLocation *location = self.selectedYelpLocation;
+    WebviewViewController *detailViewController = segue.destinationViewController;
+    detailViewController.yelpLocationFromSourceVC = location;
+}
+
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     YelpLocation *yelpLocation = [self.yelpLocations objectAtIndex:indexPath.row];
     YelpTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"yelpcell"];
 
+    // Location name label
     cell.locationName.text = yelpLocation.name;
     cell.locationName.numberOfLines = 0;
     [cell.locationName sizeToFit];
     [cell.locationName setFont:[UIFont fontWithName:@"Helvetica-Bold" size:20]];
     cell.locationName.textColor = [UIColor walkRouteColor];
 
+    // Distance label
     cell.distanceFromStation.text = [NSString stringWithFormat:@"%.01f miles from Divvy Station", yelpLocation.distanceFromStation * 0.000621371];
     [cell.distanceFromStation setFont:[UIFont fontWithName:@"Helvetica" size:12]];
     cell.distanceFromStation.textColor = [UIColor walkRouteColor];
 
+    // neighborhood/offers label.
     [cell.neighborhoodLabel setFont:[UIFont fontWithName:@"Helvetica" size:15]];
     cell.neighborhoodLabel.textColor = [UIColor walkRouteColor];
     cell.neighborhoodLabel.numberOfLines = 0;
@@ -465,22 +577,24 @@
     cell.neighborhoodLabel.textColor = [UIColor walkRouteColor];
     cell.neighborhoodLabel.numberOfLines = 0;
     if (yelpLocation.neighborhood == nil && yelpLocation.offers == nil) {
-        cell.neighborhoodLabel.text = @"Area: N/A\nOffers: N/A";
+        cell.neighborhoodLabel.text = @"Neighborhood: N/A\nOffers: N/A";
     }
     else if (yelpLocation.neighborhood && yelpLocation.offers) {
-        cell.neighborhoodLabel.text = [NSString stringWithFormat:@"Area: %@\nOffers: %@", yelpLocation.neighborhood, yelpLocation.offers];
+        cell.neighborhoodLabel.text = [NSString stringWithFormat:@"Neighborhood: %@\nOffers: %@", yelpLocation.neighborhood, yelpLocation.offers];
     }
     else if (yelpLocation.neighborhood) {
-        cell.neighborhoodLabel.text = [NSString stringWithFormat:@"Area: %@\nOffers: N/A", yelpLocation.neighborhood];
+        cell.neighborhoodLabel.text = [NSString stringWithFormat:@"Neighborhood: %@\nOffers: N/A", yelpLocation.neighborhood];
     }
     else {
-        cell.neighborhoodLabel.text = [NSString stringWithFormat:@"Area: N/A\nOffers: %@", yelpLocation.offers];
+        cell.neighborhoodLabel.text = [NSString stringWithFormat:@"Neighborhood: N/A\nOffers: %@", yelpLocation.offers];
     }
 
-
+    // Business imageview
     [cell.locationImageView sd_setImageWithURL:[NSURL URLWithString:yelpLocation.businessImageURL]
                       placeholderImage:[UIImage imageNamed:@"building"]];
     cell.imageView.clipsToBounds = YES;
+
+    // Star rating imageview
     [cell.ratingImageView sd_setImageWithURL:[NSURL URLWithString:yelpLocation.businessRatingImageURL]
                               placeholderImage:[UIImage imageNamed:@"building"]];
     cell.imageView.clipsToBounds = YES;
@@ -494,6 +608,14 @@
         return 125.0f;
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    self.selectedYelpLocation = [self.yelpLocations objectAtIndex:indexPath.row];
+    [self performSegueWithIdentifier:@"websegue" sender:self];
+    [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
+    NSLog(@"Selected station name: %@", self.selectedYelpLocation.name);
+}
+
 
 #pragma mark - Yelp API call methods
 -(void)makeYelpAPICallwithTerm:(NSString *)term andSortType:(NSNumber *) sortType
@@ -502,7 +624,9 @@
     self.activityIndicator.hidden = NO;
     [self.activityIndicator startAnimating];
 
-    // Sort type 0 - is a sort by best match
+    // Sort type 0 - best match (default)
+    // Sort type 1 - distance
+    // Sort type 2 - highest rated
     NSLog(@"Station Latitude: %f", self.stationFromSourceVC.latitude.floatValue);
     NSLog(@"Station Longitude: %f", self.stationFromSourceVC.longitude.floatValue);
     NSLog(@"Search term: %@", term);
@@ -547,8 +671,6 @@
                 yelpLocation.businessURL = [dictionary objectForKey:@"url"];
                 yelpLocation.businessImageURL = [dictionary objectForKey:@"image_url"];
                 yelpLocation.neighborhood = [[[dictionary objectForKey:@"location"] objectForKey:@"neighborhoods"] firstObject];;
-
-                NSLog(@"neighborhood: %@", yelpLocation.neighborhood);
 
                 if (!yelpLocation.businessImageURL) {
                     NSURL *placeholderURL = [[NSBundle mainBundle] URLForResource:@"building" withExtension:@"png"];
@@ -619,7 +741,7 @@
 
     [NSURLConnection sendAsynchronousRequest:self.request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
         // If poor connection...
-        if (connectionError) {NSLog(@"Connection error");}
+        if (connectionError) {NSLog(@"Connection error - can't find neighborhood");}
         else {
             NSLog(@"Yelp data returned");
             NSDictionary *dictionary  = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&connectionError];
@@ -636,7 +758,6 @@
                 if (neighborhoodsArray.count > 0) {
                     for (NSString *neighborhood in neighborhoodsArray) {
                         [neighborhoodsArray2 addObject:neighborhood];
-                        NSLog(@"Neighborhood: %@", neighborhood);
                     }
                 }
                 [arrayOfYelpBarObjects addObject:location];
@@ -655,7 +776,6 @@
             }
 
             self.neighborhood1 = mostOccurring;
-
             NSMutableArray *secondArray = [NSMutableArray new];
 
             for (NSString *string in neighborhoodsArray2) {
@@ -663,23 +783,19 @@
                     [secondArray addObject:string];
                 }
             }
-
             NSCountedSet *bag1 = [[NSCountedSet alloc] initWithArray:secondArray];
             NSString *secondMostOccurring;
             NSUInteger secondHighest = 0;
             for (NSString *t in bag1)
             {
-                if ([bag1 countForObject:t] > secondHighest)
-                {
+                if ([bag1 countForObject:t] > secondHighest) {
                     highest = [bag countForObject:t];
                     secondMostOccurring = t;
                 }
             }
-
             self.neighborhood2 = secondMostOccurring;
-
-            self.neighborhoodsLabel.text = [NSString stringWithFormat:@"Neighborhoods\n%@\n%@", self.neighborhood1, self.neighborhood2];
-
+            self.neighborhoodsLabel.text = [NSString stringWithFormat:@"Neighborhood\n%@", self.neighborhood1];
+            NSLog(@"Neighborhood found");
         }
     }];
 }
@@ -702,7 +818,6 @@
 
                             // If placemark is found, assign lat and long. properties to yelpLocation object
                             if (placemarks.count > 0) {
-                                NSLog(@"Result found");
                                 MKPlacemark *placemark = [placemarks firstObject];
                                 yelpLocation.latitude = placemark.location.coordinate.latitude;
                                 yelpLocation.longitude = placemark.location.coordinate.longitude;
@@ -722,7 +837,7 @@
                                  [self performLanguageQuery:languageQueryArray];
                                 }
                              else {
-                                 NSLog(@"Setting yelp pins after address geocode");
+                                 NSLog(@"Geocoding completed");
                                  [self setYelpPinAnnotations];
                                 }
                          }
@@ -733,7 +848,6 @@
 -(void)performLanguageQuery:(NSMutableArray *)queryArray
 {
     self.counter2 = 0;
-
     for (YelpLocation *yelpLocation in queryArray) {
 
             // Perform natural lanuage query on yelpLocation's name property.
@@ -749,7 +863,6 @@
 
                 // If there are mapItems returned from query, then set the lat/long properties of YelpLocation and add the MKPointAnnotation to the map.
                 if (mapItems.count > 0) {
-                    NSLog(@"Result found");
                     MKMapItem *mapItem = [mapItems firstObject];
                     yelpLocation.latitude = mapItem.placemark.coordinate.latitude;
                     yelpLocation.longitude = mapItem.placemark.coordinate.longitude;
@@ -761,7 +874,7 @@
 
                 // When the second counter equals the number of yelpLocations in queryArray, all yelpLocations have been evaluated
                 if (self.counter2 == queryArray.count) {
-                    NSLog(@"Setting yelp pins after natural language query");
+                    NSLog(@"Geocoding completed");
                     [self setYelpPinAnnotations];
                 }
         }];
@@ -813,10 +926,10 @@
         }
     }
 
-    // Set all search booleans back to NO and enable user interaction of the buttons.
-    [self disableSearchBooleans];
+    // Enable user interaction of buttons, reload tableview, create the mapcontainer view, display the segmented control, stop the activity indictor.
     [self enableButtons];
     [self.tableView reloadData];
+    [self createMapContainerView];
     self.segmentedControl.hidden = NO;
 
     // Stop the activity indicator
@@ -825,6 +938,183 @@
 
     NSLog(@"Set pins method completed");
 }
+
+#pragma mark - Map container view methods
+
+-(void)createMapContainerView
+{
+    CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
+    CGFloat containerViewHeight = 40.0f;
+    CGFloat containerViewWidth = 40.0f;
+    CGFloat horizontalOffset = self.view.frame.size.width - containerViewWidth -10.0f;
+    CGFloat verticalOffset = self.view.frame.size.height - tabBarHeight - containerViewHeight -10.0f;
+
+    // Create view to hold the map information vies.
+    self.mapContainerView = [[UIView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, containerViewWidth, containerViewHeight)];
+    [self.view addSubview:self.mapContainerView];
+
+    // Add the "i" info icon to mapcontainer view.
+    UIImageView *searchMoreImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.mapContainerView.frame.size.width, self.mapContainerView.frame.size.height)];
+    searchMoreImageView.backgroundColor = [UIColor walkRouteColor];
+    searchMoreImageView.image = [UIImage imageNamed:@"info"];
+    searchMoreImageView.alpha = 0.8f;
+    searchMoreImageView.layer.cornerRadius = containerViewHeight/2;
+    [self.mapContainerView addSubview:searchMoreImageView];
+
+    // Add tap gesture recognizer to mapcontainer view
+    self.tapToOpenMapContainer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openContainer:)];
+    [self.mapContainerView addGestureRecognizer:self.tapToOpenMapContainer];
+
+    NSLog(@"Created map container view");
+}
+
+-(void)openContainer:(id)sender
+{
+    // Remove the tap gesture recognizer that opened the container view
+    [self.mapContainerView removeGestureRecognizer:self.tapToOpenMapContainer];
+
+    // Remove label from the container view
+    NSArray *subviews = [self.mapContainerView subviews];
+    for (UILabel *label in subviews) {
+        [label removeFromSuperview];
+    }
+
+    // Resize the container view with animation
+    CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
+    CGFloat containerViewHeight = 120.0f;
+    CGFloat containerViewWidth = 120.0f;
+    CGFloat horizontalOffset = self.view.frame.size.width - containerViewWidth;
+    CGFloat verticalOffset = self.view.frame.size.height - tabBarHeight - containerViewHeight;
+
+    [UIView beginAnimations:nil context:nil];
+    [UIView setAnimationDuration:1.0];
+    [UIView setAnimationDelay:0.0];
+    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
+
+    self.mapContainerView.frame = CGRectMake(horizontalOffset, verticalOffset, containerViewWidth, containerViewHeight);
+    [UIView commitAnimations];
+
+    // Add buttons to map container view
+
+    // Create and style the two buttons.
+    NSMutableArray *buttonsArray = [NSMutableArray new];
+
+    UIButton *button1 = [[UIButton alloc] init];
+    button1.backgroundColor = [UIColor whiteColor];
+    [button1 setTitleColor:[UIColor walkRouteColor] forState:UIControlStateNormal];
+    button1.layer.borderColor = [[UIColor walkRouteColor] CGColor];
+    button1.layer.borderWidth = 1.0f;
+    [button1 setTitle:@"Nearest" forState:UIControlStateNormal];
+
+    UIButton *button2 = [[UIButton alloc] init];
+    button2.backgroundColor = [UIColor walkRouteColor];
+    [button2 setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [button2 setTitle:@"Highest\nRated" forState:UIControlStateNormal];
+    button2.titleLabel.numberOfLines = 0;
+    button2.titleLabel.textAlignment = NSTextAlignmentCenter;
+
+    [buttonsArray addObject:button1];
+    [buttonsArray addObject:button2];
+
+    // Place the buttons one on top of the other in the container view.
+    verticalOffset = 0.0;
+    horizontalOffset = 0.0f;
+    CGFloat buttonWidth = self.mapContainerView.frame.size.width;
+    CGFloat buttonHeight = 50.0f;
+
+    for (UIButton *button in buttonsArray) {
+        button.frame = CGRectMake(horizontalOffset, verticalOffset, buttonWidth, buttonHeight);
+        button.titleLabel.font = [UIFont fontWithName:@"Helvetica" size:17.0];
+        [self.mapContainerView addSubview:button];
+        verticalOffset += button.frame.size.height;
+    }
+
+    // Set button targets.
+    [button1 addTarget:self
+                action:@selector(nearestSelected:)
+      forControlEvents:UIControlEventTouchUpInside];
+
+    [button2 addTarget:self
+                action:@selector(topRatedSelected:)
+      forControlEvents:UIControlEventTouchUpInside];
+
+    // Add tap that will close the mapContainer view, when the user taps anywhere on the view.
+    self.tapToCloseMapContainer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(closeContainer:)];
+    [self.view addGestureRecognizer:self.tapToCloseMapContainer];
+
+    // Disable buttons while the container view is pulled out, so a tap anywhere will close the container view.
+    [self disableButtons];
+}
+
+-(void)closeContainer:(id)sender
+{
+    // Remove buttons from the container view
+    [self clearContainerView];
+
+    // Resize the container view with animation back to its original size.
+    [UIView beginAnimations:nil context:nil];
+    [UIView setAnimationDuration:1.0];
+    [UIView setAnimationDelay:0.0];
+    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
+
+    CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
+    CGFloat containerViewHeight = 40.0;
+    CGFloat containerViewWidth = 40.0;
+    CGFloat horizontalOffset = self.view.frame.size.width - containerViewWidth -10.0f;
+    CGFloat verticalOffset = self.view.frame.size.height - tabBarHeight - containerViewHeight -10.0f;
+    self.mapContainerView.frame = CGRectMake(horizontalOffset, verticalOffset, containerViewWidth, containerViewHeight);
+    [UIView commitAnimations];
+
+    // Add the "i" icon back to mapcontainer view.
+    UIImageView *searchMoreImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.mapContainerView.frame.size.width, self.mapContainerView.frame.size.height)];
+    searchMoreImageView.backgroundColor = [UIColor walkRouteColor];
+    searchMoreImageView.image = [UIImage imageNamed:@"info"];
+    searchMoreImageView.alpha = 0.8f;
+    searchMoreImageView.layer.cornerRadius = containerViewHeight/2;
+    [self.mapContainerView addSubview:searchMoreImageView];
+
+    // Remove the close gesture recognizer..
+    [self.view removeGestureRecognizer:self.tapToCloseMapContainer];
+
+    // Add the open gesture recognizer
+    [self.mapContainerView addGestureRecognizer:self.tapToOpenMapContainer];
+
+    // Enable the buttons on the screen
+    [self enableButtons];
+}
+
+-(void)nearestSelected:(id)sender
+{
+    [self.view removeGestureRecognizer:self.tapToCloseMapContainer];
+
+    NSLog(@"Find nearest button selected");
+    // Perform an API call with returned results sorted by distance.
+    self.sortType = @1;
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
+
+    //Disable user interaction
+    [self disableButtons];
+
+    // Remove buttons from the container view
+    [self clearContainerView];
+}
+
+-(void)topRatedSelected:(id)sender
+{
+    [self.view removeGestureRecognizer:self.tapToCloseMapContainer];
+
+    NSLog(@"Find highest rated button selected");
+    // Perform an API call with returned results sorted by highest rated.
+    self.sortType = @2;
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
+
+    //Disable user interaction
+    [self disableButtons];
+
+    // Remove buttons from the container view
+    [self clearContainerView];
+}
+
 
 #pragma mark - helper methods
 
@@ -842,6 +1132,17 @@
     }
 }
 
+-(void)clearContainerView
+{
+    NSArray *subviews = [self.mapContainerView subviews];
+    for (UILabel *label in subviews) {
+        [label removeFromSuperview];
+    }
+    for (UIButton *button in subviews) {
+        [button removeFromSuperview];
+    }
+}
+
 -(void)disableSearchBooleans
 {
     self.foodSearch = NO;
@@ -850,7 +1151,5 @@
     self.sightseeSearch = NO;
     self.musicSearch = NO;
 }
-
-
 
 @end

@@ -461,6 +461,20 @@
             annotation.subtitle = [NSString stringWithFormat:@"%.01f miles from %@", divvyStation.distanceFromDestination * 0.000621371, self.userLocationString];
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"Divvy";
+
+            // Dynamically update the background color
+            // Max RGB value = 255.0
+
+            // Scale the fraction of available bikes to the 0-255 RGB range
+            CGFloat bikesFractionOfTotal = divvyStation.availableBikes.floatValue/divvyStation.totalDocks.floatValue;
+            CGFloat greenScaler = (bikesFractionOfTotal * 255);
+            CGFloat redScaler = (1 - bikesFractionOfTotal) *255;
+
+            // Apply scaler values to background color. When pan is at the bottom of the view, blueScaler is low and redScaler is high (i.e. more red), and vice versa.
+            CGFloat red = redScaler/255.0;
+            CGFloat green = greenScaler/255.0;
+            CGFloat blue = 0.0/255.0;
+            annotation.backgroundColor = [UIColor colorWithRed:red green:green blue:blue alpha:1.0];
             [self.mapView addAnnotation:annotation];
         }
         counter += 1;
@@ -496,6 +510,21 @@
             annotation.subtitle = [NSString stringWithFormat:@"%.01f miles from %@", divvyStation.distanceFromDestination * 0.000621371, self.userDestinationString];
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"Divvy";
+
+            // Dynamically update the background color
+            // Max RGB value = 255.0
+
+            // Scale the fraction of available bikes to the 0-255 RGB range
+            CGFloat bikesFractionOfTotal = divvyStation.availableBikes.floatValue/divvyStation.totalDocks.floatValue;
+            CGFloat greenScaler = (bikesFractionOfTotal * 255);
+            CGFloat redScaler = (1 - bikesFractionOfTotal) *255;
+
+            // Apply scaler values to background color. When pan is at the bottom of the view, blueScaler is low and redScaler is high (i.e. more red), and vice versa.
+            CGFloat red = redScaler/255.0;
+            CGFloat green = greenScaler/255.0;
+            CGFloat blue = 0.0/255.0;
+            annotation.backgroundColor = [UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+            
             [self.mapView addAnnotation:annotation];
         }
         counter2 += 1;
@@ -905,6 +934,8 @@
     else if (indexPath.section == 2) {
         self.selectedStation = [self.stationsNearDestination firstObject];
     }
+
+    [self performSegueWithIdentifier:@"station" sender:self];
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
@@ -939,6 +970,9 @@
             }
 
             annotationView.image = [UIImage imageNamed:divvyAnnotation.imageName];
+            annotationView.frame = CGRectMake(0, 0, 30, 30);
+            annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
+            annotationView.backgroundColor = divvyAnnotation.backgroundColor;
 
         return annotationView;
     }
@@ -1068,6 +1102,9 @@ calloutAccessoryControlTapped:(UIControl *)control
     self.segmentedControl.layer.borderWidth = 1.0f;
     self.segmentedControl.layer.cornerRadius = 5.0f;
     self.segmentedControl.alpha = .8f;
+    UIFont *font = [UIFont boldSystemFontOfSize:17.0f];
+    NSDictionary *attributes = @{NSFontAttributeName: font};
+    [self.segmentedControl setTitleTextAttributes:attributes forState:UIControlStateNormal];
 
     // Activity indicator
     self.activityIndicator.color = [UIColor divvyColor];
