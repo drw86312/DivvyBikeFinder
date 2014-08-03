@@ -11,7 +11,6 @@
 @interface RouteTableViewCell : UITableViewCell
 
 @property (weak, nonatomic) IBOutlet UILabel *stepLabel;
-@property (weak, nonatomic) IBOutlet UILabel *distanceLabel;
 @property (weak, nonatomic) IBOutlet UIImageView *transportModeImageView;
 
 @end

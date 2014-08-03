@@ -31,7 +31,7 @@
 @property NSString *postalCode;
 @property NSString *location;
 @property NSString *landMark;
-
-
+@property (nonatomic, strong) UIColor *bikesColor;
+@property (nonatomic, strong) UIColor *docksColor;
 
 @end

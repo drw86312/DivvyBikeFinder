@@ -63,7 +63,10 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+
+    // Disable UI, enable when JSON has returned.
+    [self disableUI];
+
     // Create the activity indicator
     CGFloat indicatorWidth = 50.0f;
     CGFloat indicatorHeight = 50.0f;
@@ -91,7 +94,6 @@
     self.currentLocationButtonPressed = NO;
     self.segmentedControl.hidden = YES;
     self.toggleIndex = 0;
-    self.currentLocationButtonOutlet.enabled = NO;
 
     // Helper method for styling views
     [self setStyle];
@@ -105,13 +107,21 @@
 
 -(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
+    // If no CLLocations, alert the user.
+    if (locations.count < 1) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Please enable location services to use this feature" message:nil delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        [alert show];
+        [self enableUI];
+        NSLog(@"No CLLocations");
+    }
+    else {
+
     for (CLLocation *location in locations) {
         if (location.verticalAccuracy < 1000 && location.horizontalAccuracy < 1000) {
             [self.locationManager stopUpdatingLocation];
 
             // Set the user location property.
             self.userLocation = location;
-            [self getUserLocationString];
             CGFloat userDistanceFromChicago = [self.chicago distanceFromLocation:self.userLocation];
 
             // If user is too far from Chicago, map will default to the Chicago area.
@@ -122,7 +132,6 @@
                 MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
                 self.mapView.showsUserLocation = YES;
                 [self.mapView setRegion:region animated:YES];
-                break;
             }
             // If user is in Chicago, draw map around their location.
             else {
@@ -131,7 +140,9 @@
                 MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
                 self.mapView.showsUserLocation = YES;
                 [self.mapView setRegion:region animated:YES];
-                break;
+                }
+            [self getUserLocationString];
+            break;
             }
         }
     }
@@ -139,6 +150,7 @@
 
 -(void)getJSON
 {
+    NSLog(@"Getting JSON");
     self.activityIndicator.hidden = NO;
     [self.activityIndicator startAnimating];
 
@@ -152,6 +164,8 @@
          if (connectionError) {
              UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Unable to Connect to Divvy" message:@"Try again later" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
              [alert show];
+             [self enableUI];
+             NSLog(@"Divvy API connection Error");
          }
          else {
 
@@ -162,7 +176,6 @@
              for (NSDictionary *dictionary in stationsArray) {
 
                  DivvyStation *divvyStation = [[DivvyStation alloc] init];
-
                  divvyStation.stationName = [dictionary objectForKey:@"stationName"];
                  divvyStation.statusValue = [dictionary objectForKey:@"statusValue"];
                  divvyStation.streetAddress1 = [dictionary objectForKey:@"stAddress1"];
@@ -171,7 +184,6 @@
                  divvyStation.postalCode = [dictionary objectForKey:@"postalCode"];
                  divvyStation.location = [dictionary objectForKey:@"location"];
                  divvyStation.landMark = [dictionary objectForKey:@"landMark"];
-
                  float longitude = [[dictionary objectForKey:@"longitude"] floatValue];
                  divvyStation.longitude = [NSNumber numberWithFloat:longitude];
                  float latitude = [[dictionary objectForKey:@"latitude"] floatValue];
@@ -190,7 +202,7 @@
 
                  CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:divvyStation.latitude.floatValue longitude:divvyStation.longitude.floatValue];
                  divvyStation.distanceFromUser = [stationLocation distanceFromLocation:self.userLocation];
-
+                 [self setStationColors:divvyStation];
                  [tempArray addObject:divvyStation];
              }
 
@@ -201,6 +213,7 @@
 
              self.activityIndicator.hidden = YES;
              [self.activityIndicator stopAnimating];
+             [self enableUI];
          }
      }];
 }
@@ -213,19 +226,20 @@
     self.fromTextFieldOutlet.text = nil;
     self.destinationTextFieldOutlet.text = nil;
 
-    self.currentLocationButtonOutlet.enabled = YES;
-
     [self.fromTextFieldOutlet endEditing:YES];
     [self.destinationTextFieldOutlet endEditing:YES];
+
+    [self enableUI];
 }
 
 - (IBAction)onCurrentLocationButtonPressed:(id)sender
 {
+    [self disableUI];
+
     // Show activity indicator
     self.activityIndicator.hidden = NO;
     [self.activityIndicator startAnimating];
 
-    self.currentLocationButtonOutlet.enabled = NO;
     self.currentLocationButtonPressed = YES;
     [self.locationManager startUpdatingLocation];
 }
@@ -277,6 +291,7 @@
             [self.mapContainerView removeFromSuperview];
 
             // Begin search process
+            [self disableUI];
             [self getOriginFromName];
             }
         }
@@ -324,10 +339,11 @@
             }
         else {
             // Show alert that origin result was not found.
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Sorry" message:[NSString stringWithFormat:@"No results found matching %@", self.userLocationString] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:@"Sorry, no results found matching %@", self.userLocationString] message:@"Try including 'Chicago' in your search'" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
             [alert show];
             self.activityIndicator.hidden = YES;
             [self.activityIndicator stopAnimating];
+            [self enableUI];
         }
     }];
 }
@@ -345,8 +361,8 @@
         if (mapItems.count > 0) {
             MKMapItem *mapItem = [mapItems firstObject];
             self.destinationPlacemark = mapItem.placemark;
-            [self dropPins];
             NSLog(@"Destination name found");
+            [self dropPins];
         }
         else {
             [self getDestinationFromAddress];
@@ -365,10 +381,11 @@
             NSLog(@"Destination address found");
         }
         else {
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Sorry" message:[NSString stringWithFormat:@"No results found matching %@", self.userDestinationString] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:@"Sorry, no results found matching %@", self.userDestinationString] message:@"Try including 'Chicago' in your search'" delegate:self cancelButtonTitle:@"OK"otherButtonTitles:nil, nil];
             [alert show];
             self.activityIndicator.hidden = YES;
             [self.activityIndicator stopAnimating];
+            [self enableUI];
         }
     }];
 }
@@ -391,16 +408,18 @@
 
         // 40,233 meters is 25 miles, approximately.
         if (originDistanceFromChicago > 40233.6) {
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:[NSString stringWithFormat:@"%@ not found in Chicago", self.userLocationString] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:@"Sorry, %@ not found in Chicago", self.userLocationString] message:@"Try including 'Chicago' in your search'" delegate:self cancelButtonTitle:@"OK"otherButtonTitles:nil, nil];
             [alert show];
             self.activityIndicator.hidden = YES;
             [self.activityIndicator stopAnimating];
+            [self enableUI];
         }
         else if (destinationDistanceFromChicago > 40233.6) {
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:[NSString stringWithFormat:@"%@ not found in Chicago", self.userDestinationString] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:@"Sorry, %@ not found in Chicago", self.userDestinationString] message:@"Try including 'Chicago' in your search'" delegate:self cancelButtonTitle:@"OK"otherButtonTitles:nil, nil];
             [alert show];
             self.activityIndicator.hidden = YES;
             [self.activityIndicator stopAnimating];
+            [self enableUI];
         }
         else {
         // Reassign destination and origin string names to those provided by the placemark.
@@ -461,20 +480,7 @@
             annotation.subtitle = [NSString stringWithFormat:@"%.01f miles from %@", divvyStation.distanceFromDestination * 0.000621371, self.userLocationString];
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"Divvy";
-
-            // Dynamically update the background color
-            // Max RGB value = 255.0
-
-            // Scale the fraction of available bikes to the 0-255 RGB range
-            CGFloat bikesFractionOfTotal = divvyStation.availableBikes.floatValue/divvyStation.totalDocks.floatValue;
-            CGFloat greenScaler = (bikesFractionOfTotal * 255);
-            CGFloat redScaler = (1 - bikesFractionOfTotal) *255;
-
-            // Apply scaler values to background color. When pan is at the bottom of the view, blueScaler is low and redScaler is high (i.e. more red), and vice versa.
-            CGFloat red = redScaler/255.0;
-            CGFloat green = greenScaler/255.0;
-            CGFloat blue = 0.0/255.0;
-            annotation.backgroundColor = [UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+            annotation.backgroundColor = divvyStation.bikesColor;
             [self.mapView addAnnotation:annotation];
         }
         counter += 1;
@@ -510,37 +516,24 @@
             annotation.subtitle = [NSString stringWithFormat:@"%.01f miles from %@", divvyStation.distanceFromDestination * 0.000621371, self.userDestinationString];
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"Divvy";
-
-            // Dynamically update the background color
-            // Max RGB value = 255.0
-
-            // Scale the fraction of available bikes to the 0-255 RGB range
-            CGFloat bikesFractionOfTotal = divvyStation.availableBikes.floatValue/divvyStation.totalDocks.floatValue;
-            CGFloat greenScaler = (bikesFractionOfTotal * 255);
-            CGFloat redScaler = (1 - bikesFractionOfTotal) *255;
-
-            // Apply scaler values to background color. When pan is at the bottom of the view, blueScaler is low and redScaler is high (i.e. more red), and vice versa.
-            CGFloat red = redScaler/255.0;
-            CGFloat green = greenScaler/255.0;
-            CGFloat blue = 0.0/255.0;
-            annotation.backgroundColor = [UIColor colorWithRed:red green:green blue:blue alpha:1.0];
-            
+            annotation.backgroundColor = divvyStation.bikesColor;
             [self.mapView addAnnotation:annotation];
         }
         counter2 += 1;
     }
+
     self.stationsNearDestination = [NSArray arrayWithArray:tempArray3];
-
-
     if (self.stationsNearDestination.count > 0 && self.stationsNearOrigin.count > 0) {
+        [self getDirections];
         NSLog(@"Stations near origin and destination found");
     }
     else {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Sorry" message:@"Unable to locate nearby Divvy Bike stations" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
         [alert show];
+        self.activityIndicator.hidden = YES;
+        [self.activityIndicator stopAnimating];
+        [self enableUI];
     }
-
-    [self getDirections];
 }
 
 #pragma mark - Directions methods
@@ -581,60 +574,72 @@
     directionsRequest1.transportType =MKDirectionsTransportTypeWalking;
 
     MKDirections *directions1 = [[MKDirections alloc] initWithRequest:directionsRequest1];
-
     [directions1 calculateDirectionsWithCompletionHandler:^(MKDirectionsResponse *response, NSError *error) {
-
-        NSArray *routeItems1 = response.routes;
-        self.walkRoute1 = [routeItems1 firstObject];
-        self.walkrouteSteps1 = self.walkRoute1.steps;
-
-        self.etaCounter += self.walkRoute1.expectedTravelTime;
-        for (MKRouteStep *routeStep in self.walkrouteSteps1) {
-            self.distanceCounter += routeStep.distance;
+        if (error) {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Sorry" message:@"Unable to find a route for this trip" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+            [alert show];
+            self.activityIndicator.hidden = YES;
+            [self.activityIndicator stopAnimating];
+            [self enableUI];
         }
-
+            else {
+                NSLog(@"Route 1 found");
+                NSArray *routeItems1 = response.routes;
+                self.walkRoute1 = [routeItems1 firstObject];
+                self.walkrouteSteps1 = self.walkRoute1.steps;
+                self.etaCounter += self.walkRoute1.expectedTravelTime;
+                    for (MKRouteStep *routeStep in self.walkrouteSteps1) {
+                        self.distanceCounter += routeStep.distance;
+                    }
         // Create second directions request and parameters (DivvyStation to DivvyStation).
         MKDirectionsRequest *directionsRequest2 = [MKDirectionsRequest new];
         directionsRequest2.source = stationNearOriginMapItem;
         directionsRequest2.destination = stationNearDestinationMapItem;
         directionsRequest2.transportType =MKDirectionsTransportTypeWalking;
         directionsRequest2.requestsAlternateRoutes = YES;
-
         MKDirections *directions2 = [[MKDirections alloc] initWithRequest:directionsRequest2];
 
         [directions2 calculateDirectionsWithCompletionHandler:^(MKDirectionsResponse *response, NSError *error) {
-
-            NSArray *routeItems2 = response.routes;
-            NSLog(@"Num of routes: %lu", (unsigned long)routeItems2.count);
-
-            self.bikeRoute = [routeItems2 firstObject];
-            self.bikerouteSteps = self.bikeRoute.steps;
-
-            // Assumes cycling is about 3 times faster than walking (approx. biking speed assumption is between 9.0-9.5 MPH)
-            self.etaCounter += (self.bikeRoute.expectedTravelTime/3);
-
-            for (MKRouteStep *routeStep in self.bikerouteSteps) {
-                self.distanceCounter += routeStep.distance;
+            if (error) {
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Sorry" message:@"Unable to find a route for this trip" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                [alert show];
+                self.activityIndicator.hidden = YES;
+                [self.activityIndicator stopAnimating];
+                [self enableUI];
             }
-
+            else {
+                NSLog(@"Route 2 found");
+                NSArray *routeItems2 = response.routes;
+                self.bikeRoute = [routeItems2 firstObject];
+                self.bikerouteSteps = self.bikeRoute.steps;
+                // Assumes cycling is about 3 times faster than walking (approx. biking speed assumption is between 9.0-9.5 MPH)
+                self.etaCounter += (self.bikeRoute.expectedTravelTime/3);
+                    for (MKRouteStep *routeStep in self.bikerouteSteps) {
+                            self.distanceCounter += routeStep.distance;
+                        }
             // Create third directions request and parameters (DivvyStation near destination to destination).
             MKDirectionsRequest *directionsRequest3 = [MKDirectionsRequest new];
             directionsRequest3.source = stationNearDestinationMapItem;
             directionsRequest3.destination = destinationMapItem;
             directionsRequest3.transportType =MKDirectionsTransportTypeWalking;
-
             MKDirections *directions3 = [[MKDirections alloc] initWithRequest:directionsRequest3];
-
             [directions3 calculateDirectionsWithCompletionHandler:^(MKDirectionsResponse *response, NSError *error) {
-
-                NSArray *routeItems3 = response.routes;
-                self.walkroute2 = [routeItems3 firstObject];
-                self.walkrouteSteps2 = self.walkroute2.steps;
-                self.etaCounter += self.walkroute2.expectedTravelTime;
-                for (MKRouteStep *routeStep in self.walkrouteSteps2) {
-                    self.distanceCounter += routeStep.distance;
+                if (error) {
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Sorry" message:@"Unable to find a route for this trip" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                    [alert show];
+                    self.activityIndicator.hidden = YES;
+                    [self.activityIndicator stopAnimating];
+                    [self enableUI];
                 }
-
+                else {
+                    NSLog(@"Route 3 found");
+                    NSArray *routeItems3 = response.routes;
+                    self.walkroute2 = [routeItems3 firstObject];
+                    self.walkrouteSteps2 = self.walkroute2.steps;
+                    self.etaCounter += self.walkroute2.expectedTravelTime;
+                        for (MKRouteStep *routeStep in self.walkrouteSteps2) {
+                            self.distanceCounter += routeStep.distance;
+                            }
                 // Add route overlays to the map
                 [self.mapView addOverlay:self.walkRoute1.polyline];
                 [self.mapView addOverlay:self.bikeRoute.polyline];
@@ -648,19 +653,27 @@
 
                 self.activityIndicator.hidden = YES;
                 [self.activityIndicator stopAnimating];
-
                 [self.tableView reloadData];
                 [self createLineViews];
+                [self enableUI];
+                }
             }];
-        }];
-    }];
+          }
+       }];
+     }
+  }];
 }
 
 -(void)createLineViews
 {
+    NSLog(@"Map information view created");
     CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
+    CGFloat containerViewHeight = 75.0f;
+    CGFloat containerViewWidth = 150.0f;
+    CGFloat horizontalOffset = self.view.frame.origin.x;
+    CGFloat verticalOffset = self.view.frame.size.height -tabBarHeight - containerViewHeight;
 
-    self.mapContainerView = [[UIView alloc] initWithFrame:CGRectMake(self.view.frame.origin.x, (self.view.frame.size.height -tabBarHeight) -65, 150, 60)];
+    self.mapContainerView = [[UIView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, containerViewWidth, containerViewHeight)];
     [self.view addSubview:self.mapContainerView];
 
     NSMutableArray *viewsArray = [NSMutableArray new];
@@ -673,10 +686,10 @@
     [viewsArray addObject:bikeRouteView];
     [viewsArray addObject:walkingRouteView];
 
-    CGFloat viewWidth = 30.0f;
+    CGFloat viewWidth = 25.0f;
     CGFloat viewHeight = 5.0f;
-    CGFloat horizontalOffset = 10.0f;
-    CGFloat verticalOffset = 10.0f;
+    horizontalOffset = 10.0f;
+    verticalOffset = 10.0f;
 
     for (UIView *view in viewsArray) {
         view.frame = CGRectMake(horizontalOffset, verticalOffset, 1, viewHeight);
@@ -692,19 +705,28 @@
         [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
 
         view.frame = CGRectMake(horizontalOffset, verticalOffset, viewWidth, viewHeight);
-        verticalOffset += viewHeight + 20.f;
+        verticalOffset += viewHeight + 28.f;
 
         [UIView commitAnimations];
     }
 
-    // Add labels
-    UILabel *bikeLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 0, 100, 25)];
-    bikeLabel.text = @"Cycling";
-    [self.mapContainerView addSubview:bikeLabel];
+    CGFloat imageViewWidth = 35.0f;
+    CGFloat imageViewHeight = 25.0f;
+    horizontalOffset += walkingRouteView.frame.size.width + 5.0f;
+    verticalOffset = 0.0f;
 
-    UILabel *walkingLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 25, 100, 25)];
-    walkingLabel.text = @"Walking";
-    [self.mapContainerView addSubview:walkingLabel];
+    // Add imageviews
+    UIImageView *bikeImageView = [[UIImageView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, imageViewWidth, imageViewHeight)];
+    bikeImageView.image = [UIImage imageNamed:@"bluebike"];
+    [self.mapContainerView addSubview:bikeImageView];
+
+    verticalOffset += bikeImageView.frame.size.height + 5.0f;
+    CGFloat imageViewWidth2 = 20.0f;
+    CGFloat imageViewHeight2 = 35.0f;
+
+    UIImageView *walkingImageView = [[UIImageView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, imageViewWidth2, imageViewHeight2)];
+    walkingImageView.image = [UIImage imageNamed:@"redwalker"];
+    [self.mapContainerView addSubview:walkingImageView];
 
     if (self.toggleIndex == 1) {
         self.mapContainerView.hidden = YES;
@@ -753,10 +775,10 @@
             cell.etaLabel.text = [NSString stringWithFormat:@"Travel Time: %@", self.travelTimeString];
 
             cell.backgroundColor = [UIColor whiteColor];
-            cell.tripLabel.textColor = [UIColor divvyColor];
-            cell.distanceLabel.textColor = [UIColor divvyColor];
-            cell.etaLabel.textColor = [UIColor divvyColor];
-            cell.titleLabel.textColor = [UIColor divvyColor];
+            cell.tripLabel.textColor = [UIColor blackColor];
+            cell.distanceLabel.textColor = [UIColor blackColor];
+            cell.etaLabel.textColor = [UIColor blackColor];
+            cell.titleLabel.textColor = [UIColor blackColor];
 
             return cell;
         }
@@ -766,20 +788,29 @@
             BikeTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
             DivvyStation *divvyStation = [self.stationsNearOrigin objectAtIndex:indexPath.row];
 
-            cell.titleLabel.text = @"Nearest Station";
+            cell.titleLabel.text = @"Nearest Divvy Station";
             cell.stationLabel.text = divvyStation.stationName;
+
             cell.bikesLabel.text = [NSString stringWithFormat:@"Bikes\n%@", divvyStation.availableBikes.description];
+            cell.bikesLabel.backgroundColor = divvyStation.bikesColor;
+            cell.bikesLabel.textColor = [UIColor blackColor];
+            cell.bikesLabel.layer.borderWidth = 1.0f;
+            cell.bikesLabel.layer.borderColor = [[UIColor blackColor] CGColor];
+
             cell.docksLabel.text = [NSString stringWithFormat:@"Docks\n%@", divvyStation.availableDocks.description];
+            cell.docksLabel.backgroundColor = divvyStation.docksColor;
+            cell.docksLabel.textColor = [UIColor blackColor];
+            cell.docksLabel.layer.borderWidth = 1.0f;
+            cell.docksLabel.layer.borderColor = [[UIColor blackColor] CGColor];
 
             NSString *milesFromUser = [NSString stringWithFormat:@"%.01f miles from %@", divvyStation.distanceFromUser * 0.000621371, self.userLocationString];
             cell.distanceLabel.text = milesFromUser;
 
             cell.backgroundColor = [UIColor whiteColor];
-            cell.stationLabel.textColor = [UIColor divvyColor];
-            cell.distanceLabel.textColor = [UIColor divvyColor];
-            cell.bikesLabel.textColor = [UIColor divvyColor];
-            cell.docksLabel.textColor = [UIColor divvyColor];
-            cell.titleLabel.textColor = [UIColor divvyColor];
+            cell.stationLabel.textColor = [UIColor blackColor];
+            cell.distanceLabel.textColor = [UIColor blackColor];
+            cell.titleLabel.textColor = [UIColor blackColor];
+
             return cell;
         }
 
@@ -788,20 +819,29 @@
             BikeTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
             DivvyStation *divvyStation = [self.stationsNearDestination objectAtIndex:indexPath.row];
 
-            cell.titleLabel.text = @"Destination Station";
+            cell.titleLabel.text = @"Destination Divvy Station";
             cell.stationLabel.text = divvyStation.stationName;
+
             cell.bikesLabel.text = [NSString stringWithFormat:@"Bikes\n%@", divvyStation.availableBikes.description];
+            cell.bikesLabel.backgroundColor = divvyStation.bikesColor;
+            cell.bikesLabel.textColor = [UIColor blackColor];
+            cell.bikesLabel.layer.borderWidth = 1.0f;
+            cell.bikesLabel.layer.borderColor = [[UIColor blackColor] CGColor];
+
             cell.docksLabel.text = [NSString stringWithFormat:@"Docks\n%@", divvyStation.availableDocks.description];
+            cell.docksLabel.backgroundColor = divvyStation.docksColor;
+            cell.docksLabel.textColor = [UIColor blackColor];
+            cell.docksLabel.layer.borderWidth = 1.0f;
+            cell.docksLabel.layer.borderColor = [[UIColor blackColor] CGColor];
 
             NSString *milesFromUser = [NSString stringWithFormat:@"%.01f miles from %@", divvyStation.distanceFromDestination * 0.000621371, self.userDestinationString];
             cell.distanceLabel.text = milesFromUser;
 
             cell.backgroundColor = [UIColor whiteColor];
-            cell.stationLabel.textColor = [UIColor divvyColor];
-            cell.distanceLabel.textColor = [UIColor divvyColor];
-            cell.bikesLabel.textColor = [UIColor divvyColor];
-            cell.docksLabel.textColor = [UIColor divvyColor];
-            cell.titleLabel.textColor = [UIColor divvyColor];
+            cell.stationLabel.textColor = [UIColor blackColor];
+            cell.distanceLabel.textColor = [UIColor blackColor];
+            cell.titleLabel.textColor = [UIColor blackColor];
+
             return cell;
         }
 
@@ -809,17 +849,15 @@
         else if (indexPath.section == 3) {
             RouteTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"routecell"];
             MKRouteStep *routeStep = [self.walkrouteSteps1 objectAtIndex:indexPath.row];
+            CGFloat distance = routeStep.distance * 0.000621371;
 
             // First element in a routeSteps array always has distance 0.00, so not necessary to display it.
             if ([routeStep isEqual:[self.walkrouteSteps1 firstObject]]) {
-                cell.distanceLabel.text = @"";
+                cell.stepLabel.text = [NSString stringWithFormat:@"%@", routeStep.instructions];
                 }
-            else {
-                CGFloat distance = routeStep.distance * 0.000621371;
-                cell.distanceLabel.text = [NSString stringWithFormat:@"Distance\n%.02f mi.", distance];
-                }
+
             // Last element in a routeSteps array says "The destination". I want "The destination" to be replaced by "Divvy Station"
-            if ([routeStep isEqual:[self.walkrouteSteps1 lastObject]]) {
+            else if ([routeStep isEqual:[self.walkrouteSteps1 lastObject]]) {
 
                 // Find the instructions string
                 NSString *instructions = [[self.walkrouteSteps1 lastObject] instructions];
@@ -830,18 +868,16 @@
                 // Replace lower case "the destination"
                 NSString *instructionsNew2 = [instructionsNew stringByReplacingOccurrencesOfString:@"the destination" withString:@"Divvy Station"];
 
-                // Set cell label text.
-                cell.stepLabel.text = [NSString stringWithFormat:@"%@", instructionsNew2];
-
+                // Set cell label text by adding distance to the end of the reformatted instructions
+                cell.stepLabel.text = [instructionsNew2 stringByAppendingString:[NSString stringWithFormat:@" in %.02f miles", distance]];
             }
+
             else {
-                cell.stepLabel.text = [NSString stringWithFormat:@"%@", routeStep.instructions];
+                cell.stepLabel.text = [NSString stringWithFormat:@"%@ in %.02f miles", routeStep.instructions, distance];
             }
-
                 cell.transportModeImageView.image = [UIImage imageNamed:@"Walking"];
-                cell.backgroundColor = [UIColor divvyColor];
+                cell.backgroundColor = [UIColor walkRouteColor];
                 cell.stepLabel.textColor = [UIColor whiteColor];
-                cell.distanceLabel.textColor = [UIColor whiteColor];
             return cell;
         }
 
@@ -850,19 +886,18 @@
         {
             RouteTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"routecell"];
             MKRouteStep *routeStep = [self.bikerouteSteps objectAtIndex:indexPath.row];
+            CGFloat distance = routeStep.distance * 0.000621371;
 
+            // First element in a routeSteps array always has distance 0.00, so not necessary to display it.
             if ([routeStep isEqual:[self.bikerouteSteps firstObject]]) {
-                cell.distanceLabel.text = @"";
+                cell.stepLabel.text = [NSString stringWithFormat:@"%@", routeStep.instructions];
             }
-            else {
-                CGFloat distance = routeStep.distance * 0.000621371;
-                cell.distanceLabel.text = [NSString stringWithFormat:@"Distance\n%.02f mi.", distance];
-            }
+
             // Last element in a routeSteps array says "The destination". I want "The destination" to be replaced by "Divvy Station"
-            if ([routeStep isEqual:[self.bikerouteSteps lastObject]]) {
+            else if ([routeStep isEqual:[self.bikerouteSteps lastObject]]) {
 
                 // Find the instructions string
-                NSString *instructions = [[self.walkrouteSteps1 lastObject] instructions];
+                NSString *instructions = [[self.bikerouteSteps lastObject] instructions];
 
                 // Replace upper case "The destination"
                 NSString *instructionsNew = [instructions stringByReplacingOccurrencesOfString:@"The destination" withString:@"Divvy Station"];
@@ -870,16 +905,16 @@
                 // Replace lower case "the destination"
                 NSString *instructionsNew2 = [instructionsNew stringByReplacingOccurrencesOfString:@"the destination" withString:@"Divvy Station"];
 
-                // Set cell steplabel text
-                cell.stepLabel.text = [NSString stringWithFormat:@"%@", instructionsNew2];
+                // Set cell label text by adding distance to the end of the reformatted instructions
+                cell.stepLabel.text = [instructionsNew2 stringByAppendingString:[NSString stringWithFormat:@" in %.02f miles", distance]];
             }
+
             else {
-                cell.stepLabel.text = [NSString stringWithFormat:@"%@", routeStep.instructions];
+                cell.stepLabel.text = [NSString stringWithFormat:@"%@ in %.02f miles", routeStep.instructions, distance];
             }
                 cell.transportModeImageView.image = [UIImage imageNamed:@"bicycle"];
                 cell.backgroundColor = [UIColor divvyColor];
                 cell.stepLabel.textColor = [UIColor whiteColor];
-                cell.distanceLabel.textColor = [UIColor whiteColor];
             return cell;
         }
 
@@ -887,20 +922,18 @@
         else {
             RouteTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"routecell"];
             MKRouteStep *routeStep = [self.walkrouteSteps2 objectAtIndex:indexPath.row];
+            CGFloat distance = routeStep.distance * 0.000621371;
 
+            // First element in a routeSteps array always has distance 0.00, so not necessary to display it.
             if ([routeStep isEqual:[self.walkrouteSteps2 firstObject]]) {
-                cell.distanceLabel.text = @"";
+                cell.stepLabel.text = [NSString stringWithFormat:@"%@", routeStep.instructions];
             }
             else {
-                CGFloat distance = routeStep.distance * 0.000621371;
-                cell.distanceLabel.text = [NSString stringWithFormat:@"Distance\n%.02f mi.", distance];
+                cell.stepLabel.text = [NSString stringWithFormat:@"%@ in %.02f miles", routeStep.instructions, distance];
             }
-                cell.stepLabel.text = [NSString stringWithFormat:@"%@", routeStep.instructions];
-
                 cell.transportModeImageView.image = [UIImage imageNamed:@"Walking"];
-                cell.backgroundColor = [UIColor divvyColor];
+                cell.backgroundColor = [UIColor walkRouteColor];
                 cell.stepLabel.textColor = [UIColor whiteColor];
-                cell.distanceLabel.textColor = [UIColor whiteColor];
             return cell;
         }
 }
@@ -908,13 +941,13 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (indexPath.section == 0) {
-        return 120.0f;
+        return 100.0f;
     }
     else if (indexPath.section == 1) {
-        return 90.0f;
+        return 100.0f;
     }
     else if (indexPath.section == 2) {
-        return 90.0f;
+        return 100.0f;
     }
     else {
         return 45.0f;
@@ -930,12 +963,13 @@
 {
     if (indexPath.section == 1) {
         self.selectedStation = [self.stationsNearOrigin firstObject];
+        [self performSegueWithIdentifier:@"station" sender:self];
     }
     else if (indexPath.section == 2) {
         self.selectedStation = [self.stationsNearDestination firstObject];
+        [self performSegueWithIdentifier:@"station" sender:self];
     }
 
-    [self performSegueWithIdentifier:@"station" sender:self];
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
@@ -1028,7 +1062,6 @@ calloutAccessoryControlTapped:(UIControl *)control
         self.mapView.hidden = NO;
         self.mapContainerView.hidden = NO;
         self.toggleIndex = 0;
-        self.segmentedControl.layer.borderColor = [[UIColor divvyColor] CGColor];
     }
     else
     {
@@ -1036,9 +1069,6 @@ calloutAccessoryControlTapped:(UIControl *)control
         self.tableView.hidden = NO;
         self.mapContainerView.hidden = YES;
         self.toggleIndex = 1;
-        self.segmentedControl.alpha = 1.0f;
-
-        self.segmentedControl.layer.borderColor = [[UIColor whiteColor] CGColor];
     }
 }
 - (IBAction)onSegmentControlToggle:(id)sender
@@ -1054,17 +1084,23 @@ calloutAccessoryControlTapped:(UIControl *)control
 
     [geocoder reverseGeocodeLocation:self.userLocation completionHandler:^(NSArray *placemarks, NSError *error) {
         for (CLPlacemark *placemark in placemarks) {
-            self.userLocationString = ABCreateStringWithAddressDictionary(placemark.addressDictionary, NO);
-            NSLog(@"User Location: %@", self.userLocationString);
-
-            if (self.currentLocationButtonPressed) {
-                self.fromTextFieldOutlet.text = self.userLocationString;
-                self.currentLocationButtonPressed = NO;
+            if (placemarks.count < 1) {
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Unable to find your current location" message:@"Please try again later" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                [alert show];
+                NSLog(@"No current location found");
+            }
+            else {
+                self.userLocationString = ABCreateStringWithAddressDictionary(placemark.addressDictionary, NO);
+                    if (self.currentLocationButtonPressed) {
+                        self.fromTextFieldOutlet.text = self.userLocationString;
+                        NSLog(@"User Location: %@", self.userLocationString);
+                }
             }
         }
+        self.currentLocationButtonPressed = NO;
         self.activityIndicator.hidden = YES;
         [self.activityIndicator stopAnimating];
-        self.currentLocationButtonOutlet.enabled = YES;
+        [self enableUI];
     }];
 }
 
@@ -1095,13 +1131,15 @@ calloutAccessoryControlTapped:(UIControl *)control
 
 -(void)setStyle
 {
+    self.navigationItem.title = @"Divvy & Conquer";
+    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
+
     //Segmented control
     self.segmentedControl.backgroundColor = [UIColor divvyColor];
     self.segmentedControl.tintColor = [UIColor whiteColor];
-    self.segmentedControl.layer.borderColor = [[UIColor divvyColor] CGColor];
+    self.segmentedControl.layer.borderColor = [[UIColor whiteColor] CGColor];
     self.segmentedControl.layer.borderWidth = 1.0f;
     self.segmentedControl.layer.cornerRadius = 5.0f;
-    self.segmentedControl.alpha = .8f;
     UIFont *font = [UIFont boldSystemFontOfSize:17.0f];
     NSDictionary *attributes = @{NSFontAttributeName: font};
     [self.segmentedControl setTitleTextAttributes:attributes forState:UIControlStateNormal];
@@ -1111,6 +1149,7 @@ calloutAccessoryControlTapped:(UIControl *)control
 
     //Tableview
     self.tableView.separatorColor = [UIColor divvyColor];
+    self.tableView.backgroundColor = [UIColor divvyColor];
 
     //Cancel button
     [self.cancelButtonOutlet setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
@@ -1139,6 +1178,80 @@ calloutAccessoryControlTapped:(UIControl *)control
     // Background view
     self.view.backgroundColor = [UIColor divvyColor];
     self.tableViewBlockerView.backgroundColor = [UIColor divvyColor];
+}
+
+-(void)setStationColors:(DivvyStation *)divvyStation
+{
+    // Dynamically update the background color from red -> yellow -> green
+    // Max RGB value = 255.0, the blue color is not in this spectrum, thus it is always 0.
+    CGFloat blue = 0.0f/255.0f;
+
+        // Set values
+        CGFloat totalDocks = divvyStation.availableDocks.floatValue + divvyStation.availableBikes.floatValue;
+        CGFloat bikesFractionOfTotal = divvyStation.availableBikes.floatValue/totalDocks;
+        CGFloat docksFractionOfTotal = divvyStation.availableDocks.floatValue/totalDocks;
+        CGFloat availableBikes = divvyStation.availableBikes.floatValue;
+        CGFloat availableDocks = divvyStation.availableDocks.floatValue;
+
+        // Find bikes color
+        // If ratio is less than half, apply max red and adjust green level accordingly
+        if (bikesFractionOfTotal < 0.5f) {
+            CGFloat red = 1.0f;
+            CGFloat green = 1 - (((totalDocks/2) - availableBikes)/(totalDocks/2));
+            divvyStation.bikesColor =[UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+        }
+        // If ratio is less than half, apply max green and adjust red level accordingly
+        else if (bikesFractionOfTotal > 0.5f) {
+            CGFloat green = 1.0f;
+            CGFloat red = 1-(((availableBikes - totalDocks/2))/(totalDocks/2));
+            divvyStation.bikesColor =[UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+        }
+        // Else, fraction is 0.5, apply maxRGB for both green and red (pure yellow)
+        else {
+            CGFloat red = 1.0f;
+            CGFloat green = 1.0f;
+            divvyStation.bikesColor =[UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+        }
+
+        // Find docks color
+        // If ratio is less than half, apply max red and adjust green level accordingly
+        if (docksFractionOfTotal < 0.5f) {
+            CGFloat red = 1.0f;
+            CGFloat green = 1 - (((totalDocks/2) - availableDocks)/(totalDocks/2));
+            divvyStation.docksColor =[UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+        }
+        // If ratio is less than half, apply max green and adjust red level accordingly
+        else if (docksFractionOfTotal > 0.5f) {
+            CGFloat green = 1.0f;
+            CGFloat red = 1-(((availableDocks - totalDocks/2))/(totalDocks/2));
+            divvyStation.docksColor =[UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+        }
+        // Else, fraction is 0.5, apply maxRGB for both green and red (pure yellow)
+        else {
+            CGFloat red = 1.0f;
+            CGFloat green = 1.0f;
+            divvyStation.docksColor =[UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+        }
+}
+
+-(void)disableUI
+{
+    NSLog(@"Disabling UI");
+    self.fromTextFieldOutlet.enabled = NO;
+    self.destinationTextFieldOutlet.enabled = NO;
+    self.currentLocationButtonOutlet.enabled = NO;
+    self.cancelButtonOutlet.enabled = NO;
+    self.segmentedControl.enabled = NO;
+}
+
+-(void)enableUI
+{
+    NSLog(@"Enabling UI");
+    self.fromTextFieldOutlet.enabled = YES;
+    self.destinationTextFieldOutlet.enabled = YES;
+    self.currentLocationButtonOutlet.enabled = YES;
+    self.cancelButtonOutlet.enabled = YES;
+    self.segmentedControl.enabled = YES;
 }
 
 

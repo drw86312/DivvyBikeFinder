@@ -17,6 +17,8 @@
 #import "StationDetailViewController.h"
 #import "SearchViewController.h"
 #import "UIColor+DesignColors.h"
+#import <CoreGraphics/CoreGraphics.h>
+#import <QuartzCore/QuartzCore.h>
 
 @interface MapViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate>
 
@@ -33,7 +35,6 @@
 @property (weak, nonatomic) IBOutlet UISegmentedControl *segmentedControl;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *refreshButtonOutlet;
 @property UIImageView *mapDivvyImage;
-@property UITapGestureRecognizer *tapToOpenMapContainer;
 @property UITapGestureRecognizer *tapToCloseMapContainer;
 @property UIView *mapContainerView;
 
@@ -77,6 +78,7 @@
 
             // Assign userlocation IVar
             self.userLocation = location;
+            [self getJSON];
 
             // Instantiate chicago location and assign the "distance from chicago" variable
             CLLocation *chicago = [[CLLocation alloc] initWithLatitude:41.891813 longitude:-87.647343];
@@ -90,7 +92,6 @@
                 MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
                 self.mapView.showsUserLocation = YES;
                 [self.mapView setRegion:region animated:YES];
-                NSLog(@"User not in Chicago");
                 break;
             }
             // If user is in Chicago, draw map around their location.
@@ -100,12 +101,10 @@
                 MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
                 self.mapView.showsUserLocation = YES;
                 [self.mapView setRegion:region animated:YES];
-                NSLog(@"User in Chicago");
                 break;
             }
         }
     }
-    [self getJSON];
 }
 
 #pragma  mark - IBActions
@@ -197,7 +196,8 @@
              // Assign the sorted array to the divvyStations ivar array.
              self.divvyStations = [divvyStationsArray sortedArrayUsingDescriptors:sortDescriptors];
 
-             // Reload the tableview and call method to create map annotations.
+             // Call helper method to set station colors, reload the tableview and call method to create map annotations.
+             [self setStationColors:self.divvyStations];
              [self createMapAnnotations];
              [self.tableView reloadData];
             }
@@ -228,6 +228,7 @@
             annotation.subtitle = [NSString stringWithFormat:@"%.01f miles away  %@ Bikes  %@ Docks", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"No-Docks";
+            annotation.backgroundColor = [UIColor greenColor];
             [self.mapView addAnnotation:annotation];
         }
         else {
@@ -236,20 +237,7 @@
             annotation.subtitle = [NSString stringWithFormat:@"%.01f miles away  %@ Bikes  %@ Docks", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"Divvy";
-
-            // Dynamically update the background color
-            // Max RGB value = 255.0
-
-            // Scale the fraction of available bikes to the 0-255 RGB range
-            CGFloat bikesFractionOfTotal = divvyStation.availableBikes.floatValue/divvyStation.totalDocks.floatValue;
-            CGFloat greenScaler = (bikesFractionOfTotal * 255);
-            CGFloat redScaler = (1 - bikesFractionOfTotal) *255;
-
-            // Apply scaler values to background color. When pan is at the bottom of the view, blueScaler is low and redScaler is high (i.e. more red), and vice versa.
-            CGFloat red = redScaler/255.0;
-            CGFloat green = greenScaler/255.0;
-            CGFloat blue = 0.0/255.0;
-            annotation.backgroundColor = [UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+            annotation.backgroundColor = divvyStation.bikesColor;
             [self.mapView addAnnotation:annotation];
         }
     }
@@ -296,8 +284,10 @@
             annotationView.annotation = annotation;
             }
 
-            annotationView.image = [UIImage imageNamed:noDocksAnnotation.imageName];
-
+        annotationView.image = [UIImage imageNamed:noDocksAnnotation.imageName];
+        annotationView.frame = CGRectMake(0, 0, 30, 30);
+        annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
+        annotationView.backgroundColor = noDocksAnnotation.backgroundColor;
         return annotationView;
         }
 
@@ -363,26 +353,19 @@ calloutAccessoryControlTapped:(UIControl *)control
         cell.stationLabel.textColor = [UIColor whiteColor];
 
         cell.bikesLabel.text = [NSString stringWithFormat:@"Bikes\n%@", divvyStation.availableBikes.description];
-        cell.bikesLabel.textColor = [UIColor whiteColor];
+        cell.bikesLabel.backgroundColor = divvyStation.bikesColor;
+        cell.bikesLabel.textColor = [UIColor blackColor];
+        cell.bikesLabel.layer.borderWidth = 1.0f;
+        cell.bikesLabel.layer.borderColor = [[UIColor blackColor] CGColor];
 
         cell.docksLabel.text = [NSString stringWithFormat:@"Docks\n%@", divvyStation.availableDocks.description];
-        cell.docksLabel.textColor = [UIColor whiteColor];
+        cell.docksLabel.textColor = [UIColor blackColor];
+        cell.docksLabel.backgroundColor = divvyStation.docksColor;
+        cell.docksLabel.layer.borderWidth = 1.0f;
+        cell.docksLabel.layer.borderColor = [[UIColor blackColor] CGColor];
 
         NSString *milesFromUser = [NSString stringWithFormat:@"%.02f miles", divvyStation.distanceFromUser * 0.000621371];
         cell.distanceLabel.text = milesFromUser;
-
-            if (divvyStation.availableBikes.floatValue < 1) {
-                cell.bikesLabel.textColor = [UIColor redColor];
-            }
-            else {
-                cell.bikesLabel.textColor = [UIColor whiteColor];
-            }
-            if (divvyStation.availableDocks.floatValue < 1) {
-                cell.docksLabel.textColor = [UIColor redColor];
-            }
-            else {
-            cell.docksLabel.textColor = [UIColor whiteColor];
-            }
         return cell;
 }
 
@@ -391,13 +374,10 @@ calloutAccessoryControlTapped:(UIControl *)control
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
     self.selectedStation = [self.divvyStations objectAtIndex:indexPath.row];
     [self performSegueWithIdentifier:@"segue" sender:self];
-
-    NSLog(@"Selected station name: %@", self.selectedStation.stationName);
 }
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    NSLog(@"Prepeare for segue ran");
     DivvyStation *station = self.selectedStation;
     StationDetailViewController *detailViewController = segue.destinationViewController;
     detailViewController.stationFromSourceVC = station;
@@ -434,32 +414,26 @@ calloutAccessoryControlTapped:(UIControl *)control
     CGFloat containerViewHeight = 40.0f;
     CGFloat containerViewWidth = 40.0f;
     CGFloat horizontalOffset = self.view.frame.size.width - containerViewWidth -10.0f;
-    CGFloat verticalOffset = self.view.frame.size.height - tabBarHeight - containerViewHeight -10.0f;
+    CGFloat verticalOffset = self.view.frame.size.height -tabBarHeight - containerViewHeight -10.0f;
 
     // Create view to hold the map information vies.
     self.mapContainerView = [[UIView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, containerViewWidth, containerViewHeight)];
     [self.view addSubview:self.mapContainerView];
 
-    // Add the "i" info icon to mapcontainer view.
-    UIImageView *searchMoreImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.mapContainerView.frame.size.width, self.mapContainerView.frame.size.height)];
-    searchMoreImageView.backgroundColor = [UIColor divvyColor];
-    searchMoreImageView.image = [UIImage imageNamed:@"info"];
-    searchMoreImageView.alpha = 0.8f;
-    searchMoreImageView.layer.cornerRadius = containerViewHeight/2;
-    [self.mapContainerView addSubview:searchMoreImageView];
-
-    // Add tap gesture recognizer to mapcontainer view
-    self.tapToOpenMapContainer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openContainer:)];
-    [self.mapContainerView addGestureRecognizer:self.tapToOpenMapContainer];
-
-    NSLog(@"Created map container view");
+    // Add the "i" info button to mapcontainer view.
+    UIButton *expandButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, self.mapContainerView.frame.size.width, self.mapContainerView.frame.size.height)];
+    [expandButton setBackgroundColor:[UIColor divvyColor]];
+    [expandButton setBackgroundImage:[UIImage imageNamed:@"info"] forState:UIControlStateNormal];
+    expandButton.alpha = 0.8f;
+    expandButton.layer.cornerRadius = containerViewHeight/2;
+    [expandButton addTarget:self
+                action:@selector(openContainer:)
+      forControlEvents:UIControlEventTouchUpInside];
+    [self.mapContainerView addSubview:expandButton];
 }
 
 -(void)openContainer:(id)sender
 {
-    // Remove tap to open gesture recognizer
-    [self.mapContainerView removeGestureRecognizer:self.tapToOpenMapContainer];
-
     // Hide the divvy logo image and disable the segmented control
     self.segmentedControl.enabled = NO;
     self.mapDivvyImage.hidden = YES;
@@ -474,7 +448,13 @@ calloutAccessoryControlTapped:(UIControl *)control
     CGFloat containerViewWidth = self.view.frame.size.width;
     CGFloat horizontalOffset = self.view.frame.origin.x;
     CGFloat verticalOffset = self.view.frame.size.height - tabBarHeight - containerViewHeight;
-    self.mapContainerView.frame= CGRectMake(horizontalOffset, verticalOffset, containerViewWidth, containerViewHeight);
+
+    [UIView beginAnimations:nil context:nil];
+    [UIView setAnimationDuration:1.0];
+    [UIView setAnimationDelay:0.0];
+    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
+
+    self.mapContainerView.frame = CGRectMake(horizontalOffset, verticalOffset, containerViewWidth, containerViewHeight);
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -490,7 +470,7 @@ calloutAccessoryControlTapped:(UIControl *)control
     gradient.frame = gradientView.bounds;
     [gradient setStartPoint:CGPointMake(0.0, 0.5)];
     [gradient setEndPoint:CGPointMake(1.0, 0.5)];
-    gradient.colors = [NSArray arrayWithObjects:(id)[[UIColor greenColor] CGColor], (id)[[UIColor redColor] CGColor], nil];
+    gradient.colors = [NSArray arrayWithObjects:(id)[[UIColor greenColor] CGColor], (id)[[UIColor yellowColor] CGColor], (id)[[UIColor redColor] CGColor], nil];
     [gradientView.layer insertSublayer:gradient atIndex:0];
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -502,6 +482,7 @@ calloutAccessoryControlTapped:(UIControl *)control
     CGFloat imageViewWidth = 30.0;
     CGFloat imageViewHeight = 30.0;
     NSInteger fontSize = 10;
+    UIColor *textColor = [UIColor blackColor];
 
     // Create label for "No Docks"
 
@@ -509,7 +490,7 @@ calloutAccessoryControlTapped:(UIControl *)control
     verticalOffset += spacing;
     UILabel *noDocksLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
     noDocksLabel.text = @"No Docks";
-    noDocksLabel.textColor = [UIColor whiteColor];
+    noDocksLabel.textColor = textColor;
     noDocksLabel.textAlignment = NSTextAlignmentCenter;
     [noDocksLabel setFont:[UIFont fontWithName:@"Helvetica" size:fontSize]];
     [self.mapContainerView addSubview:noDocksLabel];
@@ -521,7 +502,7 @@ calloutAccessoryControlTapped:(UIControl *)control
     horizontalOffset = (labelWidth/2 + spacing) - (imageViewWidth/2);
 
     UIImageView *noDocksImageView = [[UIImageView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, imageViewWidth, imageViewHeight)];
-    noDocksImageView.image = [UIImage imageNamed:@"No-Bikes"];
+    noDocksImageView.image = [UIImage imageNamed:@"No-Docks"];
     [self.mapContainerView addSubview:noDocksImageView];
 
     verticalOffset += noDocksImageView.frame.size.height;
@@ -532,7 +513,7 @@ calloutAccessoryControlTapped:(UIControl *)control
 
     UILabel *stationFullLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
     stationFullLabel.text = @"Station Full";
-    stationFullLabel.textColor = [UIColor whiteColor];
+    stationFullLabel.textColor = textColor;
     stationFullLabel.textAlignment = NSTextAlignmentCenter;
     [stationFullLabel setFont:[UIFont fontWithName:@"Helvetica" size:fontSize]];
     [self.mapContainerView addSubview:stationFullLabel];
@@ -549,7 +530,7 @@ calloutAccessoryControlTapped:(UIControl *)control
 
     UILabel *moreBikesLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
     moreBikesLabel.text = @"More Bikes";
-    moreBikesLabel.textColor = [UIColor whiteColor];
+    moreBikesLabel.textColor = textColor;
     moreBikesLabel.textAlignment = NSTextAlignmentCenter;
     [moreBikesLabel setFont:[UIFont fontWithName:@"Helvetica" size:fontSize]];
     [self.mapContainerView addSubview:moreBikesLabel];
@@ -573,7 +554,7 @@ calloutAccessoryControlTapped:(UIControl *)control
 
     UILabel *fewerBikesLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
     fewerBikesLabel.text = @"Fewer Bikes";
-    fewerBikesLabel.textColor = [UIColor whiteColor];
+    fewerBikesLabel.textColor = textColor;
     fewerBikesLabel.textAlignment = NSTextAlignmentCenter;
     [fewerBikesLabel setFont:[UIFont fontWithName:@"Helvetica" size:fontSize]];
     [self.mapContainerView addSubview:fewerBikesLabel];
@@ -595,7 +576,7 @@ calloutAccessoryControlTapped:(UIControl *)control
 
     UILabel *noBikesLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
     noBikesLabel.text = @"No Bikes";
-    noBikesLabel.textColor = [UIColor whiteColor];
+    noBikesLabel.textColor = textColor;
     noBikesLabel.textAlignment = NSTextAlignmentCenter;
     [noBikesLabel setFont:[UIFont fontWithName:@"Helvetica" size:fontSize]];
     [self.mapContainerView addSubview:noBikesLabel];
@@ -618,18 +599,53 @@ calloutAccessoryControlTapped:(UIControl *)control
 
     UILabel *stationEmptyLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
     stationEmptyLabel.text = @"Station Empty";
-    stationEmptyLabel.textColor = [UIColor whiteColor];
+    stationEmptyLabel.textColor = textColor;
     stationEmptyLabel.textAlignment = NSTextAlignmentCenter;
     [stationEmptyLabel setFont:[UIFont fontWithName:@"Helvetica" size:fontSize]];
     [self.mapContainerView addSubview:stationEmptyLabel];
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+    [UIView commitAnimations];
+
     // Add tap that will close the mapContainer view, when the user taps anywhere on the view.
     self.tapToCloseMapContainer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(closeContainer:)];
     [self.view addGestureRecognizer:self.tapToCloseMapContainer];
+}
 
-    NSLog(@"Map container view opened");
+-(void)closeContainer:(id)sender
+{
+    // Remove tap to close gesture recognizer
+    for (UIGestureRecognizer *recognizer in self.view.gestureRecognizers) {
+        [self.view removeGestureRecognizer:recognizer];
+    }
+    self.tapToCloseMapContainer = nil;
+
+    // Show the divvy logo image and enable the segmented control
+    self.mapDivvyImage.hidden = NO;
+    self.segmentedControl.enabled = YES;
+
+    [self removeMapContainerSubviews];
+
+    CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
+    CGFloat containerViewHeight = 40.0f;
+    CGFloat containerViewWidth = 40.0f;
+    CGFloat horizontalOffset = self.view.frame.size.width - containerViewWidth -10.0f;
+    CGFloat verticalOffset = self.view.frame.size.height - tabBarHeight - containerViewHeight -10.0f;
+
+    // Resize map containerview
+    self.mapContainerView.frame = CGRectMake(horizontalOffset, verticalOffset, containerViewWidth, containerViewHeight);
+
+    // Add the "i" info button to mapcontainer view.
+    UIButton *expandButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, self.mapContainerView.frame.size.width, self.mapContainerView.frame.size.height)];
+    [expandButton setBackgroundColor:[UIColor divvyColor]];
+    [expandButton setBackgroundImage:[UIImage imageNamed:@"info"] forState:UIControlStateNormal];
+    expandButton.alpha = 0.8f;
+    expandButton.layer.cornerRadius = containerViewHeight/2;
+    [expandButton addTarget:self
+                     action:@selector(openContainer:)
+           forControlEvents:UIControlEventTouchUpInside];
+    [self.mapContainerView addSubview:expandButton];
 }
 
 -(void)createMapDivvyImageView
@@ -648,45 +664,69 @@ calloutAccessoryControlTapped:(UIControl *)control
     [self.view addSubview:self.mapDivvyImage];
 }
 
--(void)closeContainer:(id)sender
+-(void)setStationColors:(NSArray *)stationsArray
 {
-    // Remove tap to close gesture recognizer
-    [self.view removeGestureRecognizer:self.tapToCloseMapContainer];
+    // Dynamically update the background color from red -> yellow -> green
+    // Max RGB value = 255.0, the blue color is not in this spectrum, thus it is always 0.
+    CGFloat blue = 0.0f/255.0f;
 
-    // Show the divvy logo image and enable the segmented control
-    self.mapDivvyImage.hidden = NO;
-    self.segmentedControl.enabled = YES;
+    for (DivvyStation *divvyStation in stationsArray) {
 
-    [self removeMapContainerSubviews];
+        // Set values
+        CGFloat totalDocks = divvyStation.availableDocks.floatValue + divvyStation.availableBikes.floatValue;
+        CGFloat bikesFractionOfTotal = divvyStation.availableBikes.floatValue/totalDocks;
+        CGFloat docksFractionOfTotal = divvyStation.availableDocks.floatValue/totalDocks;
+        CGFloat availableBikes = divvyStation.availableBikes.floatValue;
+        CGFloat availableDocks = divvyStation.availableDocks.floatValue;
 
-    CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
-    CGFloat containerViewHeight = 40.0f;
-    CGFloat containerViewWidth = 40.0f;
-    CGFloat horizontalOffset = self.view.frame.size.width - containerViewWidth -10.0f;
-    CGFloat verticalOffset = self.view.frame.size.height - tabBarHeight - containerViewHeight -10.0f;
+        // Find bikes color
+            // If ratio is less than half, apply max red and adjust green level accordingly
+            if (bikesFractionOfTotal < 0.5f) {
+                CGFloat red = 1.0f;
+                CGFloat green = 1 - (((totalDocks/2) - availableBikes)/(totalDocks/2));
+                divvyStation.bikesColor =[UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+            }
+            // If ratio is less than half, apply max green and adjust red level accordingly
+            else if (bikesFractionOfTotal > 0.5f) {
+                CGFloat green = 1.0f;
+                CGFloat red = 1-(((availableBikes - totalDocks/2))/(totalDocks/2));
+                divvyStation.bikesColor =[UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+            }
+            // Else, fraction is 0.5, apply maxRGB for both green and red (pure yellow)
+            else {
+                CGFloat red = 1.0f;
+                CGFloat green = 1.0f;
+                divvyStation.bikesColor =[UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+            }
 
-    // Resize map containerview
-    self.mapContainerView.frame = CGRectMake(horizontalOffset, verticalOffset, containerViewWidth, containerViewHeight);
-
-    // Add the "i" info icon to mapcontainer view.
-    UIImageView *searchMoreImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.mapContainerView.frame.size.width, self.mapContainerView.frame.size.height)];
-    searchMoreImageView.backgroundColor = [UIColor divvyColor];
-    searchMoreImageView.image = [UIImage imageNamed:@"info"];
-    searchMoreImageView.alpha = 0.8f;
-    searchMoreImageView.layer.cornerRadius = containerViewHeight/2;
-    [self.mapContainerView addSubview:searchMoreImageView];
-
-    // Re-add tap gesture recognizer to mapcontainer view
-    self.tapToOpenMapContainer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openContainer:)];
-    [self.mapContainerView addGestureRecognizer:self.tapToOpenMapContainer];
+        // Find docks color
+            // If ratio is less than half, apply max red and adjust green level accordingly
+            if (docksFractionOfTotal < 0.5f) {
+                CGFloat red = 1.0f;
+                CGFloat green = 1 - (((totalDocks/2) - availableDocks)/(totalDocks/2));
+                divvyStation.docksColor =[UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+            }
+            // If ratio is less than half, apply max green and adjust red level accordingly
+            else if (docksFractionOfTotal > 0.5f) {
+                CGFloat green = 1.0f;
+                CGFloat red = 1-(((availableDocks - totalDocks/2))/(totalDocks/2));
+                divvyStation.docksColor =[UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+            }
+            // Else, fraction is 0.5, apply maxRGB for both green and red (pure yellow)
+            else {
+                CGFloat red = 1.0f;
+                CGFloat green = 1.0f;
+                divvyStation.docksColor =[UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+            }
+        }
 }
 
 -(void)removeMapContainerSubviews
 {
     NSArray *subviews = [self.mapContainerView subviews];
 
-    for (UIImageView *imageView in subviews) {
-        [imageView removeFromSuperview];
+    for (UIButton *button in subviews) {
+        [button removeFromSuperview];
     }
 
     for (UILabel *label in subviews) {
@@ -694,6 +734,9 @@ calloutAccessoryControlTapped:(UIControl *)control
     }
     for (UIView *view in subviews) {
         [view   removeFromSuperview];
+    }
+    for (UIImageView *imageView in subviews) {
+        [imageView removeFromSuperview];
     }
 }
 
@@ -704,16 +747,16 @@ calloutAccessoryControlTapped:(UIControl *)control
     self.tableView.hidden = YES;
 
     //Set backgroundview
-    self.view.backgroundColor = [UIColor whiteColor];
+    self.view.backgroundColor = [UIColor divvyColor];
     self.navigationItem.title = @"Divvy & Conquer";
+    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
 
     //Segmented control
     self.segmentedControl.backgroundColor = [UIColor divvyColor];
     self.segmentedControl.tintColor = [UIColor whiteColor];
-    self.segmentedControl.layer.borderColor = [[UIColor divvyColor] CGColor];
+    self.segmentedControl.layer.borderColor = [[UIColor whiteColor] CGColor];
     self.segmentedControl.layer.borderWidth = 1.0f;
     self.segmentedControl.layer.cornerRadius = 5.0f;
-    self.segmentedControl.alpha = .8f;
     UIFont *font = [UIFont boldSystemFontOfSize:17.0f];
     NSDictionary *attributes = @{NSFontAttributeName: font};
     [self.segmentedControl setTitleTextAttributes:attributes forState:UIControlStateNormal];

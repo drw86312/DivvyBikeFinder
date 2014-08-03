@@ -47,6 +47,11 @@
 @property UITapGestureRecognizer *tapToCloseMapContainer;
 @property UIImageView *mapYelpImage;
 @property id request;
+@property UIButton *button1;
+@property UIButton *button2;
+@property UIButton *button3;
+@property UIButton *button4;
+@property UIButton *button5;
 @property BOOL foodSearch;
 @property BOOL drinkSearch;
 @property BOOL shopSearch;
@@ -71,6 +76,9 @@
     [self findNeighborhoods];
 
     self.navigationItem.title = self.stationFromSourceVC.stationName;
+    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
+    self.navigationController.navigationBar.tintColor = [UIColor divvyColor];
+
     self.tableView.separatorColor = [UIColor walkRouteColor];
 
     self.view.backgroundColor = [UIColor divvyColor];
@@ -82,8 +90,7 @@
     // Find status and navigation bar heights and set spacing between views
     CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
     CGFloat navBarHeight = self.navigationController.navigationBar.frame.size.height;
-    CGFloat backgroundViewHeight = 60.0f;
-    CGFloat spacing = 10.0f;
+    CGFloat backgroundViewHeight = 50.0f;
 
     // Create a background view to hold station details
     self.backgroundView = [[UIView alloc] initWithFrame:CGRectMake(self.view.frame.origin.x, navBarHeight + statusBarHeight, self.view.frame.size.width, backgroundViewHeight)];
@@ -93,34 +100,35 @@
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Add the station label
-    CGFloat verticalOffset = spacing;
-    CGFloat horizontalOffset = spacing;
-    CGFloat stationLabelWidth = 195.0f;
-    CGFloat stationLabelHeight = 30.0f;
+    CGFloat verticalOffset = 2.5f;
+    CGFloat horizontalOffset = 10.0f;
+    CGFloat stationLabelWidth = self.view.frame.size.width - ( 2* horizontalOffset);
+    CGFloat stationLabelHeight = 25.0f;
 
     UILabel *stationLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, stationLabelWidth, stationLabelHeight)];
-    stationLabel.text = [NSString stringWithFormat:@"Bikes: %@ Docks: %@", self.stationFromSourceVC.availableBikes, self.stationFromSourceVC.availableDocks];
+    stationLabel.text = [NSString stringWithFormat:@"Bikes: %@   Docks: %@", self.stationFromSourceVC.availableBikes, self.stationFromSourceVC.availableDocks];
     stationLabel.textColor = [UIColor whiteColor];
+    stationLabel.textAlignment = NSTextAlignmentCenter;
     [stationLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:21]];
     stationLabel.numberOfLines = 0;
     [self.backgroundView addSubview:stationLabel];
 
-    horizontalOffset += stationLabel.frame.size.width + spacing;
+    verticalOffset += stationLabel.frame.size.height;
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Add the neighborhoods label - must be a property as its text gets set in the findNeighborhoods method.
-    CGFloat neighborhoodsLabelWidth = self.view.frame.size.width - (horizontalOffset + spacing);
-    CGFloat neighborhoodsLabelHeight = 60.0f;
+    CGFloat neighborhoodsLabelWidth = stationLabelWidth;
+    CGFloat neighborhoodsLabelHeight = 17.5f;
 
-    self.neighborhoodsLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, 0.0, neighborhoodsLabelWidth , neighborhoodsLabelHeight)];
-    self.neighborhoodsLabel.numberOfLines = 0;
-    self.neighborhoodsLabel.textAlignment = NSTextAlignmentRight;
+    self.neighborhoodsLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, neighborhoodsLabelWidth, neighborhoodsLabelHeight)];
+    self.neighborhoodsLabel.numberOfLines = 1;
+    self.neighborhoodsLabel.textAlignment = NSTextAlignmentCenter;
     self.neighborhoodsLabel.textColor = [UIColor whiteColor];
-    [self.neighborhoodsLabel setFont:[UIFont fontWithName:@"Helvetica" size:12]];
+    [self.neighborhoodsLabel setFont:[UIFont fontWithName:@"Helvetica" size:15]];
     [self.backgroundView addSubview:self.neighborhoodsLabel];
 
-    verticalOffset = verticalOffset + stationLabel.frame.size.height;
+    verticalOffset = verticalOffset + self.neighborhoodsLabel.frame.size.height;
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -144,27 +152,33 @@
 {
     self.buttonsArray = [NSMutableArray new];
 
-    UIButton *button1 = [[UIButton alloc] init];
-    UIButton *button2 = [[UIButton alloc] init];
-    UIButton *button3 = [[UIButton alloc] init];
-    UIButton *button4 = [[UIButton alloc] init];
-    UIButton *button5 = [[UIButton alloc] init];
+    self.button1 = [[UIButton alloc] init];
+    self.button2 = [[UIButton alloc] init];
+    self.button3 = [[UIButton alloc] init];
+    self.button4 = [[UIButton alloc] init];
+    self.button5 = [[UIButton alloc] init];
 
-    [self.buttonsArray addObject:button1];
-    [self.buttonsArray addObject:button2];
-    [self.buttonsArray addObject:button3];
-    [self.buttonsArray addObject:button4];
-    [self.buttonsArray addObject:button5];
+    _button1.tag = 0;
+    _button2.tag = 1;
+    _button3.tag = 2;
+    _button4.tag = 3;
+    _button5.tag = 4;
 
-    CGFloat spacing = 5.0f;
-    CGFloat verticalOffset = self.backgroundView.frame.origin.y + self.backgroundView.frame.size.height + spacing;
-    CGFloat horizontalOffset = 5.0f;
+    [self.buttonsArray addObject:_button1];
+    [self.buttonsArray addObject:_button2];
+    [self.buttonsArray addObject:_button3];
+    [self.buttonsArray addObject:_button4];
+    [self.buttonsArray addObject:_button5];
+
+    CGFloat spacing = 10.0f;
+    CGFloat verticalOffset = self.backgroundView.frame.origin.y + self.backgroundView.frame.size.height;
+    CGFloat horizontalOffset = 10.0f;
     CGFloat buttonWidth = (self.view.frame.size.width - ((self.buttonsArray.count + 1) * spacing))/ self.buttonsArray.count;
-    CGFloat buttonHeight = 40.0f;
+    CGFloat buttonHeight = buttonWidth;
 
     for (UIButton *button in self.buttonsArray) {
         button.frame = CGRectMake(horizontalOffset, verticalOffset, buttonWidth, buttonHeight);
-        button.layer.cornerRadius = 5.0f;
+        button.layer.cornerRadius = button.frame.size.width/2;
         button.layer.borderWidth = 1.0f;
         button.layer.borderColor = [[UIColor walkRouteColor] CGColor];
         button.backgroundColor = [UIColor whiteColor];
@@ -175,29 +189,29 @@
         [self.view addSubview:button];
     }
 
-    [button1 setTitle:@"Eat" forState:UIControlStateNormal];
-    [button2 setTitle:@"Drink" forState:UIControlStateNormal];
-    [button3 setTitle:@"Shop" forState:UIControlStateNormal];
-    [button4 setTitle:@"Sights" forState:UIControlStateNormal];
-    [button5 setTitle:@"Music" forState:UIControlStateNormal];
+    [_button1 setTitle:@"Eat" forState:UIControlStateNormal];
+    [_button2 setImage:[UIImage imageNamed:@"drinkcolor"] forState:UIControlStateNormal];
+    [_button3 setImage:[UIImage imageNamed:@"shopcolor"] forState:UIControlStateNormal];
+    [_button4 setTitle:@"Sights" forState:UIControlStateNormal];
+    [_button5 setImage:[UIImage imageNamed:@"guitarcolor"] forState:UIControlStateNormal];
 
-    [button1 addTarget:self
+    [_button1 addTarget:self
                action:@selector(button1Selected:)
      forControlEvents:UIControlEventTouchUpInside];
 
-    [button2 addTarget:self
+    [_button2 addTarget:self
                 action:@selector(button2Selected:)
       forControlEvents:UIControlEventTouchUpInside];
 
-    [button3 addTarget:self
+    [_button3 addTarget:self
                 action:@selector(button3Selected:)
       forControlEvents:UIControlEventTouchUpInside];
 
-    [button4 addTarget:self
+    [_button4 addTarget:self
                 action:@selector(button4Selected:)
       forControlEvents:UIControlEventTouchUpInside];
 
-    [button5 addTarget:self
+    [_button5 addTarget:self
                 action:@selector(button5Selected:)
       forControlEvents:UIControlEventTouchUpInside];
 
@@ -206,20 +220,19 @@
     // Create segmented control
     CGFloat segmentedControlHeight = 30.0f;
     CGFloat segmentedControlWidth = 290.0f;
-    verticalOffset += button1.frame.size.height + (2 *spacing + 2);
+    verticalOffset += _button1.frame.size.height + (spacing + 2);
     horizontalOffset = (self.view.frame.size.width/2) - (segmentedControlWidth/2);
 
     self.segmentedControl = [[UISegmentedControl alloc] initWithItems:@[@"Map",@"List"]];
     self.segmentedControl.frame = CGRectMake(horizontalOffset, verticalOffset, segmentedControlWidth, segmentedControlHeight);
     [self.segmentedControl setSelectedSegmentIndex:0];
     [self.segmentedControl addTarget:self action:@selector(segmentChanged:) forControlEvents:UIControlEventValueChanged];
-    self.segmentedControl.hidden = YES;
+    self.segmentedControl.enabled = NO;
     self.segmentedControl.backgroundColor = [UIColor walkRouteColor];
     self.segmentedControl.tintColor = [UIColor whiteColor];
     self.segmentedControl.layer.borderWidth = 1.0f;
     self.segmentedControl.layer.borderColor = [[UIColor walkRouteColor] CGColor];
     self.segmentedControl.layer.cornerRadius = 5.0f;
-    self.segmentedControl.alpha = .8f;
     UIFont *font = [UIFont boldSystemFontOfSize:17.0f];
     NSDictionary *attributes = @{NSFontAttributeName: font};
     [self.segmentedControl setTitleTextAttributes:attributes forState:UIControlStateNormal];
@@ -248,7 +261,6 @@
         self.tableView.hidden = YES;
         self.mapContainerView.hidden = NO;
         self.mapYelpImage.hidden = NO;
-        self.segmentedControl.alpha = 0.8f;
     }
     else
     {
@@ -256,7 +268,6 @@
         self.tableView.hidden = NO;
         self.mapContainerView.hidden = YES;
         self.mapYelpImage.hidden = YES;
-        self.segmentedControl.alpha = 1.0f;
     }
 }
 
@@ -265,6 +276,11 @@
 // When one of these buttons is pushed...1) remove mapview annotations 2) set search boolean to YES 3) disable user interaction of all the buttons, 4) perform API call with relevent search term.
 -(void)button1Selected:(id)sender
 {
+    // Switch button from picture to text.
+    [self setButtonImages];
+    [self.button1 setImage:[UIImage new] forState:UIControlStateNormal];
+    [self.button1 setTitle:@"Food" forState:UIControlStateNormal];
+
     NSLog(@"Food search");
     // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
     [self disableSearchBooleans];
@@ -288,6 +304,10 @@
 
 -(void)button2Selected:(id)sender
 {
+    [self setButtonImages];
+    [self.button2 setImage:[UIImage new] forState:UIControlStateNormal];
+    [self.button2 setTitle:@"Bars" forState:UIControlStateNormal];
+
     NSLog(@"Bar search");
     // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
     [self disableSearchBooleans];
@@ -311,6 +331,10 @@
 
 -(void)button3Selected:(id)sender
 {
+    [self setButtonImages];
+    [self.button3 setImage:[UIImage new] forState:UIControlStateNormal];
+    [self.button3 setTitle:@"Shop" forState:UIControlStateNormal];
+
     NSLog(@"Shopping search");
     // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
     [self disableSearchBooleans];
@@ -334,7 +358,10 @@
 
 -(void)button4Selected:(id)sender
 {
-    NSLog(@"Sightsee search");
+    [self setButtonImages];
+    [self.button4 setImage:[UIImage new] forState:UIControlStateNormal];
+    [self.button4 setTitle:@"Sights" forState:UIControlStateNormal];
+
     // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
     [self disableSearchBooleans];
     self.sightseeSearch = YES;
@@ -357,6 +384,10 @@
 
 -(void)button5Selected:(id)sender
 {
+    [self setButtonImages];
+    [self.button5 setImage:[UIImage new] forState:UIControlStateNormal];
+    [self.button5 setTitle:@"Music" forState:UIControlStateNormal];
+
     NSLog(@"Live music search");
     // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
     [self disableSearchBooleans];
@@ -406,12 +437,13 @@
     [self.mapView setRegion:region animated:YES];
 
     // Place Divvy pin annotation
-    DivvyBikeAnnotation *divvyAnnotation = [[DivvyBikeAnnotation alloc] init];
-    divvyAnnotation.coordinate = self.stationFromSourceVC.coordinate;
-    divvyAnnotation.title = self.stationFromSourceVC.stationName;
-    divvyAnnotation.subtitle = [NSString stringWithFormat:@"%.01f miles away", self.stationFromSourceVC.distanceFromUser * 0.000621371];
-    divvyAnnotation.imageName = @"Divvy";
-    [self.mapView addAnnotation:divvyAnnotation];
+    DivvyBikeAnnotation *annotation = [[DivvyBikeAnnotation alloc] init];
+    annotation.coordinate = self.stationFromSourceVC.coordinate;
+    annotation.title = self.stationFromSourceVC.stationName;
+    annotation.subtitle = [NSString stringWithFormat:@"%.01f miles away", self.stationFromSourceVC.distanceFromUser * 0.000621371];
+    annotation.imageName = @"Divvy";
+    annotation.backgroundColor = self.stationFromSourceVC.bikesColor;
+    [self.mapView addAnnotation:annotation];
 }
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
@@ -434,6 +466,10 @@
             annotationView.annotation = annotation;
         }
         annotationView.image = [UIImage imageNamed:divvyAnnotation.imageName];
+        annotationView.frame = CGRectMake(0, 0, 30, 30);
+        annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
+        annotationView.backgroundColor = divvyAnnotation.backgroundColor;
+
         return annotationView;
     }
 
@@ -470,8 +506,9 @@
             annotationView.annotation = annotation;
         }
         annotationView.image = [UIImage imageNamed:drinkAnnotation.imageName];
-        annotationView.tintColor = [UIColor redColor];
-
+        annotationView.backgroundColor = drinkAnnotation.backgroundColor;
+        annotationView.frame = CGRectMake(0, 0, 30, 30);
+        annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
         return annotationView;
     }
 
@@ -489,8 +526,9 @@
             annotationView.annotation = annotation;
         }
         annotationView.image = [UIImage imageNamed:shopAnnotation.imageName];
-        annotationView.tintColor = [UIColor blueColor];
-
+        annotationView.frame = CGRectMake(0, 0, 30, 30);
+        annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
+        annotationView.backgroundColor = shopAnnotation.backgroundColor;
         return annotationView;
     }
 
@@ -508,7 +546,9 @@
             annotationView.annotation = annotation;
         }
         annotationView.image = [UIImage imageNamed:sightseeAnnotation.imageName];
-        annotationView.tintColor = [UIColor yellowColor];
+        annotationView.backgroundColor = sightseeAnnotation.backgroundColor;
+        annotationView.frame = CGRectMake(0, 0, 30, 30);
+        annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
 
         return annotationView;
     }
@@ -527,12 +567,29 @@
             annotationView.annotation = annotation;
         }
         annotationView.image = [UIImage imageNamed:musicAnnotation.imageName];
-        annotationView.tintColor = [UIColor orangeColor];
-
+        annotationView.backgroundColor = musicAnnotation.backgroundColor;
+        annotationView.frame = CGRectMake(0, 0, 30, 30);
+        annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
         return annotationView;
     }
     else {
         return nil;
+    }
+}
+
+- (void)mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view
+calloutAccessoryControlTapped:(UIControl *)control
+{
+    [self performSegueWithIdentifier:@"websegue" sender:self];
+}
+
+-(void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKPinAnnotationView *)view
+{
+    for (YelpLocation *yelpLocation in self.yelpLocations)
+    {
+        if ([view.annotation.title isEqualToString:yelpLocation.name]) {
+            self.selectedYelpLocation = yelpLocation;
+        }
     }
 }
 
@@ -741,7 +798,10 @@
 
     [NSURLConnection sendAsynchronousRequest:self.request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
         // If poor connection...
-        if (connectionError) {NSLog(@"Connection error - can't find neighborhood");}
+        if (connectionError) {
+            NSLog(@"Connection error - can't find neighborhood");
+            self.neighborhoodsLabel.text = @"Neighborhood: N/A";
+        }
         else {
             NSLog(@"Yelp data returned");
             NSDictionary *dictionary  = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&connectionError];
@@ -794,7 +854,22 @@
                 }
             }
             self.neighborhood2 = secondMostOccurring;
-            self.neighborhoodsLabel.text = [NSString stringWithFormat:@"Neighborhood\n%@", self.neighborhood1];
+
+            if (!self.neighborhood1 && !self.neighborhood2) {
+                self.neighborhoodsLabel.text = @"Neighborhood: N/A";
+            }
+            else if (self.neighborhood2 && self.neighborhood1) {
+                self.neighborhoodsLabel.text = [NSString stringWithFormat:@"Neighborhoods: %@, %@", self.neighborhood1, self.neighborhood2];
+            }
+            else if (self.neighborhood1) {
+                self.neighborhoodsLabel.text = [NSString stringWithFormat:@"Neighborhood: %@", self.neighborhood1];
+            }
+            else if (self.neighborhood2) {
+                self.neighborhoodsLabel.text = [NSString stringWithFormat:@"Neighborhood: %@", self.neighborhood2];
+            }
+            else {
+                self.neighborhoodsLabel.text = @"Neighborhood: N/A";
+            }
             NSLog(@"Neighborhood found");
         }
     }];
@@ -871,7 +946,6 @@
                 else {
                     NSLog(@"Could not find location for: %@", yelpLocation.name);
                 }
-
                 // When the second counter equals the number of yelpLocations in queryArray, all yelpLocations have been evaluated
                 if (self.counter2 == queryArray.count) {
                     NSLog(@"Geocoding completed");
@@ -890,6 +964,7 @@
             foodannotation.title = yelpLocation.name;
             foodannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
             foodannotation.imageName = @"food";
+            foodannotation.backgroundColor = [UIColor walkRouteColor];
             [self.mapView addAnnotation:foodannotation];
         }
         else if (self.drinkSearch) {
@@ -898,6 +973,7 @@
             drinkannotation.title = yelpLocation.name;
             drinkannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
             drinkannotation.imageName = @"drink";
+            drinkannotation.backgroundColor = [UIColor walkRouteColor];
             [self.mapView addAnnotation:drinkannotation];
         }
         else if (self.shopSearch) {
@@ -906,6 +982,7 @@
             shopannotation.title = yelpLocation.name;
             shopannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
             shopannotation.imageName = @"shop";
+            shopannotation.backgroundColor = [UIColor walkRouteColor];
             [self.mapView addAnnotation:shopannotation];
         }
         else if (self.sightseeSearch) {
@@ -914,6 +991,7 @@
             sightseeannotation.title = yelpLocation.name;
             sightseeannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
             sightseeannotation.imageName = @"sightsee";
+            sightseeannotation.backgroundColor = [UIColor walkRouteColor];
             [self.mapView addAnnotation:sightseeannotation];
         }
         else {
@@ -922,6 +1000,7 @@
             musicsannotation.title = yelpLocation.name;
             musicsannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
             musicsannotation.imageName = @"music";
+            musicsannotation.backgroundColor = [UIColor walkRouteColor];
             [self.mapView addAnnotation:musicsannotation];
         }
     }
@@ -930,7 +1009,7 @@
     [self enableButtons];
     [self.tableView reloadData];
     [self createMapContainerView];
-    self.segmentedControl.hidden = NO;
+    self.segmentedControl.enabled = YES;
 
     // Stop the activity indicator
     self.activityIndicator.hidden = YES;
@@ -981,13 +1060,13 @@
 
     // Resize the container view with animation
     CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
-    CGFloat containerViewHeight = 120.0f;
-    CGFloat containerViewWidth = 120.0f;
-    CGFloat horizontalOffset = self.view.frame.size.width - containerViewWidth;
+    CGFloat containerViewHeight = 60.0f;
+    CGFloat containerViewWidth = self.view.frame.size.width;
+    CGFloat horizontalOffset = self.view.frame.origin.x;
     CGFloat verticalOffset = self.view.frame.size.height - tabBarHeight - containerViewHeight;
 
     [UIView beginAnimations:nil context:nil];
-    [UIView setAnimationDuration:1.0];
+    [UIView setAnimationDuration:0.5];
     [UIView setAnimationDelay:0.0];
     [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
 
@@ -1019,14 +1098,14 @@
     // Place the buttons one on top of the other in the container view.
     verticalOffset = 0.0;
     horizontalOffset = 0.0f;
-    CGFloat buttonWidth = self.mapContainerView.frame.size.width;
-    CGFloat buttonHeight = 50.0f;
+    CGFloat buttonWidth = self.mapContainerView.frame.size.width/2;
+    CGFloat buttonHeight = self.mapContainerView.frame.size.height;
 
     for (UIButton *button in buttonsArray) {
         button.frame = CGRectMake(horizontalOffset, verticalOffset, buttonWidth, buttonHeight);
         button.titleLabel.font = [UIFont fontWithName:@"Helvetica" size:17.0];
         [self.mapContainerView addSubview:button];
-        verticalOffset += button.frame.size.height;
+        horizontalOffset += button.frame.size.width;
     }
 
     // Set button targets.
@@ -1053,7 +1132,7 @@
 
     // Resize the container view with animation back to its original size.
     [UIView beginAnimations:nil context:nil];
-    [UIView setAnimationDuration:1.0];
+    [UIView setAnimationDuration:0.5];
     [UIView setAnimationDelay:0.0];
     [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
 
@@ -1087,6 +1166,9 @@
 {
     [self.view removeGestureRecognizer:self.tapToCloseMapContainer];
 
+    //Remove mapview annotations
+    [self.mapView removeAnnotations:self.mapView.annotations];
+
     NSLog(@"Find nearest button selected");
     // Perform an API call with returned results sorted by distance.
     self.sortType = @1;
@@ -1102,6 +1184,9 @@
 -(void)topRatedSelected:(id)sender
 {
     [self.view removeGestureRecognizer:self.tapToCloseMapContainer];
+
+    //Remove mapview annotations
+    [self.mapView removeAnnotations:self.mapView.annotations];
 
     NSLog(@"Find highest rated button selected");
     // Perform an API call with returned results sorted by highest rated.
@@ -1150,6 +1235,15 @@
     self.shopSearch = NO;
     self.sightseeSearch = NO;
     self.musicSearch = NO;
+}
+
+-(void)setButtonImages
+{
+    [_button1 setTitle:@"Eat" forState:UIControlStateNormal];
+    [_button2 setImage:[UIImage imageNamed:@"drinkcolor"] forState:UIControlStateNormal];
+    [_button3 setImage:[UIImage imageNamed:@"shopcolor"] forState:UIControlStateNormal];
+    [_button4 setTitle:@"Sights" forState:UIControlStateNormal];
+    [_button5 setImage:[UIImage imageNamed:@"guitarcolor"] forState:UIControlStateNormal];
 }
 
 @end
