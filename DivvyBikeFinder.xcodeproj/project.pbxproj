@@ -37,6 +37,7 @@
 		0E0819D919897F3100CBF509 /* UIView+WebCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0819C919897F3100CBF509 /* UIView+WebCacheOperation.m */; };
 		0E0819DC198989E300CBF509 /* YelpTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0819DB198989E300CBF509 /* YelpTableViewCell.m */; };
 		0E0819DF198B5CE800CBF509 /* WebviewViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0819DE198B5CE800CBF509 /* WebviewViewController.m */; };
+		0E0819E2198F2EBA00CBF509 /* UIFont+DesignFonts.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0819E1198F2EB900CBF509 /* UIFont+DesignFonts.m */; };
 		0E0FD84C196CA40A00A26E2B /* DestinationAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0FD84B196CA40A00A26E2B /* DestinationAnnotation.m */; };
 		0E1E759419809A2A00357F31 /* SearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E1E759319809A2A00357F31 /* SearchViewController.m */; };
 		0E4A5B4D196B30CB00273EA6 /* DivvyBikeAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B4C196B30CB00273EA6 /* DivvyBikeAnnotation.m */; };
@@ -149,6 +150,8 @@
 		0E0819DB198989E300CBF509 /* YelpTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YelpTableViewCell.m; sourceTree = "<group>"; };
 		0E0819DD198B5CE800CBF509 /* WebviewViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebviewViewController.h; sourceTree = "<group>"; };
 		0E0819DE198B5CE800CBF509 /* WebviewViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebviewViewController.m; sourceTree = "<group>"; };
+		0E0819E0198F2EB900CBF509 /* UIFont+DesignFonts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIFont+DesignFonts.h"; sourceTree = "<group>"; };
+		0E0819E1198F2EB900CBF509 /* UIFont+DesignFonts.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIFont+DesignFonts.m"; sourceTree = "<group>"; };
 		0E0FD84A196CA40A00A26E2B /* DestinationAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DestinationAnnotation.h; path = ../DestinationAnnotation.h; sourceTree = "<group>"; };
 		0E0FD84B196CA40A00A26E2B /* DestinationAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DestinationAnnotation.m; path = ../DestinationAnnotation.m; sourceTree = "<group>"; };
 		0E1E759219809A2A00357F31 /* SearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchViewController.h; sourceTree = "<group>"; };
@@ -272,6 +275,8 @@
 		0E08198A1985AC3300CBF509 /* Design */ = {
 			isa = PBXGroup;
 			children = (
+				0E0819E0198F2EB900CBF509 /* UIFont+DesignFonts.h */,
+				0E0819E1198F2EB900CBF509 /* UIFont+DesignFonts.m */,
 				0E056B9319848664001BD53D /* UIColor+DesignColors.h */,
 				0E056B9419848664001BD53D /* UIColor+DesignColors.m */,
 			);
@@ -617,6 +622,7 @@
 				0E0819CE19897F3100CBF509 /* SDWebImageDecoder.m in Sources */,
 				0E0819D919897F3100CBF509 /* UIView+WebCacheOperation.m in Sources */,
 				0E08198D1986F3AB00CBF509 /* TimerViewController.m in Sources */,
+				0E0819E2198F2EBA00CBF509 /* UIFont+DesignFonts.m in Sources */,
 				0E0819D119897F3100CBF509 /* SDWebImageManager.m in Sources */,
 				0E4A5B56196B370C00273EA6 /* InitialViewController.m in Sources */,
 				0E08199319881BED00CBF509 /* TDOAuth.m in Sources */,

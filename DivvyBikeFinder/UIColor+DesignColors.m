@@ -1,10 +1,8 @@
 //
 //  UIColor+DesignColors.m
-//  PubChatter
 //
-//  Created by Yeah Right on 6/26/14.
-//  Copyright (c) 2014 Naomi Himley. All rights reserved.
 //
+
 
 #import "UIColor+DesignColors.h"
 
@@ -25,5 +23,6 @@
     CGFloat blue = 58.0/255.0;
     return [UIColor colorWithRed:red green:green blue:blue alpha:1];
 }
+
 
 @end

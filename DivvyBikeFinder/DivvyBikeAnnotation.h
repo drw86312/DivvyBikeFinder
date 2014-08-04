@@ -12,5 +12,6 @@
 
 @property(nonatomic, strong) NSString *imageName;
 @property(nonatomic, strong) UIColor *backgroundColor;
+@property CGFloat sizeScaler;
 
 @end

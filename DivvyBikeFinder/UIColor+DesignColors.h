@@ -7,6 +7,7 @@
 #import <UIKit/UIKit.h>
 
 @interface UIColor (DesignColors)
+
 + (UIColor *)divvyColor;
 + (UIColor *)walkRouteColor;
 

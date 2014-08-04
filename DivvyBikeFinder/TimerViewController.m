@@ -8,6 +8,7 @@
 
 #import "TimerViewController.h"
 #import "UIColor+DesignColors.h"
+#import "UIFont+DesignFonts.h"
 #import <AudioToolbox/AudioToolbox.h>
 
 @interface TimerViewController () <UITextFieldDelegate>
@@ -19,6 +20,7 @@
 @property NSDate *initialTime;
 @property NSDate *deadline;
 @property NSTimeInterval timeInterval;
+@property UILocalNotification *notification;
 @property BOOL startButtonSelected;
 
 @end
@@ -224,6 +226,18 @@
         // Set the point in time when the timer is created. Set the point in time when the timer will expire.
         self.initialTime = [NSDate date];
         self.deadline = [self.initialTime dateByAddingTimeInterval:self.timeInterval];
+
+        self.notification = [[UILocalNotification alloc] init];
+        NSTimeInterval timeInterval = self.timeInterval - (5 * 60);
+        NSDate *fiveMinToDeadline = [self.initialTime dateByAddingTimeInterval:timeInterval];
+        self.notification.fireDate = fiveMinToDeadline;
+        self.notification.alertBody = @"You have five minutes remaining";
+        self.notification.soundName = UILocalNotificationDefaultSoundName;
+        self.notification.timeZone = [NSTimeZone defaultTimeZone];
+        [[UIApplication sharedApplication] scheduleLocalNotification:self.notification];
+
+
+        NSLog(@"%@", self.notification);
 
         // Style start button
         [self.startButton setTitle:@"Cancel" forState:UIControlStateNormal];

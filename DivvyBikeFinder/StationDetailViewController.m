@@ -9,6 +9,7 @@
 #import "StationDetailViewController.h"
 #import "DivvyBikeAnnotation.h"
 #import "UIColor+DesignColors.h"
+#import "UIFont+DesignFonts.h"
 #import "WebviewViewController.h"
 #import <MapKit/MapKit.h>
 #import "YelpLocation.h"
@@ -189,10 +190,10 @@
         [self.view addSubview:button];
     }
 
-    [_button1 setTitle:@"Eat" forState:UIControlStateNormal];
+    [_button1 setImage:[UIImage imageNamed:@"foodcolor"] forState:UIControlStateNormal];
     [_button2 setImage:[UIImage imageNamed:@"drinkcolor"] forState:UIControlStateNormal];
     [_button3 setImage:[UIImage imageNamed:@"shopcolor"] forState:UIControlStateNormal];
-    [_button4 setTitle:@"Sights" forState:UIControlStateNormal];
+    [_button4 setImage:[UIImage imageNamed:@"sightseecolor"] forState:UIControlStateNormal];
     [_button5 setImage:[UIImage imageNamed:@"guitarcolor"] forState:UIControlStateNormal];
 
     [_button1 addTarget:self
@@ -443,6 +444,7 @@
     annotation.subtitle = [NSString stringWithFormat:@"%.01f miles away", self.stationFromSourceVC.distanceFromUser * 0.000621371];
     annotation.imageName = @"Divvy";
     annotation.backgroundColor = self.stationFromSourceVC.bikesColor;
+    annotation.sizeScaler = self.stationFromSourceVC.annotationSizeScaler;
     [self.mapView addAnnotation:annotation];
 }
 
@@ -466,10 +468,9 @@
             annotationView.annotation = annotation;
         }
         annotationView.image = [UIImage imageNamed:divvyAnnotation.imageName];
-        annotationView.frame = CGRectMake(0, 0, 30, 30);
+        annotationView.frame = CGRectMake(0, 0, (20 + (7.0f * divvyAnnotation.sizeScaler)), (20 + (7.0f * divvyAnnotation.sizeScaler)));
         annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
         annotationView.backgroundColor = divvyAnnotation.backgroundColor;
-
         return annotationView;
     }
 
@@ -487,8 +488,9 @@
             annotationView.annotation = annotation;
         }
         annotationView.image = [UIImage imageNamed:foodAnnotation.imageName];
-        annotationView.tintColor = [UIColor greenColor];
-
+        annotationView.frame = CGRectMake(0, 0, 30, 30);
+        annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
+        annotationView.backgroundColor = foodAnnotation.backgroundColor;
         return annotationView;
     }
 
@@ -712,7 +714,7 @@ calloutAccessoryControlTapped:(UIControl *)control
 
         else
         {
-            NSLog(@"Yelp data returned");
+            NSLog(@"Yelp data received");
             NSDictionary *dictionary  = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&connectionError];
 
             NSMutableArray *arrayOfYelpLocationObjects = [NSMutableArray new];
@@ -758,7 +760,6 @@ calloutAccessoryControlTapped:(UIControl *)control
                     yelpLocation.categories = @"N/A";
                     yelpLocation.offers = @"N/A";
                 }
-
                 yelpLocation.yelpID = [dictionary objectForKey:@"id"];
                 [arrayOfYelpLocationObjects addObject:yelpLocation];
             }
@@ -803,7 +804,6 @@ calloutAccessoryControlTapped:(UIControl *)control
             self.neighborhoodsLabel.text = @"Neighborhood: N/A";
         }
         else {
-            NSLog(@"Yelp data returned");
             NSDictionary *dictionary  = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&connectionError];
             NSArray *yelpLocations = [dictionary objectForKey:@"businesses"];
             NSMutableArray *arrayOfYelpBarObjects = [NSMutableArray new];
@@ -913,7 +913,7 @@ calloutAccessoryControlTapped:(UIControl *)control
                                 }
                              else {
                                  NSLog(@"Geocoding completed");
-                                 [self setYelpPinAnnotations];
+                                 [self removeYelpLocationsWithNoCoordinates];
                                 }
                          }
                 }];
@@ -949,52 +949,103 @@ calloutAccessoryControlTapped:(UIControl *)control
                 // When the second counter equals the number of yelpLocations in queryArray, all yelpLocations have been evaluated
                 if (self.counter2 == queryArray.count) {
                     NSLog(@"Geocoding completed");
-                    [self setYelpPinAnnotations];
+                    [self removeYelpLocationsWithNoCoordinates];
                 }
         }];
+    }
+}
+
+// Remove any yelpLocations with no location coordinates
+-(void)removeYelpLocationsWithNoCoordinates
+{
+    NSMutableArray *tempArray = [NSMutableArray new];
+
+    // Set parameters to keep map from being drawn outside an area around the station, the buffer is a half a degree of longitude and latitude (about 35 miles)
+    CGFloat buffer = 0.5f;
+    CGFloat stationLatitude = self.stationFromSourceVC.latitude.floatValue;
+    CGFloat chicagoLatitudeLowerBound = stationLatitude - buffer;
+    CGFloat chicagoLatitudeUpperBound = stationLatitude + buffer;
+
+    CGFloat stationLongitude = self.stationFromSourceVC.longitude.floatValue;
+    CGFloat chicagoLongitudeAbsValue = fabsf(stationLongitude);
+    CGFloat chicagoLongitudeLowerBound = chicagoLongitudeAbsValue - buffer;
+    CGFloat chicagoLongitudeUpperBound = chicagoLongitudeAbsValue + buffer;
+
+    for (YelpLocation *yelpLocation in self.yelpLocations) {
+        CGFloat locationLongitudeAbsValue = fabsf(yelpLocation.longitude);
+
+        if (yelpLocation.latitude == 0.0f) {
+            NSLog(@"Removed %@ for not having a latitude", yelpLocation.name);
+        }
+        else if (yelpLocation.longitude == 0.0f) {
+            NSLog(@"Removed %@ for not having a longitude", yelpLocation.name);
+        }
+        else if (chicagoLatitudeLowerBound > yelpLocation.latitude && yelpLocation.latitude > chicagoLatitudeUpperBound) {
+            NSLog(@"Removed %@ for having a latitude outside the bounds of chicago", yelpLocation.name);
+            }
+        else if (chicagoLongitudeLowerBound > locationLongitudeAbsValue && locationLongitudeAbsValue > chicagoLongitudeUpperBound) {
+            NSLog(@"Removed %@ for having a longitude outside the bounds of chicago", yelpLocation.name);
+            }
+        else {
+            [tempArray addObject:yelpLocation];
+        }
+    }
+
+    self.yelpLocations = [NSArray arrayWithArray:tempArray];
+    if (self.yelpLocations.count < 1) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:@"Sorry, could not locate %@ in this area", self.searchTerm] message:@"Please try again" delegate:self cancelButtonTitle:nil otherButtonTitles:nil, nil];
+        [alert show];
+        [self enableButtons];
+    }
+    else {
+        [self setYelpPinAnnotations];
+        NSLog(@"Yelplocations mapped and listed %lu", (unsigned long)self.yelpLocations.count);
     }
 }
 
 -(void)setYelpPinAnnotations
 {
     for (YelpLocation *yelpLocation in self.yelpLocations) {
-        if (self.foodSearch) {
-            FoodAnnotation *foodannotation = [[FoodAnnotation alloc] init];
-            foodannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
-            foodannotation.title = yelpLocation.name;
-            foodannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
-            foodannotation.imageName = @"food";
-            foodannotation.backgroundColor = [UIColor walkRouteColor];
-            [self.mapView addAnnotation:foodannotation];
+        // If yelplocation latitude and longitude coordinates exist, set appropriate annotations.
+        if (yelpLocation.latitude && yelpLocation.latitude) {
+
+            if (self.foodSearch) {
+                FoodAnnotation *foodannotation = [[FoodAnnotation alloc] init];
+                foodannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
+                foodannotation.title = yelpLocation.name;
+                foodannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+                foodannotation.imageName = @"food";
+                foodannotation.backgroundColor = [UIColor walkRouteColor];
+                [self.mapView addAnnotation:foodannotation];
         }
-        else if (self.drinkSearch) {
-            DrinkAnnotation *drinkannotation = [[DrinkAnnotation alloc] init];
-            drinkannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
-            drinkannotation.title = yelpLocation.name;
-            drinkannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
-            drinkannotation.imageName = @"drink";
-            drinkannotation.backgroundColor = [UIColor walkRouteColor];
-            [self.mapView addAnnotation:drinkannotation];
+            else if (self.drinkSearch) {
+                DrinkAnnotation *drinkannotation = [[DrinkAnnotation alloc] init];
+                drinkannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
+                drinkannotation.title = yelpLocation.name;
+                drinkannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+                drinkannotation.imageName = @"drink";
+                drinkannotation.backgroundColor = [UIColor walkRouteColor];
+                [self.mapView addAnnotation:drinkannotation];
         }
-        else if (self.shopSearch) {
-            ShopAnnotation *shopannotation = [[ShopAnnotation alloc] init];
-            shopannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
-            shopannotation.title = yelpLocation.name;
-            shopannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
-            shopannotation.imageName = @"shop";
-            shopannotation.backgroundColor = [UIColor walkRouteColor];
-            [self.mapView addAnnotation:shopannotation];
+            else if (self.shopSearch) {
+                ShopAnnotation *shopannotation = [[ShopAnnotation alloc] init];
+                shopannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
+                shopannotation.title = yelpLocation.name;
+                shopannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+                shopannotation.imageName = @"shop";
+                shopannotation.backgroundColor = [UIColor walkRouteColor];
+                [self.mapView addAnnotation:shopannotation];
         }
-        else if (self.sightseeSearch) {
-            SightseeAnnotation *sightseeannotation = [[SightseeAnnotation alloc] init];
-            sightseeannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
-            sightseeannotation.title = yelpLocation.name;
-            sightseeannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
-            sightseeannotation.imageName = @"sightsee";
-            sightseeannotation.backgroundColor = [UIColor walkRouteColor];
-            [self.mapView addAnnotation:sightseeannotation];
+            else if (self.sightseeSearch) {
+                SightseeAnnotation *sightseeannotation = [[SightseeAnnotation alloc] init];
+                sightseeannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
+                sightseeannotation.title = yelpLocation.name;
+                sightseeannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+                sightseeannotation.imageName = @"sightsee";
+                sightseeannotation.backgroundColor = [UIColor walkRouteColor];
+                [self.mapView addAnnotation:sightseeannotation];
         }
-        else {
+            else {
             MusicAnnotation *musicsannotation = [[MusicAnnotation alloc] init];
             musicsannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
             musicsannotation.title = yelpLocation.name;
@@ -1003,12 +1054,13 @@ calloutAccessoryControlTapped:(UIControl *)control
             musicsannotation.backgroundColor = [UIColor walkRouteColor];
             [self.mapView addAnnotation:musicsannotation];
         }
+        }
     }
-
-    // Enable user interaction of buttons, reload tableview, create the mapcontainer view, display the segmented control, stop the activity indictor.
+    // Enable user interaction of buttons, reload tableview, create the mapcontainer view, scale map to fit the annotations, display the segmented control, stop the activity indictor.
     [self enableButtons];
     [self.tableView reloadData];
     [self createMapContainerView];
+    [self scaleMapViewToFitAnnotations];
     self.segmentedControl.enabled = YES;
 
     // Stop the activity indicator
@@ -1169,16 +1221,16 @@ calloutAccessoryControlTapped:(UIControl *)control
     //Remove mapview annotations
     [self.mapView removeAnnotations:self.mapView.annotations];
 
-    NSLog(@"Find nearest button selected");
-    // Perform an API call with returned results sorted by distance.
-    self.sortType = @1;
-    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
-
     //Disable user interaction
     [self disableButtons];
 
     // Remove buttons from the container view
     [self clearContainerView];
+
+    NSLog(@"Find nearest button selected");
+    // Perform an API call with returned results sorted by distance.
+    self.sortType = @1;
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
 }
 
 -(void)topRatedSelected:(id)sender
@@ -1188,16 +1240,16 @@ calloutAccessoryControlTapped:(UIControl *)control
     //Remove mapview annotations
     [self.mapView removeAnnotations:self.mapView.annotations];
 
-    NSLog(@"Find highest rated button selected");
-    // Perform an API call with returned results sorted by highest rated.
-    self.sortType = @2;
-    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
-
     //Disable user interaction
     [self disableButtons];
 
     // Remove buttons from the container view
     [self clearContainerView];
+
+    NSLog(@"Find highest rated button selected");
+    // Perform an API call with returned results sorted by highest rated.
+    self.sortType = @2;
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
 }
 
 
@@ -1239,11 +1291,81 @@ calloutAccessoryControlTapped:(UIControl *)control
 
 -(void)setButtonImages
 {
-    [_button1 setTitle:@"Eat" forState:UIControlStateNormal];
+    [_button1 setImage:[UIImage imageNamed:@"foodcolor"] forState:UIControlStateNormal];
     [_button2 setImage:[UIImage imageNamed:@"drinkcolor"] forState:UIControlStateNormal];
     [_button3 setImage:[UIImage imageNamed:@"shopcolor"] forState:UIControlStateNormal];
-    [_button4 setTitle:@"Sights" forState:UIControlStateNormal];
+    [_button4 setImage:[UIImage imageNamed:@"sightseecolor"] forState:UIControlStateNormal];
     [_button5 setImage:[UIImage imageNamed:@"guitarcolor"] forState:UIControlStateNormal];
 }
+
+// Scales the map view appropriately to include both origin and destination location.
+-(void)scaleMapViewToFitAnnotations
+{
+    // Instatitate top left and lower right coordinates
+    CLLocationCoordinate2D topLeftCoord;
+    CLLocationCoordinate2D bottomRightCoord;
+
+    //Set initial values of longitude and latitude to their max/min values
+    CGFloat lowestLongitude =180.0f;
+    CGFloat highestLatitude = -90.0f;
+    CGFloat highestLongitude = -180.0f;
+    CGFloat lowestLatitude = 90.0f;
+
+    // Set parameters to keep map from being drawn outside an area around the station, the buffer is a half a degree of longitude and latitude (about 35 miles)
+    CGFloat buffer = 0.5f;
+    CGFloat stationLatitude = self.stationFromSourceVC.latitude.floatValue;
+    CGFloat chicagoLatitudeLowerBound = stationLatitude - buffer;
+    CGFloat chicagoLatitudeUpperBound = stationLatitude + buffer;
+
+    CGFloat stationLongitude = self.stationFromSourceVC.longitude.floatValue;
+    CGFloat chicagoLongitudeAbsValue = fabsf(stationLongitude);
+    CGFloat chicagoLongitudeLowerBound = chicagoLongitudeAbsValue - buffer;
+    CGFloat chicagoLongitudeUpperBound = chicagoLongitudeAbsValue + buffer;
+
+    // Iterate through yelplocations and assign highest and lowest latitude
+    for (YelpLocation *yelpLocation in self.yelpLocations) {
+        if (!yelpLocation.latitude == 0.0f || !yelpLocation.longitude == 0.0f) {
+            CGFloat locationLatitude = yelpLocation.latitude;
+            CGFloat locationLongitude = yelpLocation.longitude;
+            CGFloat locationLongitudeAbsValue = fabsf(locationLongitude);
+
+            if (chicagoLatitudeLowerBound < locationLatitude && locationLatitude < chicagoLatitudeUpperBound) {
+                highestLatitude = fmax(locationLatitude, highestLatitude);
+                lowestLatitude = fmin(locationLatitude, lowestLatitude);
+            }
+                else {
+                    NSLog(@"Latitude found outside chicago %f", locationLatitude);
+                }
+
+            if (chicagoLongitudeLowerBound < locationLongitudeAbsValue && locationLongitudeAbsValue < chicagoLongitudeUpperBound) {
+                lowestLongitude = fmin(locationLongitude, lowestLongitude);
+                highestLongitude = fmax(locationLongitude, highestLongitude);
+            }
+            else {
+                NSLog(@"Longitude found outside chicago %f", locationLongitude);
+            }
+        }
+        else {
+            NSLog(@"Location has no coordinates: %f, %f", yelpLocation.latitude, yelpLocation.longitude);
+        }
+    }
+
+    topLeftCoord.longitude = lowestLongitude;
+    topLeftCoord.latitude = highestLatitude;
+    bottomRightCoord.longitude = highestLongitude;
+    bottomRightCoord.latitude = lowestLatitude;
+
+    MKCoordinateRegion region;
+    region.center.latitude = topLeftCoord.latitude - (topLeftCoord.latitude - bottomRightCoord.latitude) * 0.3;
+    region.center.longitude = topLeftCoord.longitude + (bottomRightCoord.longitude - topLeftCoord.longitude) * 0.3;
+
+    // Adding some buffer space to the mapview
+    region.span.latitudeDelta = fabs(topLeftCoord.latitude - bottomRightCoord.latitude) * 1.5;
+    region.span.longitudeDelta = fabs(bottomRightCoord.longitude - topLeftCoord.longitude) * 1.5;
+
+    region = [self.mapView regionThatFits:region];
+    [self.mapView setRegion:region animated:YES];
+}
+
 
 @end

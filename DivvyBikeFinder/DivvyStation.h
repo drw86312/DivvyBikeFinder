@@ -33,5 +33,6 @@
 @property NSString *landMark;
 @property (nonatomic, strong) UIColor *bikesColor;
 @property (nonatomic, strong) UIColor *docksColor;
+@property CGFloat annotationSizeScaler;
 
 @end

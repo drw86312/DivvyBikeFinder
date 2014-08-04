@@ -17,6 +17,7 @@
 #import "StationDetailViewController.h"
 #import "SearchViewController.h"
 #import "UIColor+DesignColors.h"
+#import "UIFont+DesignFonts.h"
 #import <CoreGraphics/CoreGraphics.h>
 #import <QuartzCore/QuartzCore.h>
 
@@ -196,6 +197,18 @@
              // Assign the sorted array to the divvyStations ivar array.
              self.divvyStations = [divvyStationsArray sortedArrayUsingDescriptors:sortDescriptors];
 
+             // Find the station annotation scaler value
+                CGFloat totalDocks = 0;
+                CGFloat totalStations = self.divvyStations.count;
+                for (DivvyStation *divvyStation in self.divvyStations) {
+                    CGFloat divvyStationDocks = divvyStation.availableBikes.floatValue + divvyStation.availableDocks.floatValue;
+                    totalDocks += divvyStationDocks;
+                    }
+                CGFloat averageStationSize = totalDocks/totalStations;
+                for (DivvyStation *divvyStation in self.divvyStations) {
+                    divvyStation.annotationSizeScaler = (divvyStation.availableBikes.floatValue + divvyStation.availableDocks.floatValue)/averageStationSize;
+                }
+
              // Call helper method to set station colors, reload the tableview and call method to create map annotations.
              [self setStationColors:self.divvyStations];
              [self createMapAnnotations];
@@ -219,7 +232,7 @@
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"No-Bikes";
             annotation.backgroundColor = [UIColor redColor];
-
+            annotation.sizeScaler = divvyStation.annotationSizeScaler;
             [self.mapView addAnnotation:annotation];
         }
         else if (divvyStation.availableDocks.intValue < 1) {
@@ -229,6 +242,7 @@
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"No-Docks";
             annotation.backgroundColor = [UIColor greenColor];
+            annotation.sizeScaler = divvyStation.annotationSizeScaler;
             [self.mapView addAnnotation:annotation];
         }
         else {
@@ -238,6 +252,7 @@
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"Divvy";
             annotation.backgroundColor = divvyStation.bikesColor;
+            annotation.sizeScaler = divvyStation.annotationSizeScaler;
             [self.mapView addAnnotation:annotation];
         }
     }
@@ -264,7 +279,7 @@
                 }
 
             annotationView.image = [UIImage imageNamed:noBikesAnnotation.imageName];
-            annotationView.frame = CGRectMake(0, 0, 30, 30);
+            annotationView.frame = CGRectMake(0, 0, (20 + (7.0f * noBikesAnnotation.sizeScaler)), (20 + (7.0f * noBikesAnnotation.sizeScaler)));
             annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
             annotationView.backgroundColor = noBikesAnnotation.backgroundColor;
 
@@ -285,7 +300,7 @@
             }
 
         annotationView.image = [UIImage imageNamed:noDocksAnnotation.imageName];
-        annotationView.frame = CGRectMake(0, 0, 30, 30);
+        annotationView.frame = CGRectMake(0, 0, (20 + (6.0f * noDocksAnnotation.sizeScaler)), (20 + (7.0f * noDocksAnnotation.sizeScaler)));
         annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
         annotationView.backgroundColor = noDocksAnnotation.backgroundColor;
         return annotationView;
@@ -305,7 +320,7 @@
             }
 
             annotationView.image = [UIImage imageNamed:divvyAnnotation.imageName];
-            annotationView.frame = CGRectMake(0, 0, 30, 30);
+            annotationView.frame = CGRectMake(0, 0, (20 + (7.0f * divvyAnnotation.sizeScaler)), (20 + (7.0f * divvyAnnotation.sizeScaler)));
             annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
             annotationView.backgroundColor = divvyAnnotation.backgroundColor;
 
@@ -351,21 +366,25 @@ calloutAccessoryControlTapped:(UIControl *)control
 
         cell.stationLabel.text = divvyStation.stationName;
         cell.stationLabel.textColor = [UIColor whiteColor];
+        cell.stationLabel.font = [UIFont mediumFont];
 
         cell.bikesLabel.text = [NSString stringWithFormat:@"Bikes\n%@", divvyStation.availableBikes.description];
         cell.bikesLabel.backgroundColor = divvyStation.bikesColor;
         cell.bikesLabel.textColor = [UIColor blackColor];
         cell.bikesLabel.layer.borderWidth = 1.0f;
         cell.bikesLabel.layer.borderColor = [[UIColor blackColor] CGColor];
+        cell.bikesLabel.font = [UIFont mediumFont];
 
         cell.docksLabel.text = [NSString stringWithFormat:@"Docks\n%@", divvyStation.availableDocks.description];
         cell.docksLabel.textColor = [UIColor blackColor];
         cell.docksLabel.backgroundColor = divvyStation.docksColor;
         cell.docksLabel.layer.borderWidth = 1.0f;
         cell.docksLabel.layer.borderColor = [[UIColor blackColor] CGColor];
+        cell.docksLabel.font = [UIFont mediumFont];
 
         NSString *milesFromUser = [NSString stringWithFormat:@"%.02f miles", divvyStation.distanceFromUser * 0.000621371];
         cell.distanceLabel.text = milesFromUser;
+        cell.distanceLabel.font = [UIFont smallFont];
         return cell;
 }
 
@@ -393,6 +412,7 @@ calloutAccessoryControlTapped:(UIControl *)control
         self.mapDivvyImage.hidden = NO;
         self.tableView.hidden = YES;
         self.mapContainerView.hidden = NO;
+        self.segmentedControl.layer.borderColor = [[UIColor divvyColor] CGColor];
     }
     else
     {
@@ -400,6 +420,7 @@ calloutAccessoryControlTapped:(UIControl *)control
         self.mapDivvyImage.hidden = YES;
         self.tableView.hidden = NO;
         self.mapContainerView.hidden = YES;
+        self.segmentedControl.layer.borderColor = [[UIColor whiteColor] CGColor];
     }
 }
 - (IBAction)onSegmentControlToggle:(id)sender
@@ -754,11 +775,10 @@ calloutAccessoryControlTapped:(UIControl *)control
     //Segmented control
     self.segmentedControl.backgroundColor = [UIColor divvyColor];
     self.segmentedControl.tintColor = [UIColor whiteColor];
-    self.segmentedControl.layer.borderColor = [[UIColor whiteColor] CGColor];
+    self.segmentedControl.layer.borderColor = [[UIColor divvyColor] CGColor];
     self.segmentedControl.layer.borderWidth = 1.0f;
     self.segmentedControl.layer.cornerRadius = 5.0f;
-    UIFont *font = [UIFont boldSystemFontOfSize:17.0f];
-    NSDictionary *attributes = @{NSFontAttributeName: font};
+    NSDictionary *attributes = @{NSFontAttributeName: [UIFont bigFontBold]};
     [self.segmentedControl setTitleTextAttributes:attributes forState:UIControlStateNormal];
 
     // Activity indicator
