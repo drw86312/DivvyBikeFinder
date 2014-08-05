@@ -39,7 +39,7 @@
 @property NSNumber *sortType;
 @property NSString *neighborhood1;
 @property NSString *neighborhood2;
-@property UILabel *neighborhoodsLabel;
+@property UILabel *titleLabel;
 @property NSArray *yelpLocations;
 @property NSInteger counter;
 @property NSInteger counter2;
@@ -53,12 +53,12 @@
 @property UIButton *button3;
 @property UIButton *button4;
 @property UIButton *button5;
+@property BOOL firstSearch;
 @property BOOL foodSearch;
 @property BOOL drinkSearch;
 @property BOOL shopSearch;
 @property BOOL sightseeSearch;
 @property BOOL musicSearch;
-
 
 @end
 
@@ -73,7 +73,7 @@
     self.locationManager.delegate = self;
     [self disableSearchBooleans];
     [self setMapViewandPlacePin];
-    [self makeStationDetailView];
+    [self makeViews];
     [self findNeighborhoods];
 
     self.navigationItem.title = self.stationFromSourceVC.stationName;
@@ -82,98 +82,68 @@
 
     self.tableView.separatorColor = [UIColor walkRouteColor];
 
-    self.view.backgroundColor = [UIColor divvyColor];
-    self.blockerView.backgroundColor = [UIColor divvyColor];
+    self.view.backgroundColor = [UIColor walkRouteColor];
+    self.blockerView.backgroundColor = [UIColor walkRouteColor];
 }
 
--(void)makeStationDetailView
+-(void)makeViews
 {
-    // Find status and navigation bar heights and set spacing between views
+// Create the activity indicator
+    CGFloat indicatorWidth = 50.0f;
+    CGFloat indicatorHeight = 50.0f;
+
+    self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    self.activityIndicator.frame = CGRectMake((self.view.frame.size.width/2) - (indicatorWidth/2), (self.view.frame.size.height/2) - (indicatorHeight/2), indicatorWidth, indicatorHeight);
+    self.activityIndicator.color = [UIColor walkRouteColor];
+    self.activityIndicator.hidden = YES;
+    [self.view addSubview:self.activityIndicator];
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+// Find status and navigation bar heights and set spacing between views
     CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
     CGFloat navBarHeight = self.navigationController.navigationBar.frame.size.height;
-    CGFloat backgroundViewHeight = 50.0f;
+    CGFloat backgroundViewHeight = 135.0f;
+    CGFloat spacing = 5.0f;
 
-    // Create a background view to hold station details
+// Create a background view to hold station details
     self.backgroundView = [[UIView alloc] initWithFrame:CGRectMake(self.view.frame.origin.x, navBarHeight + statusBarHeight, self.view.frame.size.width, backgroundViewHeight)];
     self.backgroundView.backgroundColor = [UIColor clearColor];
     [self.view addSubview:self.backgroundView];
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    // Add the station label
-    CGFloat verticalOffset = 2.5f;
-    CGFloat horizontalOffset = 10.0f;
-    CGFloat stationLabelWidth = self.view.frame.size.width - ( 2* horizontalOffset);
-    CGFloat stationLabelHeight = 25.0f;
+// Add the title label - must be a property as its text gets set in the findNeighborhoods method.
+    CGFloat titleLabelWidth = self.backgroundView.frame.size.width;
+    CGFloat titlehoodsLabelHeight = 25.0f;
+    CGFloat horizontalOffset = 0.0f;
+    CGFloat verticalOffset = spacing;
 
-    UILabel *stationLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, stationLabelWidth, stationLabelHeight)];
-    stationLabel.text = [NSString stringWithFormat:@"Bikes: %@   Docks: %@", self.stationFromSourceVC.availableBikes, self.stationFromSourceVC.availableDocks];
-    stationLabel.textColor = [UIColor whiteColor];
-    stationLabel.textAlignment = NSTextAlignmentCenter;
-    [stationLabel setFont:[UIFont fontWithName:@"Helvetica-Bold" size:21]];
-    stationLabel.numberOfLines = 0;
-    [self.backgroundView addSubview:stationLabel];
+    self.titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, titleLabelWidth, titlehoodsLabelHeight)];
+    self.titleLabel.font = [UIFont bigFontBold];
+    self.titleLabel.textAlignment = NSTextAlignmentCenter;
+    self.titleLabel.textColor = [UIColor whiteColor];
+    [self.backgroundView addSubview:self.titleLabel];
 
-    verticalOffset += stationLabel.frame.size.height;
+    verticalOffset = verticalOffset + self.titleLabel.frame.size.height + spacing;
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    // Add the neighborhoods label - must be a property as its text gets set in the findNeighborhoods method.
-    CGFloat neighborhoodsLabelWidth = stationLabelWidth;
-    CGFloat neighborhoodsLabelHeight = 17.5f;
+// Make buttons
 
-    self.neighborhoodsLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, neighborhoodsLabelWidth, neighborhoodsLabelHeight)];
-    self.neighborhoodsLabel.numberOfLines = 1;
-    self.neighborhoodsLabel.textAlignment = NSTextAlignmentCenter;
-    self.neighborhoodsLabel.textColor = [UIColor whiteColor];
-    [self.neighborhoodsLabel setFont:[UIFont fontWithName:@"Helvetica" size:15]];
-    [self.backgroundView addSubview:self.neighborhoodsLabel];
-
-    verticalOffset = verticalOffset + self.neighborhoodsLabel.frame.size.height;
-
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-    // Create the activity indicator
-    CGFloat indicatorWidth = 50.0f;
-    CGFloat indicatorHeight = 50.0f;
-
-    self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-    self.activityIndicator.frame = CGRectMake((self.view.frame.size.width/2) - (indicatorWidth/2), (self.view.frame.size.height/2) - (indicatorHeight/2), indicatorWidth, indicatorHeight);
-    self.activityIndicator.color = [UIColor divvyColor];
-    self.activityIndicator.hidden = YES;
-    [self.view addSubview:self.activityIndicator];
-
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-    // Make buttons
-    [self makeExploreButtonsandSegmentedControl];
-}
-
--(void)makeExploreButtonsandSegmentedControl
-{
     self.buttonsArray = [NSMutableArray new];
-
     self.button1 = [[UIButton alloc] init];
     self.button2 = [[UIButton alloc] init];
     self.button3 = [[UIButton alloc] init];
     self.button4 = [[UIButton alloc] init];
     self.button5 = [[UIButton alloc] init];
-
-    _button1.tag = 0;
-    _button2.tag = 1;
-    _button3.tag = 2;
-    _button4.tag = 3;
-    _button5.tag = 4;
-
     [self.buttonsArray addObject:_button1];
     [self.buttonsArray addObject:_button2];
     [self.buttonsArray addObject:_button3];
     [self.buttonsArray addObject:_button4];
     [self.buttonsArray addObject:_button5];
 
-    CGFloat spacing = 10.0f;
-    CGFloat verticalOffset = self.backgroundView.frame.origin.y + self.backgroundView.frame.size.height;
-    CGFloat horizontalOffset = 10.0f;
+    horizontalOffset = spacing;
     CGFloat buttonWidth = (self.view.frame.size.width - ((self.buttonsArray.count + 1) * spacing))/ self.buttonsArray.count;
     CGFloat buttonHeight = buttonWidth;
 
@@ -187,7 +157,7 @@
         button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:15.0];
 
         horizontalOffset += button.frame.size.width + spacing;
-        [self.view addSubview:button];
+        [self.backgroundView addSubview:button];
     }
 
     [_button1 setImage:[UIImage imageNamed:@"foodcolor"] forState:UIControlStateNormal];
@@ -216,13 +186,14 @@
                 action:@selector(button5Selected:)
       forControlEvents:UIControlEventTouchUpInside];
 
+    verticalOffset += self.button1.frame.size.height + (2 *spacing);
+
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Create segmented control
     CGFloat segmentedControlHeight = 30.0f;
     CGFloat segmentedControlWidth = 290.0f;
-    verticalOffset += _button1.frame.size.height + (spacing + 2);
-    horizontalOffset = (self.view.frame.size.width/2) - (segmentedControlWidth/2);
+    horizontalOffset = (self.backgroundView.frame.size.width - segmentedControlWidth)/2;
 
     self.segmentedControl = [[UISegmentedControl alloc] initWithItems:@[@"Map",@"List"]];
     self.segmentedControl.frame = CGRectMake(horizontalOffset, verticalOffset, segmentedControlWidth, segmentedControlHeight);
@@ -237,7 +208,7 @@
     UIFont *font = [UIFont boldSystemFontOfSize:17.0f];
     NSDictionary *attributes = @{NSFontAttributeName: font};
     [self.segmentedControl setTitleTextAttributes:attributes forState:UIControlStateNormal];
-    [self.view addSubview:self.segmentedControl];
+    [self.backgroundView addSubview:self.segmentedControl];
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -245,7 +216,7 @@
     CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
     CGFloat imageViewHeight = 25.0f;
     CGFloat imageViewWidth = 50.0f;
-    verticalOffset = self.view.frame.size.height - tabBarHeight - imageViewHeight -10.0f;
+    verticalOffset = self.view.frame.size.height - tabBarHeight - imageViewHeight -15.0f;
     horizontalOffset = self.view.frame.origin.x + 10.0f;
 
     self.mapYelpImage = [[UIImageView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, imageViewWidth, imageViewHeight)];
@@ -260,15 +231,17 @@
     if (segment.selectedSegmentIndex == 0) {
         self.mapView.hidden = NO;
         self.tableView.hidden = YES;
-        self.mapContainerView.hidden = NO;
         self.mapYelpImage.hidden = NO;
+        self.segmentedControl.layer.borderWidth = 1.0f;
+        self.segmentedControl.layer.borderColor = [[UIColor walkRouteColor] CGColor];
     }
     else
     {
         self.mapView.hidden = YES;
         self.tableView.hidden = NO;
-        self.mapContainerView.hidden = YES;
         self.mapYelpImage.hidden = YES;
+        self.segmentedControl.layer.borderWidth = 1.0f;
+        self.segmentedControl.layer.borderColor = [[UIColor whiteColor] CGColor];
     }
 }
 
@@ -281,6 +254,7 @@
     [self setButtonImages];
     [self.button1 setImage:[UIImage new] forState:UIControlStateNormal];
     [self.button1 setTitle:@"Food" forState:UIControlStateNormal];
+    [self.button1.titleLabel setFont:[UIFont mediumFont]];
 
     NSLog(@"Food search");
     // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
@@ -308,6 +282,7 @@
     [self setButtonImages];
     [self.button2 setImage:[UIImage new] forState:UIControlStateNormal];
     [self.button2 setTitle:@"Bars" forState:UIControlStateNormal];
+    [self.button2.titleLabel setFont:[UIFont mediumFont]];
 
     NSLog(@"Bar search");
     // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
@@ -335,6 +310,7 @@
     [self setButtonImages];
     [self.button3 setImage:[UIImage new] forState:UIControlStateNormal];
     [self.button3 setTitle:@"Shop" forState:UIControlStateNormal];
+    [self.button3.titleLabel setFont:[UIFont mediumFont]];
 
     NSLog(@"Shopping search");
     // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
@@ -362,6 +338,7 @@
     [self setButtonImages];
     [self.button4 setImage:[UIImage new] forState:UIControlStateNormal];
     [self.button4 setTitle:@"Sights" forState:UIControlStateNormal];
+    [self.button4.titleLabel setFont:[UIFont mediumFont]];
 
     // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
     [self disableSearchBooleans];
@@ -388,6 +365,7 @@
     [self setButtonImages];
     [self.button5 setImage:[UIImage new] forState:UIControlStateNormal];
     [self.button5 setTitle:@"Music" forState:UIControlStateNormal];
+    [self.button5.titleLabel setFont:[UIFont mediumFont]];
 
     NSLog(@"Live music search");
     // Flip all other booleans to NO, set the correct search boolean to YES - search booleans are used later to set the proper map annotations
@@ -437,11 +415,15 @@
     self.mapView.showsUserLocation = YES;
     [self.mapView setRegion:region animated:YES];
 
+    MKPlacemark *stationPlacemark = [[MKPlacemark alloc] initWithCoordinate:CLLocationCoordinate2DMake(self.stationFromSourceVC.latitude.floatValue, self.stationFromSourceVC.longitude.floatValue) addressDictionary:nil];
+    CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:stationPlacemark.coordinate.latitude longitude:stationPlacemark.coordinate.longitude];
+    CGFloat distanceFromUser = [self.userLocationFromSourceVC distanceFromLocation:stationLocation];
+
     // Place Divvy pin annotation
     DivvyBikeAnnotation *annotation = [[DivvyBikeAnnotation alloc] init];
     annotation.coordinate = self.stationFromSourceVC.coordinate;
     annotation.title = self.stationFromSourceVC.stationName;
-    annotation.subtitle = [NSString stringWithFormat:@"%.01f miles away", self.stationFromSourceVC.distanceFromUser * 0.000621371];
+    annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks: %@", distanceFromUser * 0.000621371, self.stationFromSourceVC.availableBikes, self.stationFromSourceVC.availableDocks];
     annotation.imageName = @"Divvy";
     annotation.backgroundColor = self.stationFromSourceVC.bikesColor;
     annotation.annotationSize = self.stationFromSourceVC.annotationSize;
@@ -619,16 +601,16 @@ calloutAccessoryControlTapped:(UIControl *)control
     cell.locationName.text = yelpLocation.name;
     cell.locationName.numberOfLines = 0;
     [cell.locationName sizeToFit];
-    [cell.locationName setFont:[UIFont fontWithName:@"Helvetica-Bold" size:20]];
+    [cell.locationName setFont:[UIFont bigFontBold]];
     cell.locationName.textColor = [UIColor walkRouteColor];
 
     // Distance label
     cell.distanceFromStation.text = [NSString stringWithFormat:@"%.01f miles from Divvy Station", yelpLocation.distanceFromStation * 0.000621371];
-    [cell.distanceFromStation setFont:[UIFont fontWithName:@"Helvetica" size:12]];
+    [cell.distanceFromStation setFont:[UIFont smallFont]];
     cell.distanceFromStation.textColor = [UIColor walkRouteColor];
 
     // neighborhood/offers label.
-    [cell.neighborhoodLabel setFont:[UIFont fontWithName:@"Helvetica" size:15]];
+    [cell.neighborhoodLabel setFont:[UIFont mediumFont]];
     cell.neighborhoodLabel.textColor = [UIColor walkRouteColor];
     cell.neighborhoodLabel.numberOfLines = 0;
 
@@ -782,6 +764,7 @@ calloutAccessoryControlTapped:(UIControl *)control
 
             // Otherwise, proceed with geocoding the locations.
             else {
+                self.firstSearch = YES;
                 [self getYelpLocationLatandLong:self.yelpLocations];
             }
         }
@@ -801,7 +784,7 @@ calloutAccessoryControlTapped:(UIControl *)control
         // If poor connection...
         if (connectionError) {
             NSLog(@"Connection error - can't find neighborhood");
-            self.neighborhoodsLabel.text = @"Neighborhood: N/A";
+            self.titleLabel.text = @"Explore this area";
         }
         else {
             NSDictionary *dictionary  = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&connectionError];
@@ -855,20 +838,11 @@ calloutAccessoryControlTapped:(UIControl *)control
             }
             self.neighborhood2 = secondMostOccurring;
 
-            if (!self.neighborhood1 && !self.neighborhood2) {
-                self.neighborhoodsLabel.text = @"Neighborhood: N/A";
-            }
-            else if (self.neighborhood2 && self.neighborhood1) {
-                self.neighborhoodsLabel.text = [NSString stringWithFormat:@"Neighborhoods: %@, %@", self.neighborhood1, self.neighborhood2];
-            }
-            else if (self.neighborhood1) {
-                self.neighborhoodsLabel.text = [NSString stringWithFormat:@"Neighborhood: %@", self.neighborhood1];
-            }
-            else if (self.neighborhood2) {
-                self.neighborhoodsLabel.text = [NSString stringWithFormat:@"Neighborhood: %@", self.neighborhood2];
+            if (self.neighborhood1) {
+                self.titleLabel.text = [NSString stringWithFormat:@"Explore %@", self.neighborhood1];
             }
             else {
-                self.neighborhoodsLabel.text = @"Neighborhood: N/A";
+                self.titleLabel.text = @"Explore this area";
             }
             NSLog(@"Neighborhood found");
         }
@@ -905,15 +879,20 @@ calloutAccessoryControlTapped:(UIControl *)control
 
                         // When the counter equals the number of yelpLocations returned, all locations have been evaluated. Now perform natural language query on any bars for which placemarks were not found.
                          if (self.counter == yelpLocations.count) {
-
                              // If languageQueryArray has at least one object, perform the natural language query method, else, skip to the set pins method.
                              if (languageQueryArray.count > 0) {
-                                 NSLog(@"Performing language query on %lu locations", (unsigned long)languageQueryArray.count);
                                  [self performLanguageQuery:languageQueryArray];
                                 }
                              else {
-                                 NSLog(@"Geocoding completed");
-                                 [self removeYelpLocationsWithNoCoordinates];
+                                    if (self.firstSearch) {
+                                        [self checkThatOriginDestinationInChicago];
+                                        NSLog(@"First Iteration");
+                                    }
+                                    else {
+                                        [self setYelpPinAnnotations];
+                                        NSLog(@"Second Iteration");
+                                    }
+
                                 }
                          }
                 }];
@@ -922,6 +901,7 @@ calloutAccessoryControlTapped:(UIControl *)control
 
 -(void)performLanguageQuery:(NSMutableArray *)queryArray
 {
+    NSLog(@"Performing language query on %lu locations", (unsigned long)queryArray.count);
     self.counter2 = 0;
     for (YelpLocation *yelpLocation in queryArray) {
 
@@ -948,63 +928,104 @@ calloutAccessoryControlTapped:(UIControl *)control
                 }
                 // When the second counter equals the number of yelpLocations in queryArray, all yelpLocations have been evaluated
                 if (self.counter2 == queryArray.count) {
-                    NSLog(@"Geocoding completed");
-                    [self removeYelpLocationsWithNoCoordinates];
+                    if (self.firstSearch) {
+                        [self checkThatOriginDestinationInChicago];
+                        NSLog(@"First search");
+                    }
+                    else {
+                        [self removeLocationsWithNoCoordinates];
+                        NSLog(@"Second search");
+                    }
                 }
         }];
     }
 }
 
-// Remove any yelpLocations with no location coordinates
--(void)removeYelpLocationsWithNoCoordinates
+// Check if YelpLocation is in Chicago
+-(void)checkThatOriginDestinationInChicago
+{
+    NSLog(@"Performing check that YelpLocations are in Chicago");
+    NSMutableArray *retryArray = [NSMutableArray new];
+
+    MKPlacemark *stationPlacemark = [[MKPlacemark alloc] initWithCoordinate:CLLocationCoordinate2DMake(self.stationFromSourceVC.latitude.floatValue, self.stationFromSourceVC.longitude.floatValue) addressDictionary:nil];
+    CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:stationPlacemark.coordinate.latitude longitude:stationPlacemark.coordinate.longitude];
+
+    NSInteger counter = 0;
+
+    for (YelpLocation *yelp in self.yelpLocations) {
+        counter += 1;
+
+        MKPlacemark *yelpPlacemark = [[MKPlacemark alloc] initWithCoordinate:CLLocationCoordinate2DMake(yelp.latitude, yelp.longitude) addressDictionary:nil];
+        CLLocation *yelpLocation = [[CLLocation alloc] initWithLatitude:yelpPlacemark.coordinate.latitude longitude:yelpPlacemark.coordinate.longitude];
+        CGFloat distanceFromStation = [stationLocation distanceFromLocation:yelpLocation];
+
+
+        if (yelp.latitude == 0) {
+            yelp.name = [yelp.name stringByAppendingString:@" Chicago"];
+            [retryArray addObject:yelp];
+            NSLog(@"Location found without coordinate");
+        }
+        else if (yelp.longitude == 0)
+        {
+            yelp.name = [yelp.name stringByAppendingString:@" Chicago"];
+            [retryArray addObject:yelp];
+            NSLog(@"Location found without coordinate");
+        }
+        else if (distanceFromStation > 32186.9f) {
+            yelp.name = [yelp.name stringByAppendingString:@" Chicago"];
+            [retryArray addObject:yelp];
+            NSLog(@"Location found outside chicago");
+        }
+        if (counter == self.yelpLocations.count) {
+            if (retryArray.count  == 0) {
+                NSLog(@"Retry Array Count: %lu", (unsigned long)retryArray.count);
+                [self removeLocationsWithNoCoordinates];
+            }
+            else {
+                NSLog(@"Retry Array Count: %lu", (unsigned long)retryArray.count);
+                [self performLanguageQuery:retryArray];
+            }
+        }
+    }
+    self.firstSearch = NO;
+}
+
+
+-(void)removeLocationsWithNoCoordinates
 {
     NSMutableArray *tempArray = [NSMutableArray new];
 
-    // Set parameters to keep map from being drawn outside an area around the station, the buffer is a half a degree of longitude and latitude (about 35 miles)
-    CGFloat buffer = 0.5f;
-    CGFloat stationLatitude = self.stationFromSourceVC.latitude.floatValue;
-    CGFloat chicagoLatitudeLowerBound = stationLatitude - buffer;
-    CGFloat chicagoLatitudeUpperBound = stationLatitude + buffer;
+    MKPlacemark *stationPlacemark = [[MKPlacemark alloc] initWithCoordinate:CLLocationCoordinate2DMake(self.stationFromSourceVC.latitude.floatValue, self.stationFromSourceVC.longitude.floatValue) addressDictionary:nil];
+    CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:stationPlacemark.coordinate.latitude longitude:stationPlacemark.coordinate.longitude];
 
-    CGFloat stationLongitude = self.stationFromSourceVC.longitude.floatValue;
-    CGFloat chicagoLongitudeAbsValue = fabsf(stationLongitude);
-    CGFloat chicagoLongitudeLowerBound = chicagoLongitudeAbsValue - buffer;
-    CGFloat chicagoLongitudeUpperBound = chicagoLongitudeAbsValue + buffer;
+    for (YelpLocation *yelp in self.yelpLocations) {
+            MKPlacemark *yelpPlacemark = [[MKPlacemark alloc] initWithCoordinate:CLLocationCoordinate2DMake(yelp.latitude, yelp.longitude) addressDictionary:nil];
+        CLLocation *yelpLocation = [[CLLocation alloc] initWithLatitude:yelpPlacemark.coordinate.latitude longitude:yelpPlacemark.coordinate.longitude];
+        CGFloat distanceFromStation = [stationLocation distanceFromLocation:yelpLocation];
 
-    for (YelpLocation *yelpLocation in self.yelpLocations) {
-        CGFloat locationLongitudeAbsValue = fabsf(yelpLocation.longitude);
-
-        if (yelpLocation.latitude == 0.0f) {
-            NSLog(@"Removed %@ for not having a latitude", yelpLocation.name);
-        }
-        else if (yelpLocation.longitude == 0.0f) {
-            NSLog(@"Removed %@ for not having a longitude", yelpLocation.name);
-        }
-        else if (chicagoLatitudeLowerBound > yelpLocation.latitude && yelpLocation.latitude > chicagoLatitudeUpperBound) {
-            NSLog(@"Removed %@ for having a latitude outside the bounds of chicago", yelpLocation.name);
-            }
-        else if (chicagoLongitudeLowerBound > locationLongitudeAbsValue && locationLongitudeAbsValue > chicagoLongitudeUpperBound) {
-            NSLog(@"Removed %@ for having a longitude outside the bounds of chicago", yelpLocation.name);
-            }
+        if (yelp.latitude == 0) {NSLog(@"Location removed without coordinate");}
+        else if (yelp.longitude == 0){NSLog(@"Location removed without coordinate");}
+        else if (distanceFromStation > 32186.9f) {NSLog(@"Location outside Chicago removed");}
         else {
-            [tempArray addObject:yelpLocation];
+            [tempArray addObject:yelp];
         }
     }
-
     self.yelpLocations = [NSArray arrayWithArray:tempArray];
+
     if (self.yelpLocations.count < 1) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:@"Sorry, could not locate %@ in this area", self.searchTerm] message:@"Please try again" delegate:self cancelButtonTitle:nil otherButtonTitles:nil, nil];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:@"Oops! could not find %@ in this area", self.searchTerm] message:@"Please try again" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
         [alert show];
-        [self enableButtons];
     }
     else {
+        NSLog(@"Pins count: %lu", (unsigned long)self.yelpLocations.count);
         [self setYelpPinAnnotations];
-        NSLog(@"Yelplocations mapped and listed %lu", (unsigned long)self.yelpLocations.count);
     }
 }
 
 -(void)setYelpPinAnnotations
 {
+    NSLog(@"Setting pins");
+
     for (YelpLocation *yelpLocation in self.yelpLocations) {
         // If yelplocation latitude and longitude coordinates exist, set appropriate annotations.
         if (yelpLocation.latitude && yelpLocation.latitude) {
@@ -1155,7 +1176,7 @@ calloutAccessoryControlTapped:(UIControl *)control
 
     for (UIButton *button in buttonsArray) {
         button.frame = CGRectMake(horizontalOffset, verticalOffset, buttonWidth, buttonHeight);
-        button.titleLabel.font = [UIFont fontWithName:@"Helvetica" size:17.0];
+        button.titleLabel.font = [UIFont bigFontBold];
         [self.mapContainerView addSubview:button];
         horizontalOffset += button.frame.size.width;
     }
@@ -1220,6 +1241,7 @@ calloutAccessoryControlTapped:(UIControl *)control
 
     //Remove mapview annotations
     [self.mapView removeAnnotations:self.mapView.annotations];
+    [self setMapViewandPlacePin];
 
     //Disable user interaction
     [self disableButtons];
@@ -1239,6 +1261,7 @@ calloutAccessoryControlTapped:(UIControl *)control
 
     //Remove mapview annotations
     [self.mapView removeAnnotations:self.mapView.annotations];
+    [self setMapViewandPlacePin];
 
     //Disable user interaction
     [self disableButtons];

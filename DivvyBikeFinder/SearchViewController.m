@@ -595,7 +595,7 @@
     for (DivvyStation *divvyStation in self.stationsNearOrigin) {
         DivvyBikeAnnotation *annotation = [[DivvyBikeAnnotation alloc] init];
         annotation.title = divvyStation.stationName;
-        annotation.subtitle = [NSString stringWithFormat:@"%.01f miles from %@", divvyStation.distanceFromUser * 0.000621371, self.userLocationString];
+        annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. from %@ | Bikes: %@ Docks: %@", divvyStation.distanceFromUser * 0.000621371, self.userLocationString, divvyStation.availableBikes, divvyStation.availableDocks];
         annotation.coordinate = divvyStation.coordinate;
         annotation.imageName = @"Divvy";
         annotation.backgroundColor = divvyStation.bikesColor;
@@ -607,7 +607,7 @@
     for (DivvyStation *divvyStation in self.stationsNearDestination) {
         DivvyBikeAnnotation *annotation = [[DivvyBikeAnnotation alloc] init];
         annotation.title = divvyStation.stationName;
-        annotation.subtitle = [NSString stringWithFormat:@"%.01f miles from %@", divvyStation.distanceFromDestination * 0.000621371, self.userDestinationString];
+        annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. from %@ | Bikes: %@ Docks: %@", divvyStation.distanceFromUser * 0.000621371, self.userDestinationString, divvyStation.availableBikes, divvyStation.availableDocks];
         annotation.coordinate = divvyStation.coordinate;
         annotation.imageName = @"Divvy";
         annotation.backgroundColor = divvyStation.bikesColor;

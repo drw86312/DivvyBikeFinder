@@ -35,7 +35,7 @@
 
     self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
     self.activityIndicator.frame = CGRectMake((self.view.frame.size.width/2) - (indicatorWidth/2), (self.view.frame.size.height/2) - (indicatorHeight/2), indicatorWidth, indicatorHeight);
-    self.activityIndicator.color = [UIColor divvyColor];
+    self.activityIndicator.color = [UIColor walkRouteColor];
     self.activityIndicator.hidden = NO;
     [self.activityIndicator startAnimating];
     [self.view addSubview:self.activityIndicator];

@@ -217,7 +217,7 @@
         if (divvyStation.availableBikes.intValue < 1) {
             NoBikesAnnotation *annotation = [[NoBikesAnnotation alloc] init];
             annotation.title = divvyStation.stationName;
-            annotation.subtitle = [NSString stringWithFormat:@"%.01f miles away  %@ Bikes  %@ Docks", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
+            annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks: %@", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"No-Bikes";
             annotation.backgroundColor = [UIColor redColor];
@@ -227,7 +227,7 @@
         else if (divvyStation.availableDocks.intValue < 1) {
             NoDocksAnnotation *annotation = [[NoDocksAnnotation alloc] init];
             annotation.title = divvyStation.stationName;
-            annotation.subtitle = [NSString stringWithFormat:@"%.01f miles away  %@ Bikes  %@ Docks", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
+            annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks:%@", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"No-Docks";
             annotation.backgroundColor = [UIColor greenColor];
@@ -237,7 +237,7 @@
         else {
             DivvyBikeAnnotation *annotation = [[DivvyBikeAnnotation alloc] init];
             annotation.title = divvyStation.stationName;
-            annotation.subtitle = [NSString stringWithFormat:@"%.01f miles away  %@ Bikes  %@ Docks", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
+            annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks: %@", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"Divvy";
             annotation.backgroundColor = divvyStation.bikesColor;
@@ -446,7 +446,6 @@ calloutAccessoryControlTapped:(UIControl *)control
 {
     // Hide the divvy logo image and disable the segmented control
     self.segmentedControl.enabled = NO;
-    self.mapDivvyImage.hidden = YES;
 
     // Clear containerview
     [self removeMapContainerSubviews];
@@ -696,7 +695,6 @@ calloutAccessoryControlTapped:(UIControl *)control
     self.tapToCloseMapContainer = nil;
 
     // Show the divvy logo image and enable the segmented control
-    self.mapDivvyImage.hidden = NO;
     self.segmentedControl.enabled = YES;
 
     [self removeMapContainerSubviews];
