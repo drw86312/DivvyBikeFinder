@@ -444,7 +444,7 @@
     annotation.subtitle = [NSString stringWithFormat:@"%.01f miles away", self.stationFromSourceVC.distanceFromUser * 0.000621371];
     annotation.imageName = @"Divvy";
     annotation.backgroundColor = self.stationFromSourceVC.bikesColor;
-    annotation.sizeScaler = self.stationFromSourceVC.annotationSizeScaler;
+    annotation.annotationSize = self.stationFromSourceVC.annotationSize;
     [self.mapView addAnnotation:annotation];
 }
 
@@ -468,7 +468,7 @@
             annotationView.annotation = annotation;
         }
         annotationView.image = [UIImage imageNamed:divvyAnnotation.imageName];
-        annotationView.frame = CGRectMake(0, 0, (20 + (7.0f * divvyAnnotation.sizeScaler)), (20 + (7.0f * divvyAnnotation.sizeScaler)));
+        annotationView.frame = CGRectMake(0, 0, divvyAnnotation.annotationSize, divvyAnnotation.annotationSize);
         annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
         annotationView.backgroundColor = divvyAnnotation.backgroundColor;
         return annotationView;

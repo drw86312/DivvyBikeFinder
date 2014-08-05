@@ -175,21 +175,21 @@
 		0E85B1921946F24700DE5E6C /* AddressBookUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBookUI.framework; path = System/Library/Frameworks/AddressBookUI.framework; sourceTree = SDKROOT; };
 		0E918D7A1982039E006041B2 /* TripTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TripTableViewCell.h; sourceTree = "<group>"; };
 		0E918D7B1982039E006041B2 /* TripTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TripTableViewCell.m; sourceTree = "<group>"; };
-		0EB161411943D30200A2F96B /* DivvyBikeFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DivvyBikeFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0EB161411943D30200A2F96B /* Divvy & Conquer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Divvy & Conquer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0EB161441943D30200A2F96B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		0EB161461943D30200A2F96B /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		0EB161481943D30200A2F96B /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		0EB1614C1943D30200A2F96B /* DivvyBikeFinder-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DivvyBikeFinder-Info.plist"; sourceTree = "<group>"; };
+		0EB1614C1943D30200A2F96B /* Divvy & Conquer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Divvy & Conquer-Info.plist"; sourceTree = "<group>"; };
 		0EB1614E1943D30200A2F96B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		0EB161501943D30200A2F96B /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		0EB161521943D30200A2F96B /* DivvyBikeFinder-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DivvyBikeFinder-Prefix.pch"; sourceTree = "<group>"; };
+		0EB161521943D30200A2F96B /* Divvy & Conquer-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Divvy & Conquer-Prefix.pch"; sourceTree = "<group>"; };
 		0EB161531943D30200A2F96B /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0EB161541943D30200A2F96B /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		0EB161571943D30200A2F96B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		0EB1615C1943D30200A2F96B /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		0EB161621943D30200A2F96B /* DivvyBikeFinderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DivvyBikeFinderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0EB161621943D30200A2F96B /* Divvy & ConquerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Divvy & ConquerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0EB161631943D30200A2F96B /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		0EB1616B1943D30200A2F96B /* DivvyBikeFinderTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DivvyBikeFinderTests-Info.plist"; sourceTree = "<group>"; };
+		0EB1616B1943D30200A2F96B /* Divvy & ConquerTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Divvy & ConquerTests-Info.plist"; sourceTree = "<group>"; };
 		0EB1616D1943D30200A2F96B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		0EB1616F1943D30200A2F96B /* DivvyBikeFinderTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DivvyBikeFinderTests.m; sourceTree = "<group>"; };
 		0EB1617919440CB900A2F96B /* DivvyStation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DivvyStation.h; sourceTree = "<group>"; };
@@ -360,7 +360,7 @@
 		0EB161381943D30200A2F96B = {
 			isa = PBXGroup;
 			children = (
-				0EB1614A1943D30200A2F96B /* DivvyBikeFinder */,
+				0EB1614A1943D30200A2F96B /* View Controllers */,
 				0EB161691943D30200A2F96B /* DivvyBikeFinderTests */,
 				0EB161431943D30200A2F96B /* Frameworks */,
 				0EB161421943D30200A2F96B /* Products */,
@@ -370,8 +370,8 @@
 		0EB161421943D30200A2F96B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				0EB161411943D30200A2F96B /* DivvyBikeFinder.app */,
-				0EB161621943D30200A2F96B /* DivvyBikeFinderTests.xctest */,
+				0EB161411943D30200A2F96B /* Divvy & Conquer.app */,
+				0EB161621943D30200A2F96B /* Divvy & ConquerTests.xctest */,
 				0E4A5B67196BA51800273EA6 /* CodeChallenge.app */,
 				0E4A5B83196BA51800273EA6 /* CodeChallengeTests.xctest */,
 			);
@@ -393,7 +393,7 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		0EB1614A1943D30200A2F96B /* DivvyBikeFinder */ = {
+		0EB1614A1943D30200A2F96B /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
 				0EB161531943D30200A2F96B /* AppDelegate.h */,
@@ -421,16 +421,17 @@
 				0E0FD849196CA3DA00A26E2B /* Annotations */,
 				0EB1614B1943D30200A2F96B /* Supporting Files */,
 			);
+			name = "View Controllers";
 			path = DivvyBikeFinder;
 			sourceTree = "<group>";
 		};
 		0EB1614B1943D30200A2F96B /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				0EB1614C1943D30200A2F96B /* DivvyBikeFinder-Info.plist */,
+				0EB1614C1943D30200A2F96B /* Divvy & Conquer-Info.plist */,
 				0EB1614D1943D30200A2F96B /* InfoPlist.strings */,
 				0EB161501943D30200A2F96B /* main.m */,
-				0EB161521943D30200A2F96B /* DivvyBikeFinder-Prefix.pch */,
+				0EB161521943D30200A2F96B /* Divvy & Conquer-Prefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -447,7 +448,7 @@
 		0EB1616A1943D30200A2F96B /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				0EB1616B1943D30200A2F96B /* DivvyBikeFinderTests-Info.plist */,
+				0EB1616B1943D30200A2F96B /* Divvy & ConquerTests-Info.plist */,
 				0EB1616C1943D30200A2F96B /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
@@ -491,9 +492,9 @@
 			productReference = 0E4A5B83196BA51800273EA6 /* CodeChallengeTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		0EB161401943D30200A2F96B /* DivvyBikeFinder */ = {
+		0EB161401943D30200A2F96B /* Divvy & Conquer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0EB161731943D30200A2F96B /* Build configuration list for PBXNativeTarget "DivvyBikeFinder" */;
+			buildConfigurationList = 0EB161731943D30200A2F96B /* Build configuration list for PBXNativeTarget "Divvy & Conquer" */;
 			buildPhases = (
 				0EB1613D1943D30200A2F96B /* Sources */,
 				0EB1613E1943D30200A2F96B /* Frameworks */,
@@ -503,14 +504,14 @@
 			);
 			dependencies = (
 			);
-			name = DivvyBikeFinder;
+			name = "Divvy & Conquer";
 			productName = DivvyBikeFinder;
-			productReference = 0EB161411943D30200A2F96B /* DivvyBikeFinder.app */;
+			productReference = 0EB161411943D30200A2F96B /* Divvy & Conquer.app */;
 			productType = "com.apple.product-type.application";
 		};
-		0EB161611943D30200A2F96B /* DivvyBikeFinderTests */ = {
+		0EB161611943D30200A2F96B /* Divvy & ConquerTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0EB161761943D30200A2F96B /* Build configuration list for PBXNativeTarget "DivvyBikeFinderTests" */;
+			buildConfigurationList = 0EB161761943D30200A2F96B /* Build configuration list for PBXNativeTarget "Divvy & ConquerTests" */;
 			buildPhases = (
 				0EB1615E1943D30200A2F96B /* Sources */,
 				0EB1615F1943D30200A2F96B /* Frameworks */,
@@ -521,9 +522,9 @@
 			dependencies = (
 				0EB161681943D30200A2F96B /* PBXTargetDependency */,
 			);
-			name = DivvyBikeFinderTests;
+			name = "Divvy & ConquerTests";
 			productName = DivvyBikeFinderTests;
-			productReference = 0EB161621943D30200A2F96B /* DivvyBikeFinderTests.xctest */;
+			productReference = 0EB161621943D30200A2F96B /* Divvy & ConquerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -543,7 +544,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 0EB1613C1943D30200A2F96B /* Build configuration list for PBXProject "DivvyBikeFinder" */;
+			buildConfigurationList = 0EB1613C1943D30200A2F96B /* Build configuration list for PBXProject "Divvy & Conquer" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -556,8 +557,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				0EB161401943D30200A2F96B /* DivvyBikeFinder */,
-				0EB161611943D30200A2F96B /* DivvyBikeFinderTests */,
+				0EB161401943D30200A2F96B /* Divvy & Conquer */,
+				0EB161611943D30200A2F96B /* Divvy & ConquerTests */,
 				0E4A5B66196BA51800273EA6 /* CodeChallenge */,
 				0E4A5B82196BA51800273EA6 /* CodeChallengeTests */,
 			);
@@ -682,7 +683,7 @@
 		};
 		0EB161681943D30200A2F96B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 0EB161401943D30200A2F96B /* DivvyBikeFinder */;
+			target = 0EB161401943D30200A2F96B /* Divvy & Conquer */;
 			targetProxy = 0EB161671943D30200A2F96B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -861,9 +862,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "DivvyBikeFinder/DivvyBikeFinder-Prefix.pch";
-				INFOPLIST_FILE = "DivvyBikeFinder/DivvyBikeFinder-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				GCC_PREFIX_HEADER = "DivvyBikeFinder/Divvy & Conquer-Prefix.pch";
+				INFOPLIST_FILE = "DivvyBikeFinder/Divvy & Conquer-Info.plist";
+				PRODUCT_NAME = "Divvy & Conquer";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -874,9 +875,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "DivvyBikeFinder/DivvyBikeFinder-Prefix.pch";
-				INFOPLIST_FILE = "DivvyBikeFinder/DivvyBikeFinder-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				GCC_PREFIX_HEADER = "DivvyBikeFinder/Divvy & Conquer-Prefix.pch";
+				INFOPLIST_FILE = "DivvyBikeFinder/Divvy & Conquer-Info.plist";
+				PRODUCT_NAME = "Divvy & Conquer";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -896,8 +897,8 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = "DivvyBikeFinderTests/DivvyBikeFinderTests-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				INFOPLIST_FILE = "DivvyBikeFinderTests/Divvy & ConquerTests-Info.plist";
+				PRODUCT_NAME = "Divvy & ConquerTests";
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
 			};
@@ -914,8 +915,8 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "DivvyBikeFinder/DivvyBikeFinder-Prefix.pch";
-				INFOPLIST_FILE = "DivvyBikeFinderTests/DivvyBikeFinderTests-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				INFOPLIST_FILE = "DivvyBikeFinderTests/Divvy & ConquerTests-Info.plist";
+				PRODUCT_NAME = "Divvy & ConquerTests";
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
 			};
@@ -942,7 +943,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0EB1613C1943D30200A2F96B /* Build configuration list for PBXProject "DivvyBikeFinder" */ = {
+		0EB1613C1943D30200A2F96B /* Build configuration list for PBXProject "Divvy & Conquer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0EB161711943D30200A2F96B /* Debug */,
@@ -951,7 +952,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0EB161731943D30200A2F96B /* Build configuration list for PBXNativeTarget "DivvyBikeFinder" */ = {
+		0EB161731943D30200A2F96B /* Build configuration list for PBXNativeTarget "Divvy & Conquer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0EB161741943D30200A2F96B /* Debug */,
@@ -960,7 +961,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0EB161761943D30200A2F96B /* Build configuration list for PBXNativeTarget "DivvyBikeFinderTests" */ = {
+		0EB161761943D30200A2F96B /* Build configuration list for PBXNativeTarget "Divvy & ConquerTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0EB161771943D30200A2F96B /* Debug */,

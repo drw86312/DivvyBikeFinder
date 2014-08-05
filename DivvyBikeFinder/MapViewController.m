@@ -178,6 +178,7 @@
                  int identifier = [[dictionary objectForKey:@"id"] intValue];
                  divvyStation.identifier = [NSNumber numberWithInt:identifier];
                  divvyStation.coordinate = CLLocationCoordinate2DMake(divvyStation.latitude.floatValue, divvyStation.longitude.floatValue);
+                 divvyStation.annotationSize = 20.0f + (0.5f * (divvyStation.availableBikes.floatValue + divvyStation.availableDocks.floatValue));
 
                  // Assign the distance from user property, if there is a user location.
                  if (self.userLocation) {
@@ -196,18 +197,6 @@
 
              // Assign the sorted array to the divvyStations ivar array.
              self.divvyStations = [divvyStationsArray sortedArrayUsingDescriptors:sortDescriptors];
-
-             // Find the station annotation scaler value
-                CGFloat totalDocks = 0;
-                CGFloat totalStations = self.divvyStations.count;
-                for (DivvyStation *divvyStation in self.divvyStations) {
-                    CGFloat divvyStationDocks = divvyStation.availableBikes.floatValue + divvyStation.availableDocks.floatValue;
-                    totalDocks += divvyStationDocks;
-                    }
-                CGFloat averageStationSize = totalDocks/totalStations;
-                for (DivvyStation *divvyStation in self.divvyStations) {
-                    divvyStation.annotationSizeScaler = (divvyStation.availableBikes.floatValue + divvyStation.availableDocks.floatValue)/averageStationSize;
-                }
 
              // Call helper method to set station colors, reload the tableview and call method to create map annotations.
              [self setStationColors:self.divvyStations];
@@ -232,7 +221,7 @@
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"No-Bikes";
             annotation.backgroundColor = [UIColor redColor];
-            annotation.sizeScaler = divvyStation.annotationSizeScaler;
+            annotation.annotationSize = divvyStation.annotationSize;
             [self.mapView addAnnotation:annotation];
         }
         else if (divvyStation.availableDocks.intValue < 1) {
@@ -242,7 +231,7 @@
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"No-Docks";
             annotation.backgroundColor = [UIColor greenColor];
-            annotation.sizeScaler = divvyStation.annotationSizeScaler;
+            annotation.annotationSize = divvyStation.annotationSize;
             [self.mapView addAnnotation:annotation];
         }
         else {
@@ -252,7 +241,7 @@
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"Divvy";
             annotation.backgroundColor = divvyStation.bikesColor;
-            annotation.sizeScaler = divvyStation.annotationSizeScaler;
+            annotation.annotationSize = divvyStation.annotationSize;
             [self.mapView addAnnotation:annotation];
         }
     }
@@ -279,7 +268,7 @@
                 }
 
             annotationView.image = [UIImage imageNamed:noBikesAnnotation.imageName];
-            annotationView.frame = CGRectMake(0, 0, (20 + (7.0f * noBikesAnnotation.sizeScaler)), (20 + (7.0f * noBikesAnnotation.sizeScaler)));
+            annotationView.frame = CGRectMake(0, 0, noBikesAnnotation.annotationSize, noBikesAnnotation.annotationSize);
             annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
             annotationView.backgroundColor = noBikesAnnotation.backgroundColor;
 
@@ -300,7 +289,7 @@
             }
 
         annotationView.image = [UIImage imageNamed:noDocksAnnotation.imageName];
-        annotationView.frame = CGRectMake(0, 0, (20 + (6.0f * noDocksAnnotation.sizeScaler)), (20 + (7.0f * noDocksAnnotation.sizeScaler)));
+        annotationView.frame = CGRectMake(0, 0, noDocksAnnotation.annotationSize, noDocksAnnotation.annotationSize);
         annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
         annotationView.backgroundColor = noDocksAnnotation.backgroundColor;
         return annotationView;
@@ -320,7 +309,7 @@
             }
 
             annotationView.image = [UIImage imageNamed:divvyAnnotation.imageName];
-            annotationView.frame = CGRectMake(0, 0, (20 + (7.0f * divvyAnnotation.sizeScaler)), (20 + (7.0f * divvyAnnotation.sizeScaler)));
+            annotationView.frame = CGRectMake(0, 0, divvyAnnotation.annotationSize, divvyAnnotation.annotationSize);
             annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
             annotationView.backgroundColor = divvyAnnotation.backgroundColor;
 
@@ -465,9 +454,11 @@ calloutAccessoryControlTapped:(UIControl *)control
 
     // Resize containerview
     CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
-    CGFloat containerViewHeight = 60.0f;
-    CGFloat containerViewWidth = self.view.frame.size.width;
-    CGFloat horizontalOffset = self.view.frame.origin.x;
+    CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
+    CGFloat navBarHeight = self.navigationController.navigationBar.frame.size.height;
+    CGFloat containerViewHeight = self.view.frame.size.height -tabBarHeight - navBarHeight -statusBarHeight;
+    CGFloat containerViewWidth = 90.0f;
+    CGFloat horizontalOffset = self.view.frame.size.width - containerViewWidth;
     CGFloat verticalOffset = self.view.frame.size.height - tabBarHeight - containerViewHeight;
 
     [UIView beginAnimations:nil context:nil];
@@ -480,47 +471,49 @@ calloutAccessoryControlTapped:(UIControl *)control
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Create gradient view and add the gradient to it
-    CGFloat gradientViewHeight = self.mapContainerView.frame.size.height;
+    CGFloat gradientViewHeight = self.mapContainerView.frame.size.height/2;
     CGFloat gradientViewWidth = self.mapContainerView.frame.size.width;
     horizontalOffset = 0.0f;
     verticalOffset = 0.0f;
     UIView *gradientView = [[UIView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, gradientViewWidth, gradientViewHeight)];
+    gradientView.layer.borderWidth = 1.0f;
+    gradientView.layer.borderColor = [[UIColor blackColor] CGColor];
     [self.mapContainerView addSubview:gradientView];
 
     CAGradientLayer *gradient = [CAGradientLayer layer];
     gradient.frame = gradientView.bounds;
-    [gradient setStartPoint:CGPointMake(0.0, 0.5)];
-    [gradient setEndPoint:CGPointMake(1.0, 0.5)];
     gradient.colors = [NSArray arrayWithObjects:(id)[[UIColor greenColor] CGColor], (id)[[UIColor yellowColor] CGColor], (id)[[UIColor redColor] CGColor], nil];
     [gradientView.layer insertSublayer:gradient atIndex:0];
 
+
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+
     // Set view size parameters
-    CGFloat spacing = 5.0f;
-    CGFloat labelWidth = 70.0f;
-    CGFloat labelHeight = 10.0f;
+    CGFloat spacing = 2.5f;
+    CGFloat labelWidth = gradientView.frame.size.width;
+    CGFloat labelHeight = 12.0f;
     CGFloat imageViewWidth = 30.0;
     CGFloat imageViewHeight = 30.0;
-    NSInteger fontSize = 10;
     UIColor *textColor = [UIColor blackColor];
 
     // Create label for "No Docks"
 
-    horizontalOffset += spacing;
-    verticalOffset += spacing;
+    horizontalOffset = 0.0f;
+    verticalOffset = spacing;
+
     UILabel *noDocksLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
     noDocksLabel.text = @"No Docks";
     noDocksLabel.textColor = textColor;
     noDocksLabel.textAlignment = NSTextAlignmentCenter;
-    [noDocksLabel setFont:[UIFont fontWithName:@"Helvetica" size:fontSize]];
+    [noDocksLabel setFont:[UIFont smallFontBold]];
     [self.mapContainerView addSubview:noDocksLabel];
 
     verticalOffset += noDocksLabel.frame.size.height;
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Create ImageView for "No Docks"
-    horizontalOffset = (labelWidth/2 + spacing) - (imageViewWidth/2);
+    horizontalOffset = (labelWidth/2) - (imageViewWidth/2);
 
     UIImageView *noDocksImageView = [[UIImageView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, imageViewWidth, imageViewHeight)];
     noDocksImageView.image = [UIImage imageNamed:@"No-Docks"];
@@ -529,103 +522,163 @@ calloutAccessoryControlTapped:(UIControl *)control
     verticalOffset += noDocksImageView.frame.size.height;
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    // Create label for "Station Full"
-    horizontalOffset = spacing;
-
-    UILabel *stationFullLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
-    stationFullLabel.text = @"Station Full";
-    stationFullLabel.textColor = textColor;
-    stationFullLabel.textAlignment = NSTextAlignmentCenter;
-    [stationFullLabel setFont:[UIFont fontWithName:@"Helvetica" size:fontSize]];
-    [self.mapContainerView addSubview:stationFullLabel];
-
-    // Add tap that will close the mapContainer view, when the user taps anywhere on the view.
-    self.tapToCloseMapContainer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(closeContainer:)];
-    [self.view addGestureRecognizer:self.tapToCloseMapContainer];
-
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
     // Add "More bikes" label
-    horizontalOffset = (self.mapContainerView.frame.size.width/2) - labelWidth - spacing;
-    verticalOffset = spacing;
+    horizontalOffset = 0.0f;
+    verticalOffset += spacing;
 
     UILabel *moreBikesLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
     moreBikesLabel.text = @"More Bikes";
     moreBikesLabel.textColor = textColor;
     moreBikesLabel.textAlignment = NSTextAlignmentCenter;
-    [moreBikesLabel setFont:[UIFont fontWithName:@"Helvetica" size:fontSize]];
+    [moreBikesLabel setFont:[UIFont smallFontBold]];
     [self.mapContainerView addSubview:moreBikesLabel];
 
-    verticalOffset += moreBikesLabel.frame.size.height + spacing;
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-    // Create Left arrow imageview
-    horizontalOffset += (labelWidth/2) - (imageViewWidth/2);
-
-    UIImageView *leftArrowImageView = [[UIImageView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, imageViewWidth, imageViewHeight)];
-    leftArrowImageView.image = [UIImage imageNamed:@"leftarrow"];
-    [self.mapContainerView addSubview:leftArrowImageView];
-    verticalOffset += noDocksImageView.frame.size.height;
+    verticalOffset += moreBikesLabel.frame.size.height + (2 *spacing);
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    // Add Fewer bikes label
-    horizontalOffset = (self.mapContainerView.frame.size.width/2) + spacing;
-    verticalOffset = spacing;
+    horizontalOffset = 0.0f;
+    verticalOffset = (gradientViewHeight - spacing) - labelHeight;
 
-    UILabel *fewerBikesLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
-    fewerBikesLabel.text = @"Fewer Bikes";
-    fewerBikesLabel.textColor = textColor;
-    fewerBikesLabel.textAlignment = NSTextAlignmentCenter;
-    [fewerBikesLabel setFont:[UIFont fontWithName:@"Helvetica" size:fontSize]];
-    [self.mapContainerView addSubview:fewerBikesLabel];
-
-    verticalOffset += fewerBikesLabel.frame.size.height + spacing;
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-    // Create Right arrow imageview
-    horizontalOffset += (labelWidth/2) - (imageViewWidth/2);
-
-    UIImageView *rightArrowImageView = [[UIImageView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, imageViewWidth, imageViewHeight)];
-    rightArrowImageView.image = [UIImage imageNamed:@"rightarrow"];
-    [self.mapContainerView addSubview:rightArrowImageView];
-
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     // Create label for "No Bikes"
-    verticalOffset = spacing;
-    horizontalOffset = self.mapContainerView.frame.size.width - spacing - labelWidth;
 
-    UILabel *noBikesLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
-    noBikesLabel.text = @"No Bikes";
-    noBikesLabel.textColor = textColor;
-    noBikesLabel.textAlignment = NSTextAlignmentCenter;
-    [noBikesLabel setFont:[UIFont fontWithName:@"Helvetica" size:fontSize]];
-    [self.mapContainerView addSubview:noBikesLabel];
+        UILabel *noBikesLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
+        noBikesLabel.text = @"No Bikes";
+        noBikesLabel.textColor = textColor;
+        noBikesLabel.textAlignment = NSTextAlignmentCenter;
+        [noBikesLabel setFont:[UIFont smallFontBold]];
+        [self.mapContainerView addSubview:noBikesLabel];
 
-    verticalOffset += noBikesLabel.frame.size.height;
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Create ImageView for "No Bikes"
+        horizontalOffset += (labelWidth/2) - (imageViewWidth/2);
+        verticalOffset -= (spacing + imageViewHeight);
+        UIImageView *noBikesImageView = [[UIImageView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, imageViewWidth, imageViewHeight)];
+        noBikesImageView.image = [UIImage imageNamed:@"No-Bikes"];
+        [self.mapContainerView addSubview:noBikesImageView];
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    // Create label for "Fewer Bikes"
+        verticalOffset -= (spacing + labelHeight);
+        horizontalOffset = 0.0f;
+
+        UILabel *fewerBikesLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
+        fewerBikesLabel.text = @"Fewer Bikes";
+        fewerBikesLabel.textColor = textColor;
+        fewerBikesLabel.textAlignment = NSTextAlignmentCenter;
+        [fewerBikesLabel setFont:[UIFont smallFontBold]];
+        [self.mapContainerView addSubview:fewerBikesLabel];
+
+        verticalOffset += noBikesLabel.frame.size.height;
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    // Create up arrow imageview
     horizontalOffset += (labelWidth/2) - (imageViewWidth/2);
+    verticalOffset = (gradientViewHeight/2) - (imageViewHeight + (spacing/2));
 
-    UIImageView *noBikesImageView = [[UIImageView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, imageViewWidth, imageViewHeight)];
-    noBikesImageView.image = [UIImage imageNamed:@"No-Bikes"];
-    [self.mapContainerView addSubview:noBikesImageView];
-
-    verticalOffset += noBikesImageView.frame.size.height;
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-    // Create label for "Station Empty"
-    horizontalOffset = self.mapContainerView.frame.size.width - spacing - labelWidth;
-
-    UILabel *stationEmptyLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
-    stationEmptyLabel.text = @"Station Empty";
-    stationEmptyLabel.textColor = textColor;
-    stationEmptyLabel.textAlignment = NSTextAlignmentCenter;
-    [stationEmptyLabel setFont:[UIFont fontWithName:@"Helvetica" size:fontSize]];
-    [self.mapContainerView addSubview:stationEmptyLabel];
+    UIImageView *upArrowImageView = [[UIImageView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, imageViewWidth, imageViewHeight)];
+    upArrowImageView.image = [UIImage imageNamed:@"arrowup"];
+    [self.mapContainerView addSubview:upArrowImageView];
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    // Create down arrow imageview
+    verticalOffset = (gradientViewHeight/2) + (spacing/2);
+
+    UIImageView *downArrowImageView = [[UIImageView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, imageViewWidth, imageViewHeight)];
+    downArrowImageView.image = [UIImage imageNamed:@"arrowdown"];
+    [self.mapContainerView addSubview:downArrowImageView];
+
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    // Create station size container view
+    horizontalOffset = 0.0f;
+    verticalOffset = gradientViewHeight;
+    CGFloat stationContainerWidth = self.mapContainerView.frame.size.width;
+    CGFloat stationContainerHeight = self.mapContainerView.frame.size.height - gradientViewHeight;
+
+    UIView *stationSizeContainer = [[UIView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, stationContainerWidth, stationContainerHeight)];
+    stationSizeContainer.backgroundColor = [UIColor blackColor];
+    [self.mapContainerView addSubview:stationSizeContainer];
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    // Create medium circle
+    CGFloat circleWidth = 32.5f;
+    CGFloat circleHeight = circleWidth;
+    verticalOffset = (stationContainerHeight/2) - (circleHeight/2) + 20.0f;
+    horizontalOffset = (stationSizeContainer.frame.size.width/2) - (circleWidth/2);
+
+    UILabel *mediumCircleLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, circleWidth, circleHeight)];
+    mediumCircleLabel.text = @"25";
+    mediumCircleLabel.textColor = [UIColor divvyColor];
+    mediumCircleLabel.layer.cornerRadius = circleWidth/2;
+    mediumCircleLabel.layer.borderColor = [[UIColor divvyColor] CGColor];
+    mediumCircleLabel.layer.borderWidth = 1.0f;
+    mediumCircleLabel.textAlignment = NSTextAlignmentCenter;
+    [mediumCircleLabel setFont:[UIFont smallFontBold]];
+    [stationSizeContainer addSubview:mediumCircleLabel];
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    // Create large circle
+    circleWidth = 40.0f;
+    circleHeight = circleWidth;
+    horizontalOffset = (stationSizeContainer.frame.size.width/2) - (circleWidth/2);
+    verticalOffset = mediumCircleLabel.frame.origin.y - (2* spacing) - circleHeight;
+
+    UILabel *bigCircleLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, circleWidth, circleHeight)];
+    bigCircleLabel.text = @"40";
+    bigCircleLabel.textColor = [UIColor divvyColor];
+    bigCircleLabel.layer.cornerRadius = circleWidth/2;
+    bigCircleLabel.layer.borderColor = [[UIColor divvyColor] CGColor];
+    bigCircleLabel.layer.borderWidth = 1.0f;
+    bigCircleLabel.textAlignment = NSTextAlignmentCenter;
+    [bigCircleLabel setFont:[UIFont smallFontBold]];
+    [stationSizeContainer addSubview:bigCircleLabel];
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    // Create small circle
+
+    circleWidth = 25.0f;
+    circleHeight = circleWidth;
+    horizontalOffset = (stationSizeContainer.frame.size.width/2) - (circleWidth/2);
+    verticalOffset = mediumCircleLabel.frame.origin.y +mediumCircleLabel.frame.size.height + (2 *spacing);
+
+    UILabel *smallCircleLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, circleWidth, circleHeight)];
+    smallCircleLabel.text = @"10";
+    smallCircleLabel.textColor = [UIColor divvyColor];
+    smallCircleLabel.layer.cornerRadius = circleWidth/2;
+    smallCircleLabel.layer.borderColor = [[UIColor divvyColor] CGColor];
+    smallCircleLabel.layer.borderWidth = 1.0f;
+    smallCircleLabel.textAlignment = NSTextAlignmentCenter;
+    [smallCircleLabel setFont:[UIFont smallFontBold]];
+    [stationSizeContainer addSubview:smallCircleLabel];
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    // Create station size label
+    horizontalOffset = 0.0f;
+    labelHeight = 25.0f;
+    verticalOffset = bigCircleLabel.frame.origin.y - (3 * spacing) - labelHeight;
+
+    UILabel *biggerStationLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
+    biggerStationLabel.text = @"Station\nSize";
+    biggerStationLabel.textColor = [UIColor divvyColor];
+    biggerStationLabel.numberOfLines = 0;
+    biggerStationLabel.textAlignment = NSTextAlignmentCenter;
+    [biggerStationLabel setFont:[UIFont smallFontBold]];
+    [stationSizeContainer addSubview:biggerStationLabel];
+
+    verticalOffset += biggerStationLabel.frame.size.height + (2 *spacing);
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 
     [UIView commitAnimations];
 

@@ -10,12 +10,15 @@
 
 @interface UIFont (DesignFont)
 + (UIFont *)smallFont;
++ (UIFont *)smallMediumFont;
 + (UIFont *)mediumFont;
 + (UIFont *)bigFont;
 + (UIFont *)smallFontBold;
++ (UIFont *)smallMediumFontBold;
 + (UIFont *)mediumFontBold;
 + (UIFont *)bigFontBold;
-
++ (UIFont *)hugeFont;
++ (UIFont *)hugeFontBold;
 
 
 @end
