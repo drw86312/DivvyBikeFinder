@@ -1093,10 +1093,10 @@
         return 100.0f;
     }
     else if (indexPath.section == 1) {
-        return 105.0f;
+        return 80.0f;
     }
     else if (indexPath.section == 2) {
-        return 105.0f;
+        return 80.0f;
     }
     else {
         return 45.0f;

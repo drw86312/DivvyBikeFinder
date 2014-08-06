@@ -57,7 +57,6 @@
 
     // Instantiate the location notification.
     self.notification = [[UILocalNotification alloc] init];
-    NSLog(@"Initial load: %@", self.notification);
 }
 
 - (void)applicationWillEnterInBackGround{
@@ -98,7 +97,7 @@
             self.startButton.layer.borderWidth = 0.0;
         }
 
-        // else, the timer is still running, but the time on the clock should be updated.
+        // else, the timer is still running, update the time left on the clock.
         else {
             self.timeInterval = [self.deadline timeIntervalSinceNow];
         }
@@ -148,7 +147,7 @@
     // Find status and navigation bar heights
     CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
     CGFloat navBarHeight = self.navigationController.navigationBar.frame.size.height;
-    CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
+ //   CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
 
     // Set button width and spacing
     CGFloat margin = 10.0f;
@@ -156,7 +155,7 @@
     CGFloat horizontalOffset = margin;
     CGFloat buttonWidth = ((self.view.frame.size.width - (2 * margin)) - ((self.buttonsArray.count -1) * spacing)) / self.buttonsArray.count;
     CGFloat buttonHeight = buttonWidth;
-    CGFloat verticalOffset = (((self.view.frame.size.height - statusBarHeight + navBarHeight)/2) - (buttonHeight/2) -25);
+    CGFloat verticalOffset = ((self.view.frame.size.height - statusBarHeight - navBarHeight)/2) - (buttonHeight/2) + 20.0f;
 
     // Iterate through all the buttons, place them on the view and style them.
     for (UIButton *button in self.buttonsArray) {
@@ -364,7 +363,7 @@
         [self disableNotificationButtons];
         [self hideIndicatorViews];
         self.notificationInformationLabel.text = @"Set an alert prior to timer expiration";
-        NSLog(@"Cancel timer button selected: %@", self.notification);
+        NSLog(@"Cancel timer button selected: %@", self.notification.fireDate);
     }
 
     // Should run when button is starting the timer
@@ -378,6 +377,13 @@
         // Set the point in time when the timer is created. Set the point in time when the timer will expire.
         self.initialTime = [NSDate date];
         self.deadline = [self.initialTime dateByAddingTimeInterval:self.timeInterval];
+
+        // Set a local notification for when the timer expires
+        self.notification.fireDate = self.deadline;
+        self.notification.alertBody = @"Time's Up!";
+        self.notification.soundName = UILocalNotificationDefaultSoundName;
+        self.notification.timeZone = [NSTimeZone defaultTimeZone];
+        [[UIApplication sharedApplication] scheduleLocalNotification:self.notification];
 
         // Style start button
         [self.startButton setTitle:@"Cancel" forState:UIControlStateNormal];
@@ -393,7 +399,7 @@
 
         //Enable notification buttons
         [self enableNotificationButtons];
-        NSLog(@"Start timer button selected: %@", self.notification);
+        NSLog(@"Start timer button selected: %@", self.notification.fireDate);
     }
     // Switch start button selected boolean
     self.startButtonSelected = !self.startButtonSelected;
@@ -458,18 +464,18 @@
 
 -(void)notificationbutton1Selected:(id)sender
 {
-    // Establish the correct time interval
-    NSTimeInterval timeInterval = self.timeInterval - (1 * 60);
+    // Establish the correct time interval to be subtracted from self.deadline.
+    NSTimeInterval timeInterval = - (1 * 60);
 
     // Make sure there is enough time left on the clock to set the alert.
-    if (timeInterval < 0) {
+    if (abs(timeInterval) > self.timeInterval) {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Not enough time left on the timer to set that alert" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
         [alert show];
         NSLog(@"Alert time too close to deadline");
     }
     // Set the proper notification alert parameters
     else {
-        NSDate *oneMinToDeadline = [self.initialTime dateByAddingTimeInterval:timeInterval];
+        NSDate *oneMinToDeadline = [self.deadline dateByAddingTimeInterval:timeInterval];
         self.notification.fireDate = oneMinToDeadline;
         self.notification.alertBody = @"One minute to timer expiration";
         self.notification.soundName = UILocalNotificationDefaultSoundName;
@@ -481,24 +487,21 @@
         // Display the indicator check mark
         self.notificationIndicator1.hidden = NO;
         self.notificationbutton1.enabled = NO;
-
-        NSLog(@"Set a notification one minutes before deadline: %@", self.notification);
+        NSLog(@"Set a notification one minutes before deadline: %@", self.notification.fireDate);
     }
 }
 
 -(void)notificationbutton2Selected:(id)sender
 {
     // Establish the correct time interval
-    NSTimeInterval timeInterval = self.timeInterval - (2 * 60);
+    NSTimeInterval timeInterval = - (2 * 60);
 
     // Make sure there is enough time left on the clock to set the alert.
-    if (timeInterval < 0) {
+    if (abs(timeInterval) > self.timeInterval) {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Not enough time left on the timer to set that alert" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
         [alert show];    }
     else {
-
-    NSTimeInterval timeInterval = self.timeInterval - (2 * 60);
-    NSDate *twoMinToDeadline = [self.initialTime dateByAddingTimeInterval:timeInterval];
+    NSDate *twoMinToDeadline = [self.deadline dateByAddingTimeInterval:timeInterval];
     self.notification.fireDate = twoMinToDeadline;
     self.notification.alertBody = @"Two minutes to timer expiration";
     self.notification.soundName = UILocalNotificationDefaultSoundName;
@@ -510,29 +513,25 @@
     // Display the indicator check mark
     self.notificationIndicator2.hidden = NO;
     self.notificationbutton2.enabled = NO;
-
-    NSLog(@"Set a notification two minutes before deadline: %@", self.notification);
+    NSLog(@"Set a notification two minutes before deadline: %@", self.notification.fireDate);
     }
 }
 
 -(void)notificationbutton3Selected:(id)sender
 {
     // Establish the correct time interval
-    NSTimeInterval timeInterval = self.timeInterval - (5 * 60);
+    NSTimeInterval timeInterval = - (5 * 60);
 
     // Make sure there is enough time left on the clock to set the alert.
-    if (timeInterval < 0) {
+    if (abs(timeInterval) > self.timeInterval) {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Not enough time left on the timer to set that alert" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
         [alert show];    }
     else {
-
-        NSTimeInterval timeInterval = self.timeInterval - (5 * 60);
-        NSDate *twoMinToDeadline = [self.initialTime dateByAddingTimeInterval:timeInterval];
-        self.notification.fireDate = twoMinToDeadline;
+        NSDate *fiveMinToDeadline = [self.deadline dateByAddingTimeInterval:timeInterval];
+        self.notification.fireDate = fiveMinToDeadline;
         self.notification.alertBody = @"Five minutes to timer expiration";
         self.notification.soundName = UILocalNotificationDefaultSoundName;
         self.notification.timeZone = [NSTimeZone defaultTimeZone];
-        NSLog(@"Five minute notification button selected: %@", self.notification);
         [[UIApplication sharedApplication] scheduleLocalNotification:self.notification];
 
         self.notificationInformationLabel.text = @"Alert set for five minutes before expiration";
@@ -540,28 +539,25 @@
         // Display the indicator check mark
         self.notificationIndicator3.hidden = NO;
         self.notificationbutton3.enabled = NO;
-
-        NSLog(@"Set a notification five minutes before deadline: %@", self.notification);
+        NSLog(@"Set a notification five minutes before deadline: %@", self.notification.fireDate);
     }
 }
 
 -(void)notificationbutton4Selected:(id)sender
 {
     // Establish the correct time interval
-    NSTimeInterval timeInterval = self.timeInterval - (10 * 60);
+    NSTimeInterval timeInterval = - (10 * 60);
 
     // Make sure there is enough time left on the clock to set the alert.
-    if (timeInterval < 0) {
+    if (abs(timeInterval) > self.timeInterval) {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Not enough time left on the timer to set that alert" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
         [alert show];    }
     else {
-        NSTimeInterval timeInterval = self.timeInterval - (10 * 60);
-        NSDate *twoMinToDeadline = [self.initialTime dateByAddingTimeInterval:timeInterval];
-        self.notification.fireDate = twoMinToDeadline;
+        NSDate *tenMinToDeadline = [self.deadline dateByAddingTimeInterval:timeInterval];
+        self.notification.fireDate = tenMinToDeadline;
         self.notification.alertBody = @"Ten minutes to timer expiration";
         self.notification.soundName = UILocalNotificationDefaultSoundName;
         self.notification.timeZone = [NSTimeZone defaultTimeZone];
-        NSLog(@"Ten minute notification button selected: %@", self.notification);
         [[UIApplication sharedApplication] scheduleLocalNotification:self.notification];
 
         self.notificationInformationLabel.text = @"Alert set for ten minutes before expiration";
@@ -569,8 +565,7 @@
         // Display the indicator check mark
         self.notificationIndicator4.hidden = NO;
         self.notificationbutton4.enabled = NO;
-
-        NSLog(@"Set a notification ten minutes before deadline: %@", self.notification);
+        NSLog(@"Set a notification ten minutes before deadline: %@", self.notification.fireDate);
     }
 }
 
@@ -632,6 +627,7 @@
         [[UIApplication sharedApplication] cancelAllLocalNotifications];
         self.notificationInformationLabel.text = @"Set an alert prior to timer expiration";
 
+        //Invalidate timer
         [self.timer invalidate];
         self.timer = nil;
         self.initialTime = nil;

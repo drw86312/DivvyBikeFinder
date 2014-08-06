@@ -188,7 +188,7 @@
 
     verticalOffset += self.button1.frame.size.height + (2 *spacing);
 
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Create segmented control
     CGFloat segmentedControlHeight = 30.0f;
@@ -216,7 +216,7 @@
     CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
     CGFloat imageViewHeight = 25.0f;
     CGFloat imageViewWidth = 50.0f;
-    verticalOffset = self.view.frame.size.height - tabBarHeight - imageViewHeight -15.0f;
+    verticalOffset = self.view.frame.size.height - tabBarHeight - imageViewHeight -18.0f;
     horizontalOffset = self.view.frame.origin.x + 10.0f;
 
     self.mapYelpImage = [[UIImageView alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, imageViewWidth, imageViewHeight)];
@@ -318,7 +318,7 @@
     self.shopSearch = YES;
 
     // Specify proper search parameters...
-    self.searchTerm = @"shop";
+    self.searchTerm = @"shopping";
     self.sortType = @0;
 
     // Remove old map annotations, but add back the Divvy Bike annotation
@@ -345,7 +345,7 @@
     self.sightseeSearch = YES;
 
     // Specify proper search parameters...
-    self.searchTerm = @"attractions";
+    self.searchTerm = @"attraction";
     self.sortType = @0;
 
     // Remove old map annotations, but add back the Divvy Bike annotation, remove map continer views
@@ -373,7 +373,7 @@
     self.musicSearch = YES;
 
     // Specify proper search parameters...
-    self.searchTerm = @"music";
+    self.searchTerm = @"live music";
     self.sortType = @0;
 
     // Remove old map annotations, but add back the Divvy Bike annotation
@@ -657,8 +657,8 @@ calloutAccessoryControlTapped:(UIControl *)control
     NSLog(@"Selected station name: %@", self.selectedYelpLocation.name);
 }
 
-
 #pragma mark - Yelp API call methods
+
 -(void)makeYelpAPICallwithTerm:(NSString *)term andSortType:(NSNumber *) sortType
 {
     // Start the activity indicator
@@ -971,7 +971,8 @@ calloutAccessoryControlTapped:(UIControl *)control
             [retryArray addObject:yelp];
             NSLog(@"Location found without coordinate");
         }
-        else if (distanceFromStation > 32186.9f) {
+        // Five mile radius
+        else if (distanceFromStation > 8046.72f) {
             yelp.name = [yelp.name stringByAppendingString:@" Chicago"];
             [retryArray addObject:yelp];
             NSLog(@"Location found outside chicago");
@@ -1005,7 +1006,8 @@ calloutAccessoryControlTapped:(UIControl *)control
 
         if (yelp.latitude == 0) {NSLog(@"Location removed without coordinate");}
         else if (yelp.longitude == 0){NSLog(@"Location removed without coordinate");}
-        else if (distanceFromStation > 32186.9f) {NSLog(@"Location outside Chicago removed");}
+        // Five mile radius
+        else if (distanceFromStation > 8046.72f) {NSLog(@"Location outside Chicago removed");}
         else {
             [tempArray addObject:yelp];
         }
@@ -1034,7 +1036,7 @@ calloutAccessoryControlTapped:(UIControl *)control
                 FoodAnnotation *foodannotation = [[FoodAnnotation alloc] init];
                 foodannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
                 foodannotation.title = yelpLocation.name;
-                foodannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+                foodannotation.subtitle = [NSString stringWithFormat:@"%.01f miles from Divvy Station", yelpLocation.distanceFromStation * 0.000621371];
                 foodannotation.imageName = @"food";
                 foodannotation.backgroundColor = [UIColor walkRouteColor];
                 [self.mapView addAnnotation:foodannotation];
@@ -1043,7 +1045,7 @@ calloutAccessoryControlTapped:(UIControl *)control
                 DrinkAnnotation *drinkannotation = [[DrinkAnnotation alloc] init];
                 drinkannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
                 drinkannotation.title = yelpLocation.name;
-                drinkannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+                drinkannotation.subtitle = [NSString stringWithFormat:@"%.01f miles from Divvy Station", yelpLocation.distanceFromStation * 0.000621371];
                 drinkannotation.imageName = @"drink";
                 drinkannotation.backgroundColor = [UIColor walkRouteColor];
                 [self.mapView addAnnotation:drinkannotation];
@@ -1052,7 +1054,7 @@ calloutAccessoryControlTapped:(UIControl *)control
                 ShopAnnotation *shopannotation = [[ShopAnnotation alloc] init];
                 shopannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
                 shopannotation.title = yelpLocation.name;
-                shopannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+                shopannotation.subtitle = [NSString stringWithFormat:@"%.01f miles from Divvy Station", yelpLocation.distanceFromStation * 0.000621371];
                 shopannotation.imageName = @"shop";
                 shopannotation.backgroundColor = [UIColor walkRouteColor];
                 [self.mapView addAnnotation:shopannotation];
@@ -1061,7 +1063,7 @@ calloutAccessoryControlTapped:(UIControl *)control
                 SightseeAnnotation *sightseeannotation = [[SightseeAnnotation alloc] init];
                 sightseeannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
                 sightseeannotation.title = yelpLocation.name;
-                sightseeannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+                sightseeannotation.subtitle = [NSString stringWithFormat:@"%.01f miles from Divvy Station", yelpLocation.distanceFromStation * 0.000621371];
                 sightseeannotation.imageName = @"sightsee";
                 sightseeannotation.backgroundColor = [UIColor walkRouteColor];
                 [self.mapView addAnnotation:sightseeannotation];
@@ -1070,7 +1072,7 @@ calloutAccessoryControlTapped:(UIControl *)control
             MusicAnnotation *musicsannotation = [[MusicAnnotation alloc] init];
             musicsannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
             musicsannotation.title = yelpLocation.name;
-            musicsannotation.subtitle = [NSString stringWithFormat:@"%.01f miles", yelpLocation.distanceFromStation * 0.000621371];
+            musicsannotation.subtitle = [NSString stringWithFormat:@"%.01f miles from Divvy Station", yelpLocation.distanceFromStation * 0.000621371];
             musicsannotation.imageName = @"music";
             musicsannotation.backgroundColor = [UIColor walkRouteColor];
             [self.mapView addAnnotation:musicsannotation];
@@ -1203,11 +1205,7 @@ calloutAccessoryControlTapped:(UIControl *)control
     // Remove buttons from the container view
     [self clearContainerView];
 
-    // Resize the container view with animation back to its original size.
-    [UIView beginAnimations:nil context:nil];
-    [UIView setAnimationDuration:0.5];
-    [UIView setAnimationDelay:0.0];
-    [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
+    // Resize the container view
 
     CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
     CGFloat containerViewHeight = 40.0;
@@ -1215,7 +1213,6 @@ calloutAccessoryControlTapped:(UIControl *)control
     CGFloat horizontalOffset = self.view.frame.size.width - containerViewWidth -10.0f;
     CGFloat verticalOffset = self.view.frame.size.height - tabBarHeight - containerViewHeight -10.0f;
     self.mapContainerView.frame = CGRectMake(horizontalOffset, verticalOffset, containerViewWidth, containerViewHeight);
-    [UIView commitAnimations];
 
     // Add the "i" icon back to mapcontainer view.
     UIImageView *searchMoreImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.mapContainerView.frame.size.width, self.mapContainerView.frame.size.height)];

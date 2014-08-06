@@ -371,7 +371,7 @@ calloutAccessoryControlTapped:(UIControl *)control
         cell.docksLabel.layer.borderColor = [[UIColor blackColor] CGColor];
         cell.docksLabel.font = [UIFont mediumFont];
 
-        NSString *milesFromUser = [NSString stringWithFormat:@"%.02f miles", divvyStation.distanceFromUser * 0.000621371];
+        NSString *milesFromUser = [NSString stringWithFormat:@"%.02f miles away", divvyStation.distanceFromUser * 0.000621371];
         cell.distanceLabel.text = milesFromUser;
         cell.distanceLabel.font = [UIFont smallFont];
         return cell;
