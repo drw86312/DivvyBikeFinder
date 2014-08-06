@@ -59,7 +59,8 @@
     self.notification = [[UILocalNotification alloc] init];
 }
 
-- (void)applicationWillEnterInBackGround{
+- (void)applicationWillEnterInBackGround
+{
     NSLog(@"Application entered background");
 }
 
@@ -104,11 +105,10 @@
     }
 }
 
-#pragma mark - UICreation
+#pragma mark - Create UI Views
 
 -(void)createViews
 {
-
     // Create buttons and place them into an array.
     self.buttonsArray = [NSMutableArray new];
 
@@ -326,8 +326,6 @@
     }
 
 }
-
-
 
 #pragma mark - IBActions
 
@@ -589,8 +587,6 @@
     _notificationInformationLabel.text = @"Set an alert prior to timer expiration";
 }
 
-
-
 # pragma mark - timer methods
 
 -(void)createTimer
@@ -681,6 +677,5 @@
     self.notificationIndicator3.hidden = YES;
     self.notificationIndicator4.hidden = YES;
 }
-
 
 @end

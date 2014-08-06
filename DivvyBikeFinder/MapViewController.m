@@ -606,14 +606,14 @@ calloutAccessoryControlTapped:(UIControl *)control
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    // Create medium circle
-    CGFloat circleWidth = 32.5f;
+// Create medium circle
+    CGFloat circleWidth = 30.0f;
     CGFloat circleHeight = circleWidth;
-    verticalOffset = (stationContainerHeight/2) - (circleHeight/2) + 20.0f;
+    verticalOffset = (stationContainerHeight/2) - (circleHeight/2) + 40.0f;
     horizontalOffset = (stationSizeContainer.frame.size.width/2) - (circleWidth/2);
 
     UILabel *mediumCircleLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, circleWidth, circleHeight)];
-    mediumCircleLabel.text = @"25";
+    mediumCircleLabel.text = @"20";
     mediumCircleLabel.textColor = [UIColor divvyColor];
     mediumCircleLabel.layer.cornerRadius = circleWidth/2;
     mediumCircleLabel.layer.borderColor = [[UIColor divvyColor] CGColor];
@@ -624,11 +624,29 @@ calloutAccessoryControlTapped:(UIControl *)control
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    // Create large circle
+// Create medium-Large circle
+    circleWidth = 35.0f;
+    circleHeight = circleWidth;
+    verticalOffset = mediumCircleLabel.frame.origin.y - circleHeight - (2*spacing);
+    horizontalOffset = (stationSizeContainer.frame.size.width/2) - (circleWidth/2);
+
+    UILabel *mediumLargeCircleLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, circleWidth, circleHeight)];
+    mediumLargeCircleLabel.text = @"30";
+    mediumLargeCircleLabel.textColor = [UIColor divvyColor];
+    mediumLargeCircleLabel.layer.cornerRadius = circleWidth/2;
+    mediumLargeCircleLabel.layer.borderColor = [[UIColor divvyColor] CGColor];
+    mediumLargeCircleLabel.layer.borderWidth = 1.0f;
+    mediumLargeCircleLabel.textAlignment = NSTextAlignmentCenter;
+    [mediumLargeCircleLabel setFont:[UIFont smallFontBold]];
+    [stationSizeContainer addSubview:mediumLargeCircleLabel];
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+// Create large circle
     circleWidth = 40.0f;
     circleHeight = circleWidth;
     horizontalOffset = (stationSizeContainer.frame.size.width/2) - (circleWidth/2);
-    verticalOffset = mediumCircleLabel.frame.origin.y - (2* spacing) - circleHeight;
+    verticalOffset = mediumLargeCircleLabel.frame.origin.y - (2* spacing) - circleHeight;
 
     UILabel *bigCircleLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, circleWidth, circleHeight)];
     bigCircleLabel.text = @"40";
@@ -642,7 +660,7 @@ calloutAccessoryControlTapped:(UIControl *)control
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    // Create small circle
+// Create small circle
 
     circleWidth = 25.0f;
     circleHeight = circleWidth;
@@ -664,7 +682,7 @@ calloutAccessoryControlTapped:(UIControl *)control
     // Create station size label
     horizontalOffset = 0.0f;
     labelHeight = 25.0f;
-    verticalOffset = bigCircleLabel.frame.origin.y - (3 * spacing) - labelHeight;
+    verticalOffset = bigCircleLabel.frame.origin.y - (2 * spacing) - labelHeight;
 
     UILabel *biggerStationLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
     biggerStationLabel.text = @"Station\nSize";
