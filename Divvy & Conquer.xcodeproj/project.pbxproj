@@ -558,6 +558,9 @@
 					0E4A5B82196BA51800273EA6 = {
 						TestTargetID = 0EB161401943D30200A2F96B;
 					};
+					0EB161401943D30200A2F96B = {
+						DevelopmentTeam = 6SW4QY498T;
+					};
 					0EB161611943D30200A2F96B = {
 						TestTargetID = 0EB161401943D30200A2F96B;
 					};
@@ -883,10 +886,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "DivvyBikeFinder/Divvy & Conquer-Prefix.pch";
 				INFOPLIST_FILE = "DivvyBikeFinder/Divvy & Conquer-Info.plist";
 				PRODUCT_NAME = "Divvy & Conquer";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -896,10 +902,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "DivvyBikeFinder/Divvy & Conquer-Prefix.pch";
 				INFOPLIST_FILE = "DivvyBikeFinder/Divvy & Conquer-Info.plist";
 				PRODUCT_NAME = "Divvy & Conquer";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

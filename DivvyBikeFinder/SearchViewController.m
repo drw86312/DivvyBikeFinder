@@ -1011,6 +1011,17 @@
                 cell.stepLabel.text = [NSString stringWithFormat:@"%@ in %@", [dictionary objectForKey:@"instructions"], distanceString];
             }
 
+            // If its the Divvy Step
+            if ([cell.stepLabel.text rangeOfString:@"Divvy"].location == NSNotFound) {
+                NSLog(@"string does not contain Divvy");
+            }
+            else {
+                cell.transportModeImageView.image = [UIImage imageNamed:@"DivvyLogo"];
+                cell.transportModeImageView.layer.cornerRadius = 5.0f;
+                cell.transportModeImageView.clipsToBounds = YES;
+                cell.backgroundColor = [UIColor blackColor];
+            }
+
         return cell;
      }
 }
@@ -1046,13 +1057,13 @@
     /* Create custom view to display section header... */
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(10, 5, tableView.frame.size.width, 30)];
     [label setFont:[UIFont bigFontBold]];
-    NSString *string = @"Directions";
+    NSString *string = @"Route Directions";
     /* Section header is in 0th index... */
     [label setText:string];
-    [label setTextColor:[UIColor whiteColor]];
+    [label setTextColor:[UIColor blackColor]];
     [label setTextAlignment:NSTextAlignmentCenter];
     [view addSubview:label];
-    [view setBackgroundColor:[UIColor blackColor]];
+    [view setBackgroundColor:[UIColor whiteColor]];
     return view;
 }
 

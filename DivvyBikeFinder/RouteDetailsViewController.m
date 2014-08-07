@@ -26,11 +26,12 @@
     [super viewDidLoad];
     [self createViews];
 
+    // Iterate through all the dictionaries until the once matching the one selected by the user is found...
     NSInteger counter = 0;
     for (NSDictionary *dictionary in self.routeDictionaries) {
         if ([dictionary isEqualToDictionary:self.selectedRouteDictionary]) {
 
-            // Find instances of 'left' and 'right' and set appropriate turn arrow.
+            // Find instances of 'left', 'right', 'continue', and 'proceed' and set appropriate direction image.
             NSString *instructions = [dictionary objectForKey:@"instructions"];
             if ([instructions rangeOfString:@"right"].location == NSNotFound) {
                 NSLog(@"string does not contain right");
@@ -61,6 +62,16 @@
                     NSLog(@"string contains proceed!");
                 }
 
+            // Find the transport type and set the appropriate imageview and background color.
+            if ([[dictionary objectForKey:@"transportType"] isEqualToString:@"walking"]) {
+                self.view.backgroundColor = [UIColor walkRouteColor];
+                self.transportTypeImageView.image = [UIImage imageNamed:@"Walking"];
+            }
+            else {
+                self.view.backgroundColor = [UIColor divvyColor];
+                self.transportTypeImageView.image = [UIImage imageNamed:@"bicycle"];
+            }
+
             // Find the right units for the distance string
             NSString *distanceString = [NSString new];
             if ([[dictionary objectForKey:@"distance"] floatValue] < 170.0f) {
@@ -72,7 +83,7 @@
                 distanceString = [NSString stringWithFormat:@"%.01f miles", distance];
             }
 
-            // The first element of the leg of route always has 0.0 distance, so don't display it
+            // The first element of the leg of route always has 0.00 distance, so don't display it
             if ([[dictionary objectForKey:@"distance"] floatValue] == 0.0f) {
                 self.routeStepLabel.text = [dictionary objectForKey:@"instructions"];
             }
@@ -88,24 +99,16 @@
 
                 // Replace lower case "the destination"
                 NSString *instructionsNew2 = [instructionsNew stringByReplacingOccurrencesOfString:@"the destination" withString:@"Divvy Station"];
-
                 self.routeStepLabel.text = [NSString stringWithFormat:@"%@\nin\n%@", instructionsNew2, distanceString];
             }
+            // Should be the last dictionary in the steps array...
             else {
                 self.routeStepLabel.text = [NSString stringWithFormat:@"%@\nin\n%@", [dictionary objectForKey:@"instructions"], distanceString];
+                self.transportTypeImageView.image = [UIImage imageNamed:@"endguy"];
+                self.view.backgroundColor = [UIColor greenColor];
             }
 
-            // Find the transport type and set the appropriate imageview and background color.
-            if ([[dictionary objectForKey:@"transportType"] isEqualToString:@"walking"]) {
-                self.view.backgroundColor = [UIColor walkRouteColor];
-                self.transportTypeImageView.image = [UIImage imageNamed:@"Walking"];
-            }
-            else {
-                self.view.backgroundColor = [UIColor divvyColor];
-                self.transportTypeImageView.image = [UIImage imageNamed:@"bicycle"];
-            }
-
-            // If its the Divvy Step
+            // If its the Divvy Step, show the Divvy image
             if ([self.routeStepLabel.text rangeOfString:@"Divvy"].location == NSNotFound) {
                 NSLog(@"string does not contain Divvy");
             }
@@ -114,6 +117,7 @@
                 self.view.backgroundColor = [UIColor blackColor];
             }
 
+        // When counter finds the right dictionary, assign the swipe index to the counter value.
         self.swipeIndex = counter;
         break;
         }
@@ -187,12 +191,12 @@
 {
     if (swipe.direction == UISwipeGestureRecognizerDirectionLeft) {
         if (self.swipeIndex == self.routeDictionaries.count -1) {
-                NSLog(@"Swipe Index = %ld", (long)self.swipeIndex);
+            NSLog(@"Farthest Right");
             }
         else {
             self.swipeIndex += 1;
 
-            // Find instances of 'left' and 'right' and set appropriate turn arrow.
+            // Find instances of 'left', 'right', 'continue', and 'proceed' and set appropriate direction image.
             NSString *instructions = [[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"instructions"];
             if ([instructions rangeOfString:@"right"].location == NSNotFound) {
                 NSLog(@"string does not contain right");
@@ -223,6 +227,17 @@
                 NSLog(@"string contains proceed!");
             }
 
+            // Find the transport type and set the appropriate imageview and background color.
+            if ([[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"transportType"] isEqualToString:@"walking"])
+            {
+                self.view.backgroundColor = [UIColor walkRouteColor];
+                self.transportTypeImageView.image = [UIImage imageNamed:@"Walking"];
+            }
+            else {
+                self.view.backgroundColor = [UIColor divvyColor];
+                self.transportTypeImageView.image = [UIImage imageNamed:@"bicycle"];
+            }
+
             // Find the right units for the distance string
             NSString *distanceString = [NSString new];
             if ([[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] < 170.0f) {
@@ -248,22 +263,14 @@
 
                 // Replace lower case "the destination"
                 NSString *instructionsNew2 = [instructionsNew stringByReplacingOccurrencesOfString:@"the destination" withString:@"Divvy Station"];
-
                 self.routeStepLabel.text = [NSString stringWithFormat:@"%@\nin\n%@", instructionsNew2, distanceString];
             }
+
+            // Last step in the route instructions
             else {
                 self.routeStepLabel.text = [NSString stringWithFormat:@"%@\nin\n%@", [[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"instructions"], distanceString];
-            }
-
-            // Find the transport type and set the appropriate imagview and background color.
-            if ([[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"transportType"] isEqualToString:@"walking"])
-            {
-                self.view.backgroundColor = [UIColor walkRouteColor];
-                self.transportTypeImageView.image = [UIImage imageNamed:@"Walking"];
-            }
-            else {
-                self.view.backgroundColor = [UIColor divvyColor];
-                self.transportTypeImageView.image = [UIImage imageNamed:@"bicycle"];
+                self.transportTypeImageView.image = [UIImage imageNamed:@"endguy"];
+                self.view.backgroundColor = [UIColor greenColor];
             }
 
             // If its the Divvy Step
@@ -277,9 +284,10 @@
         }
     }
 
+
     if (swipe.direction == UISwipeGestureRecognizerDirectionRight) {
         if (self.swipeIndex == 0) {
-            NSLog(@"Swipe Index = %ld", (long)self.swipeIndex);
+            NSLog(@"Farthest Left");
             }
             else {
                 self.swipeIndex -= 1;
@@ -315,6 +323,18 @@
                     NSLog(@"string contains proceed!");
                 }
 
+                // Find the transport type and set the appropriate imagview and background color.
+                if ([[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"transportType"] isEqualToString:@"walking"])
+                {
+                    self.view.backgroundColor = [UIColor walkRouteColor];
+                    self.transportTypeImageView.image = [UIImage imageNamed:@"Walking"];
+                }
+                else {
+                    self.view.backgroundColor = [UIColor divvyColor];
+                    self.transportTypeImageView.image = [UIImage imageNamed:@"bicycle"];
+                }
+
+
                 // Find the right units for the distance string
                 NSString *distanceString = [NSString new];
                 if ([[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] < 170.0f) {
@@ -343,19 +363,12 @@
 
                     self.routeStepLabel.text = [NSString stringWithFormat:@"%@\nin\n%@", instructionsNew2, distanceString];
                 }
+
+                // Last step in the route instructions
                 else {
                     self.routeStepLabel.text = [NSString stringWithFormat:@"%@\nin\n%@", [[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"instructions"], distanceString];
-                }
-
-                // Find the transport type and set the appropriate imagview and background color.
-                if ([[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"transportType"] isEqualToString:@"walking"])
-                {
-                    self.view.backgroundColor = [UIColor walkRouteColor];
-                    self.transportTypeImageView.image = [UIImage imageNamed:@"Walking"];
-                }
-                else {
-                    self.view.backgroundColor = [UIColor divvyColor];
-                    self.transportTypeImageView.image = [UIImage imageNamed:@"bicycle"];
+                    self.transportTypeImageView.image = [UIImage imageNamed:@"endguy"];
+                    self.view.backgroundColor = [UIColor greenColor];
                 }
 
                 // If its the Divvy Step
