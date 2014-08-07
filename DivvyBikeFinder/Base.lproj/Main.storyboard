@@ -24,7 +24,7 @@
                                 </connections>
                             </mapView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="60" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="Hzw-FT-8Aq">
-                                <rect key="frame" x="0.0" y="109" width="320" height="459"/>
+                                <rect key="frame" x="0.0" y="115" width="320" height="404"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <prototypes>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="cell" rowHeight="60" id="doe-QL-Nmz" customClass="BikeTableViewCell">
@@ -93,9 +93,9 @@
                         </subviews>
                         <constraints>
                             <constraint firstAttribute="bottom" secondItem="aOZ-Zl-Pil" secondAttribute="bottom" id="DKf-73-LO7"/>
-                            <constraint firstAttribute="bottom" secondItem="Hzw-FT-8Aq" secondAttribute="bottom" id="SxZ-Oj-pjV"/>
+                            <constraint firstAttribute="bottom" secondItem="Hzw-FT-8Aq" secondAttribute="bottom" constant="49" id="SxZ-Oj-pjV"/>
                             <constraint firstItem="aOZ-Zl-Pil" firstAttribute="top" secondItem="kh9-bI-dsS" secondAttribute="top" id="Z8g-cW-7oV"/>
-                            <constraint firstItem="Hzw-FT-8Aq" firstAttribute="top" secondItem="kh9-bI-dsS" secondAttribute="top" constant="109" id="tVM-n8-Y6b"/>
+                            <constraint firstItem="Hzw-FT-8Aq" firstAttribute="top" secondItem="kh9-bI-dsS" secondAttribute="top" constant="115" id="tVM-n8-Y6b"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="9Oy-a9-XWw">
@@ -634,6 +634,6 @@
         <simulatedScreenMetrics key="destination" type="retina4"/>
     </simulatedMetricsContainer>
     <inferredMetricsTieBreakers>
-        <segue reference="3rC-Qa-fc2"/>
+        <segue reference="9om-yy-OuH"/>
     </inferredMetricsTieBreakers>
 </document>

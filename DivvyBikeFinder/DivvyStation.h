@@ -14,8 +14,8 @@
 
 @property (nonatomic) CLLocationCoordinate2D coordinate;
 @property (nonatomic, assign) CLLocationDistance distanceFromUser;
-@property (nonatomic, assign) CLLocationDistance distanceFromDestination;
-
+@property (nonatomic, assign) CLLocationDistance distanceToOriginDivvyStation;
+@property (nonatomic, assign) CLLocationDistance distanceToDestinationDivvyStation;
 @property NSNumber *identifier;
 @property NSString *stationName;
 @property NSNumber *availableDocks;

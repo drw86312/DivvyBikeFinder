@@ -421,8 +421,8 @@
                 [self getOriginFromName];
             }
             else {
-                // Show alert that origin result was not found.
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:@"Sorry, no results found matching %@", self.userLocationString] message:nil delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                // Show alert that destination result was not found.
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:@"Sorry, no results found matching %@", self.userDestinationString] message:nil delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
                 [alert show];
                 self.activityIndicator.hidden = YES;
                 [self.activityIndicator stopAnimating];
@@ -468,7 +468,7 @@
             }
         }
         else if (destinationDistanceFromChicago > 32186.9f) {
-            // Try the search with Chicago added to the userlocation string...
+            // Try the search with Chicago added to the destination string...
             if (self.firstSearch) {
                 NSLog(@"Destination found outside Chicago, running search with 'chicago' added");
                 self.userLocationString = [self.userLocationString stringByAppendingString:@" Chicago"];
@@ -486,13 +486,22 @@
             }
         }
         else {
-            // Reassign user search strings
+            // Reassign search strings to what the placemark returned
             self.userLocationString = self.originPlacemark.name;
             self.userDestinationString = self.destinationPlacemark.name;
 
+            NSLog(@"Locations are in Chicago!");
             // Find nearest Divvy Station to the origin location.
             [self findDivvyStationNearestOrigin:originLocation];
         }
+    }
+    else {
+        // Show alert that origin/destination result was not found.
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Sorry, result not found in Chicago" message:nil delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        [alert show];
+        self.activityIndicator.hidden = YES;
+        [self.activityIndicator stopAnimating];
+        [self enableUI];
     }
 }
 
@@ -512,12 +521,12 @@
     // For all of the stations in tempArray1, assign the distance to userlocation property
     for (DivvyStation *divvyStation in tempArray1) {
         CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:divvyStation.latitude.floatValue longitude:divvyStation.longitude.floatValue];
-        divvyStation.distanceFromUser = [originLocation distanceFromLocation:stationLocation];
+        divvyStation.distanceToOriginDivvyStation = [originLocation distanceFromLocation:stationLocation];
         [tempArray2 addObject:divvyStation];
     }
 
     // Sort temparray2 by distance from origin
-    NSSortDescriptor *originDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distanceFromUser" ascending:YES];
+    NSSortDescriptor *originDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distanceToOriginDivvyStation" ascending:YES];
     NSArray *originDescriptors = @[originDescriptor];
     NSArray *sortedStationsArray = [tempArray2 sortedArrayUsingDescriptors:originDescriptors];
 
@@ -551,22 +560,22 @@
     // For all of the stations in tempArray1, assign the distance to userlocation property
     for (DivvyStation *divvyStation in tempArray1) {
         CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:divvyStation.latitude.floatValue longitude:divvyStation.longitude.floatValue];
-        divvyStation.distanceFromDestination = [destinationLocation distanceFromLocation:stationLocation];
+        divvyStation.distanceToDestinationDivvyStation = [destinationLocation distanceFromLocation:stationLocation];
         [tempArray2 addObject:divvyStation];
     }
 
     // Sort temparray2 by distance from destination
-    NSSortDescriptor *destinationDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distanceFromDestination" ascending:YES];
+    NSSortDescriptor *destinationDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distanceToDestinationDivvyStation" ascending:YES];
     NSArray *destinationDescriptors = @[destinationDescriptor];
     NSArray *sortedStationsArray = [tempArray2 sortedArrayUsingDescriptors:destinationDescriptors];
 
     DivvyStation *closestStationToDestination = [sortedStationsArray firstObject];
     self.stationsNearDestination = [NSArray arrayWithObject:closestStationToDestination];
 
-    // If there is a station-near-destination, create map pin annotations
+    // If there is a station-near-destination, get the directions
     if (self.stationsNearDestination.count > 0) {
-        NSLog(@"Closest station to destination found: %@", closestStationToDestination.stationName);
-        [self dropPins];
+        NSLog(@"Destination DivvyStation found: %@", closestStationToDestination.stationName);
+        [self getDirections];
     }
     else {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Sorry" message:[NSString stringWithFormat:@"Unable to locate a Divvy Station near %@", self.userDestinationString] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
@@ -574,60 +583,12 @@
     }
 }
 
-
--(void)dropPins
-{
-    NSLog(@"DropPins method ran");
-
-    // Add the annotation for the origin point.
-    DestinationAnnotation *originAnnotation = [[DestinationAnnotation alloc] init];
-    originAnnotation.coordinate = self.originPlacemark.coordinate;
-    originAnnotation.title = self.originPlacemark.name;
-    [self.mapView addAnnotation:originAnnotation];
-
-    // Create an annotation for the destination point.
-    DestinationAnnotation *destinationAnnotation = [[DestinationAnnotation alloc] init];
-    destinationAnnotation.coordinate = self.destinationPlacemark.coordinate;
-    destinationAnnotation.title = self.destinationPlacemark.name;
-    [self.mapView addAnnotation:destinationAnnotation];
-
-    // Add the origin Divvy map annotation.
-    for (DivvyStation *divvyStation in self.stationsNearOrigin) {
-        DivvyBikeAnnotation *annotation = [[DivvyBikeAnnotation alloc] init];
-        annotation.title = divvyStation.stationName;
-        annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. from %@ | Bikes: %@ Docks: %@", divvyStation.distanceFromUser * 0.000621371, self.userLocationString, divvyStation.availableBikes, divvyStation.availableDocks];
-        annotation.coordinate = divvyStation.coordinate;
-        annotation.imageName = @"Divvy";
-        annotation.backgroundColor = divvyStation.bikesColor;
-        annotation.annotationSize = divvyStation.annotationSize;
-        [self.mapView addAnnotation:annotation];
-    }
-
-    // Add the destination Divvy map annotation.
-    for (DivvyStation *divvyStation in self.stationsNearDestination) {
-        DivvyBikeAnnotation *annotation = [[DivvyBikeAnnotation alloc] init];
-        annotation.title = divvyStation.stationName;
-        annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. from %@ | Bikes: %@ Docks: %@", divvyStation.distanceFromUser * 0.000621371, self.userDestinationString, divvyStation.availableBikes, divvyStation.availableDocks];
-        annotation.coordinate = divvyStation.coordinate;
-        annotation.imageName = @"Divvy";
-        annotation.backgroundColor = divvyStation.bikesColor;
-        annotation.annotationSize = divvyStation.annotationSize;
-        [self.mapView addAnnotation:annotation];
-    }
-
-    // Call helper method for redrawing the map to the proper size.
-    [self redrawMapViewWithCurrentLocation:self.originPlacemark.coordinate andDestination:self.destinationPlacemark.coordinate];
-
-    // Get Routes
-    [self getDirections];
-}
-
-
-
 #pragma mark - Directions methods
 
 -(void)getDirections
 {
+    NSLog(@"Get directions method ran");
+
     // Instantiate distance and ETA counters to keep track of trip distance and time.
     self.distanceCounter = 0.0f;
     self.etaCounter = 0.0f;
@@ -662,7 +623,6 @@
                 NSArray *routeItems1 = response.routes;
                 self.walkRoute1 = [routeItems1 firstObject];
                 self.etaCounter += self.walkRoute1.expectedTravelTime;
-                NSLog(@"Route 1 Expected Travel time minutes: %.0f", self.walkRoute1.expectedTravelTime/60);
                 self.routeDictionaries = [NSMutableArray new];
                 CGFloat walkRoute1Distance = 0.0f;
                     for (MKRouteStep *routeStep in self.walkRoute1.steps) {
@@ -696,7 +656,6 @@
                 self.bikeRoute = [routeItems2 firstObject];
                 // Assumes cycling is about 3 times faster than walking (approx. biking speed assumption is between 9.0-9.5 MPH)
                 self.etaCounter += (self.bikeRoute.expectedTravelTime/3);
-                NSLog(@"Route 2 Expected Travel time minutes: %.0f", self.bikeRoute.expectedTravelTime/60/3);
                 CGFloat bikingDistance = 0.0f;
                     for (MKRouteStep *routeStep in self.bikeRoute.steps) {
                         bikingDistance += routeStep.distance;
@@ -725,7 +684,6 @@
                     NSArray *routeItems3 = response.routes;
                     self.walkroute2 = [routeItems3 firstObject];
                     self.etaCounter += (self.walkroute2.expectedTravelTime);
-                    NSLog(@"Route 3 Expected Travel time minutes: %.0f", self.walkroute2.expectedTravelTime/60);
                     CGFloat walkRoute2Distance = 0.0f;
                         for (MKRouteStep *routeStep in self.walkroute2.steps) {
                             walkRoute2Distance += routeStep.distance;
@@ -744,13 +702,11 @@
 
                 //Assign total distance strings.
                 self.totalDistanceString = [NSString stringWithFormat:@"%.01f", self.distanceCounter * 0.000621371];
-
                 NSInteger travelTimeMinutes = self.etaCounter/60;
                 self.travelTimeString = [NSString stringWithFormat:@"%ld", (long)travelTimeMinutes];
 
-                self.activityIndicator.hidden = YES;
-                [self.activityIndicator stopAnimating];
                 [self.tableView reloadData];
+                [self dropPins];
                 [self createLineViews];
                 [self enableUI];
                 }
@@ -759,6 +715,52 @@
        }];
      }
   }];
+}
+
+-(void)dropPins
+{
+    NSLog(@"DropPins method ran");
+
+    // Add the annotation for the origin point.
+    DestinationAnnotation *originAnnotation = [[DestinationAnnotation alloc] init];
+    originAnnotation.coordinate = self.originPlacemark.coordinate;
+    originAnnotation.title = self.originPlacemark.name;
+    [self.mapView addAnnotation:originAnnotation];
+
+    // Create an annotation for the destination point.
+    DestinationAnnotation *destinationAnnotation = [[DestinationAnnotation alloc] init];
+    destinationAnnotation.coordinate = self.destinationPlacemark.coordinate;
+    destinationAnnotation.title = self.destinationPlacemark.name;
+    [self.mapView addAnnotation:destinationAnnotation];
+
+    // Add the origin Divvy map annotation.
+    for (DivvyStation *divvyStation in self.stationsNearOrigin) {
+        DivvyBikeAnnotation *annotation = [[DivvyBikeAnnotation alloc] init];
+        annotation.title = divvyStation.stationName;
+        annotation.subtitle = [NSString stringWithFormat:@"%@ mi. from %@ | Bikes: %@", self.walkRoute1DistanceString, self.userLocationString, divvyStation.availableBikes];
+        annotation.coordinate = divvyStation.coordinate;
+        annotation.imageName = @"Divvy";
+        annotation.backgroundColor = divvyStation.bikesColor;
+        annotation.annotationSize = divvyStation.annotationSize;
+        [self.mapView addAnnotation:annotation];
+    }
+
+    // Add the destination Divvy map annotation.
+    for (DivvyStation *divvyStation in self.stationsNearDestination) {
+        DivvyBikeAnnotation *annotation = [[DivvyBikeAnnotation alloc] init];
+        annotation.title = divvyStation.stationName;
+        annotation.subtitle = [NSString stringWithFormat:@"%@ mi. from %@ | Docks: %@", self.walkRoute1DistanceString, self.userDestinationString, divvyStation.availableDocks];
+        annotation.coordinate = divvyStation.coordinate;
+        annotation.imageName = @"Divvy";
+        annotation.backgroundColor = divvyStation.bikesColor;
+        annotation.annotationSize = divvyStation.annotationSize;
+        [self.mapView addAnnotation:annotation];
+    }
+
+    // Call helper method for redrawing the map to the proper size.
+    [self redrawMapViewWithCurrentLocation:self.originPlacemark.coordinate andDestination:self.destinationPlacemark.coordinate];
+    self.activityIndicator.hidden = YES;
+    [self.activityIndicator stopAnimating];
 }
 
 -(void)createLineViews
@@ -991,8 +993,8 @@
                 cell.stepLabel.text = [dictionary objectForKey:@"instructions"];
             }
 
-            // Last element in a routeSteps array says "The destination". I want "The destination" to be replaced by "Divvy Station"
-            else if ([dictionary isEqual:[self.routeDictionaries lastObject]]) {
+            // For the last element in the array keep "The destination", else replace "the destination" with Divvy Station.
+            else if (![dictionary isEqual:[self.routeDictionaries lastObject]]) {
 
                 // Find the instructions string
                 NSString *instructions = [dictionary objectForKey:@"instructions"];
@@ -1002,7 +1004,6 @@
 
                 // Replace lower case "the destination"
                 NSString *instructionsNew2 = [instructionsNew stringByReplacingOccurrencesOfString:@"the destination" withString:@"Divvy Station"];
-
                 // Set cell label text by adding distance to the end of the reformatted instructions
                 cell.stepLabel.text = [instructionsNew2 stringByAppendingString:[NSString stringWithFormat:@" in %@", distanceString]];
             }

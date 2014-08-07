@@ -46,26 +46,56 @@
                     self.directionImageView.image = [UIImage imageNamed:@"leftturn"];
                     NSLog(@"string contains right!");
                 }
+                if ([instructions rangeOfString:@"continue"].location == NSNotFound) {
+                    NSLog(@"string does not contain left");
+                }
+                else {
+                    self.directionImageView.image = [UIImage imageNamed:@"straightarrow"];
+                    NSLog(@"string contains continue!");
+                }
+                if ([instructions rangeOfString:@"Proceed"].location == NSNotFound) {
+                    NSLog(@"string does not contain proceed");
+                }
+                else {
+                    self.directionImageView.image = [UIImage new];
+                    NSLog(@"string contains proceed!");
+                }
 
-            // Set routestep label with appropriate distance (miles or feet).
+            // Find the right units for the distance string
+            NSString *distanceString = [NSString new];
+            if ([[dictionary objectForKey:@"distance"] floatValue] < 170.0f) {
+                CGFloat distance = [[dictionary objectForKey:@"distance"] floatValue] * 3.28084;
+                distanceString = [NSString stringWithFormat:@"%.0f feet", distance];
+            }
+            else {
+                CGFloat distance = [[dictionary objectForKey:@"distance"] floatValue] * 0.000621371;
+                distanceString = [NSString stringWithFormat:@"%.01f miles", distance];
+            }
+
+            // The first element of the leg of route always has 0.0 distance, so don't display it
             if ([[dictionary objectForKey:@"distance"] floatValue] == 0.0f) {
                 self.routeStepLabel.text = [dictionary objectForKey:@"instructions"];
             }
+
+            // Keep "the destination" if it's the last element in the array, else replace with 'Divvy Station'
+            else if (![dictionary isEqual:[self.routeDictionaries lastObject]]) {
+
+                // Find the instructions string
+                NSString *instructions = [dictionary objectForKey:@"instructions"];
+
+                // Replace upper case "The destination"
+                NSString *instructionsNew = [instructions stringByReplacingOccurrencesOfString:@"The destination" withString:@"Divvy Station"];
+
+                // Replace lower case "the destination"
+                NSString *instructionsNew2 = [instructionsNew stringByReplacingOccurrencesOfString:@"the destination" withString:@"Divvy Station"];
+
+                self.routeStepLabel.text = [NSString stringWithFormat:@"%@\nin\n%@", instructionsNew2, distanceString];
+            }
             else {
-                NSString *distanceString = [NSString new];
-                    if ([[dictionary objectForKey:@"distance"] floatValue] < 170.0f) {
-                        CGFloat distance = [[dictionary objectForKey:@"distance"] floatValue] * 3.28084;
-                        distanceString = [NSString stringWithFormat:@"%.0f feet", distance];
-                    }
-                    else {
-                        CGFloat distance = [[dictionary objectForKey:@"distance"] floatValue] * 0.000621371;
-                        distanceString = [NSString stringWithFormat:@"%.01f miles", distance];
-                    }
-                NSString *string =[NSString stringWithFormat:@"%@\nin\n%@", [dictionary objectForKey:@"instructions"], distanceString];
-                self.routeStepLabel.text = string;
+                self.routeStepLabel.text = [NSString stringWithFormat:@"%@\nin\n%@", [dictionary objectForKey:@"instructions"], distanceString];
             }
 
-            // Find the transport type and set the appropriate imagview and background color.
+            // Find the transport type and set the appropriate imageview and background color.
             if ([[dictionary objectForKey:@"transportType"] isEqualToString:@"walking"]) {
                 self.view.backgroundColor = [UIColor walkRouteColor];
                 self.transportTypeImageView.image = [UIImage imageNamed:@"Walking"];
@@ -74,6 +104,16 @@
                 self.view.backgroundColor = [UIColor divvyColor];
                 self.transportTypeImageView.image = [UIImage imageNamed:@"bicycle"];
             }
+
+            // If its the Divvy Step
+            if ([self.routeStepLabel.text rangeOfString:@"Divvy"].location == NSNotFound) {
+                NSLog(@"string does not contain Divvy");
+            }
+            else {
+                self.transportTypeImageView.image = [UIImage imageNamed:@"DivvyLogo"];
+                self.view.backgroundColor = [UIColor blackColor];
+            }
+
         self.swipeIndex = counter;
         break;
         }
@@ -114,8 +154,8 @@
     [self.view addSubview:self.directionImageView];
 
 
-    CGFloat indicatorImageViewWidth = 35.0f;
-    CGFloat indicatorImageViewHeight = 100.0f;
+    CGFloat indicatorImageViewWidth = 25.0f;
+    CGFloat indicatorImageViewHeight = 80.0f;
     horizontalOffset = (margin/2);
     verticalOffset = (self.view.frame.size.height/2) - (indicatorImageViewHeight/2);
 
@@ -131,12 +171,12 @@
 
 
     CGFloat labelWidth = self.view.frame.size.width - (2*indicatorImageViewWidth) - (2 * margin);
-    CGFloat labelHeight = 180.0f;
-    verticalOffset = (self.view.frame.size.height/2) - (labelHeight/2) + 5.0f;
+    CGFloat labelHeight = 190.0f;
+    verticalOffset = (self.view.frame.size.height/2) - (labelHeight/2) + 8.0f;
     horizontalOffset = (self.view.frame.size.width/2) - (labelWidth/2);
 
     self.routeStepLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
-    self.routeStepLabel.font = [UIFont bigFontBold];
+    self.routeStepLabel.font = [UIFont bigHugeFontBold];
     self.routeStepLabel.textColor = [UIColor whiteColor];
     self.routeStepLabel.numberOfLines = 0;
     self.routeStepLabel.textAlignment = NSTextAlignmentCenter;
@@ -168,23 +208,51 @@
                 self.directionImageView.image = [UIImage imageNamed:@"leftturn"];
                 NSLog(@"string contains right!");
             }
+            if ([instructions rangeOfString:@"continue"].location == NSNotFound) {
+                NSLog(@"string does not contain left");
+            }
+            else {
+                self.directionImageView.image = [UIImage imageNamed:@"straightarrow"];
+                NSLog(@"string contains continue!");
+            }
+            if ([instructions rangeOfString:@"Proceed"].location == NSNotFound) {
+                NSLog(@"string does not contain proceed");
+            }
+            else {
+                self.directionImageView.image = [UIImage new];
+                NSLog(@"string contains proceed!");
+            }
 
-            // Set routestep label with appropriate distance (miles or feet).
+            // Find the right units for the distance string
+            NSString *distanceString = [NSString new];
+            if ([[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] < 170.0f) {
+                CGFloat distance = [[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] * 3.28084;
+                distanceString = [NSString stringWithFormat:@"%.0f feet", distance];
+            }
+            else {
+                CGFloat distance = [[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] * 0.000621371;
+                distanceString = [NSString stringWithFormat:@"%.01f miles", distance];
+            }
+
+            // The first element of the leg of route always has 0.0 distance, so don't display it
             if ([[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] == 0.0f) {
                 self.routeStepLabel.text = [[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"instructions"];
             }
+            // Keep "the destination" if it's the last element in the array, else replace with 'Divvy Station'
+            else if (![[self.routeDictionaries objectAtIndex:self.swipeIndex] isEqual:[self.routeDictionaries lastObject]]) {
+                // Find the instructions string
+                NSString *instructions = [[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"instructions"];
+
+                // Replace upper case "The destination"
+                NSString *instructionsNew = [instructions stringByReplacingOccurrencesOfString:@"The destination" withString:@"Divvy Station"];
+
+                // Replace lower case "the destination"
+                NSString *instructionsNew2 = [instructionsNew stringByReplacingOccurrencesOfString:@"the destination" withString:@"Divvy Station"];
+
+                self.routeStepLabel.text = [NSString stringWithFormat:@"%@\nin\n%@", instructionsNew2, distanceString];
+            }
             else {
-                NSString *distanceString = [NSString new];
-                if ([[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] < 170.0f) {
-                    CGFloat distance = [[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] * 3.28084;
-                    distanceString = [NSString stringWithFormat:@"%.0f feet", distance];
-                }
-                else {
-                    CGFloat distance = [[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] * 0.000621371;
-                    distanceString = [NSString stringWithFormat:@"%.01f miles", distance];
-                }
-                NSString *string =[NSString stringWithFormat:@"%@\nin\n%@", [[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"instructions"], distanceString];
-                self.routeStepLabel.text = string;
+                self.routeStepLabel.text = [NSString stringWithFormat:@"%@\nin\n%@", [[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"instructions"], distanceString];
             }
 
             // Find the transport type and set the appropriate imagview and background color.
@@ -198,6 +266,14 @@
                 self.transportTypeImageView.image = [UIImage imageNamed:@"bicycle"];
             }
 
+            // If its the Divvy Step
+            if ([self.routeStepLabel.text rangeOfString:@"Divvy"].location == NSNotFound) {
+                NSLog(@"string does not contain Divvy");
+            }
+            else {
+                self.transportTypeImageView.image = [UIImage imageNamed:@"DivvyLogo"];
+                self.view.backgroundColor = [UIColor blackColor];
+            }
         }
     }
 
@@ -224,25 +300,53 @@
                     self.directionImageView.image = [UIImage imageNamed:@"leftturn"];
                     NSLog(@"string contains right!");
                 }
+                if ([instructions rangeOfString:@"continue"].location == NSNotFound) {
+                    NSLog(@"string does not contain left");
+                }
+                else {
+                    self.directionImageView.image = [UIImage imageNamed:@"straightarrow"];
+                    NSLog(@"string contains continue!");
+                }
+                if ([instructions rangeOfString:@"Proceed"].location == NSNotFound) {
+                    NSLog(@"string does not contain proceed");
+                }
+                else {
+                    self.directionImageView.image = [UIImage new];
+                    NSLog(@"string contains proceed!");
+                }
 
-                // Set routestep label with appropriate distance (miles or feet).
+                // Find the right units for the distance string
+                NSString *distanceString = [NSString new];
+                if ([[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] < 170.0f) {
+                    CGFloat distance = [[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] * 3.28084;
+                    distanceString = [NSString stringWithFormat:@"%.0f feet", distance];
+                }
+                else {
+                    CGFloat distance = [[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] * 0.000621371;
+                    distanceString = [NSString stringWithFormat:@"%.01f miles", distance];
+                }
+
+                // The first element of the leg of route always has 0.0 distance, so don't display it
                 if ([[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] == 0.0f) {
                     self.routeStepLabel.text = [[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"instructions"];
                 }
-                else {
-                    NSString *distanceString = [NSString new];
-                    if ([[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] < 170.0f) {
-                        CGFloat distance = [[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] * 3.28084;
-                        distanceString = [NSString stringWithFormat:@"%.0f feet", distance];
-                    }
-                    else {
-                        CGFloat distance = [[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"distance"] floatValue] * 0.000621371;
-                        distanceString = [NSString stringWithFormat:@"%.01f miles", distance];
-                    }
-                    NSString *string =[NSString stringWithFormat:@"%@\nin\n%@", [[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"instructions"], distanceString];
-                    self.routeStepLabel.text = string;
+                // Keep "the destination" if it's the last element in the array, else replace with 'Divvy Station'
+                else if (![[self.routeDictionaries objectAtIndex:self.swipeIndex] isEqual:[self.routeDictionaries lastObject]]) {
+                    // Find the instructions string
+                    NSString *instructions = [[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"instructions"];
+
+                    // Replace upper case "The destination"
+                    NSString *instructionsNew = [instructions stringByReplacingOccurrencesOfString:@"The destination" withString:@"Divvy Station"];
+
+                    // Replace lower case "the destination"
+                    NSString *instructionsNew2 = [instructionsNew stringByReplacingOccurrencesOfString:@"the destination" withString:@"Divvy Station"];
+
+                    self.routeStepLabel.text = [NSString stringWithFormat:@"%@\nin\n%@", instructionsNew2, distanceString];
                 }
-                
+                else {
+                    self.routeStepLabel.text = [NSString stringWithFormat:@"%@\nin\n%@", [[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"instructions"], distanceString];
+                }
+
                 // Find the transport type and set the appropriate imagview and background color.
                 if ([[[self.routeDictionaries objectAtIndex:self.swipeIndex] objectForKey:@"transportType"] isEqualToString:@"walking"])
                 {
@@ -252,6 +356,15 @@
                 else {
                     self.view.backgroundColor = [UIColor divvyColor];
                     self.transportTypeImageView.image = [UIImage imageNamed:@"bicycle"];
+                }
+
+                // If its the Divvy Step
+                if ([self.routeStepLabel.text rangeOfString:@"Divvy"].location == NSNotFound) {
+                    NSLog(@"string does not contain Divvy");
+                }
+                else {
+                    self.transportTypeImageView.image = [UIImage imageNamed:@"DivvyLogo"];
+                    self.view.backgroundColor = [UIColor blackColor];
                 }
             }
         }

@@ -25,7 +25,12 @@
 
     self.navigationItem.title = @"Divvy & Conquer";
     [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
-    self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(self.view.frame.origin.x, self.view.frame.origin.x, self.view.frame.size.width, self.view.frame.size.height)];
+
+    CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
+    CGFloat navBarHeight = self.navigationController.navigationBar.frame.size.height;
+    CGFloat tabBarHeight = self.tabBarController.tabBar.frame.size.height;
+
+    self.webView = [[UIWebView alloc] initWithFrame:CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y + navBarHeight + statusBarHeight, self.view.frame.size.width, self.view.frame.size.height - (navBarHeight - statusBarHeight - tabBarHeight))];
     [self.view addSubview:self.webView];
     self.webView.delegate = self;
 

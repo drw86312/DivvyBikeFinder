@@ -125,7 +125,7 @@
     self.titleLabel.textColor = [UIColor whiteColor];
     [self.backgroundView addSubview:self.titleLabel];
 
-    verticalOffset = verticalOffset + self.titleLabel.frame.size.height + spacing;
+    verticalOffset = verticalOffset + self.titleLabel.frame.size.height + (spacing/2);
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -186,7 +186,7 @@
                 action:@selector(button5Selected:)
       forControlEvents:UIControlEventTouchUpInside];
 
-    verticalOffset += self.button1.frame.size.height + (2 *spacing);
+    verticalOffset += self.button1.frame.size.height + (2.5 *spacing);
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
