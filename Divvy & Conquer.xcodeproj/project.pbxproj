@@ -41,6 +41,7 @@
 		0E0819E51991E74000CBF509 /* DivvyData.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0819E41991E74000CBF509 /* DivvyData.m */; };
 		0E0819E81991E77600CBF509 /* DataViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0819E71991E77600CBF509 /* DataViewController.m */; };
 		0E0819EA1991F41A00CBF509 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E0819E91991F41A00CBF509 /* CoreData.framework */; };
+		0E0819ED19929B4C00CBF509 /* RouteDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0819EC19929B4C00CBF509 /* RouteDetailsViewController.m */; };
 		0E0FD84C196CA40A00A26E2B /* DestinationAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E0FD84B196CA40A00A26E2B /* DestinationAnnotation.m */; };
 		0E1E759419809A2A00357F31 /* SearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E1E759319809A2A00357F31 /* SearchViewController.m */; };
 		0E4A5B4D196B30CB00273EA6 /* DivvyBikeAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A5B4C196B30CB00273EA6 /* DivvyBikeAnnotation.m */; };
@@ -160,6 +161,8 @@
 		0E0819E61991E77600CBF509 /* DataViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataViewController.h; sourceTree = "<group>"; };
 		0E0819E71991E77600CBF509 /* DataViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataViewController.m; sourceTree = "<group>"; };
 		0E0819E91991F41A00CBF509 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		0E0819EB19929B4C00CBF509 /* RouteDetailsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RouteDetailsViewController.h; sourceTree = "<group>"; };
+		0E0819EC19929B4C00CBF509 /* RouteDetailsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RouteDetailsViewController.m; sourceTree = "<group>"; };
 		0E0FD84A196CA40A00A26E2B /* DestinationAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DestinationAnnotation.h; path = ../DestinationAnnotation.h; sourceTree = "<group>"; };
 		0E0FD84B196CA40A00A26E2B /* DestinationAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DestinationAnnotation.m; path = ../DestinationAnnotation.m; sourceTree = "<group>"; };
 		0E1E759219809A2A00357F31 /* SearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchViewController.h; sourceTree = "<group>"; };
@@ -419,6 +422,8 @@
 				0E4A5B61196B4E4D00273EA6 /* MapViewController.m */,
 				0E1E759219809A2A00357F31 /* SearchViewController.h */,
 				0E1E759319809A2A00357F31 /* SearchViewController.m */,
+				0E0819EB19929B4C00CBF509 /* RouteDetailsViewController.h */,
+				0E0819EC19929B4C00CBF509 /* RouteDetailsViewController.m */,
 				0E08198B1986F3AB00CBF509 /* TimerViewController.h */,
 				0E08198C1986F3AB00CBF509 /* TimerViewController.m */,
 				0E4A5B57196B462600273EA6 /* StationDetailViewController.h */,
@@ -652,6 +657,7 @@
 				0E056B9519848664001BD53D /* UIColor+DesignColors.m in Sources */,
 				0EB1617B19440CB900A2F96B /* DivvyStation.m in Sources */,
 				0E0819D719897F3100CBF509 /* UIImageView+HighlightedWebCache.m in Sources */,
+				0E0819ED19929B4C00CBF509 /* RouteDetailsViewController.m in Sources */,
 				0E081996198824E500CBF509 /* YelpLocation.m in Sources */,
 				0E0819A1198830AB00CBF509 /* ShopAnnotation.m in Sources */,
 				0E0819E81991E77600CBF509 /* DataViewController.m in Sources */,

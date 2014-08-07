@@ -17,6 +17,7 @@
 + (UIFont *)smallMediumFontBold;
 + (UIFont *)mediumFontBold;
 + (UIFont *)bigFontBold;
++ (UIFont *)bigHugeFontBold;
 + (UIFont *)hugeFont;
 + (UIFont *)hugeFontBold;
 

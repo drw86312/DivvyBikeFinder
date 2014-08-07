@@ -19,6 +19,7 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import <QuartzCore/QuartzCore.h>
 #import "StationDetailViewController.h"
+#import "RouteDetailsViewController.h"
 
 @interface SearchViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate>
 
@@ -30,9 +31,7 @@
 @property NSArray *divvyStations;
 @property NSArray *stationsNearOrigin;
 @property NSArray *stationsNearDestination;
-@property NSArray *bikerouteSteps;
-@property NSArray *walkrouteSteps1;
-@property NSArray *walkrouteSteps2;
+@property NSMutableArray *routeDictionaries;
 @property NSString *userLocationString;
 @property NSString *userDestinationString;
 @property NSString *walkRoute1DistanceString;
@@ -59,6 +58,7 @@
 @property CGFloat distanceCounter;
 @property CGFloat etaCounter;
 @property NSInteger toggleIndex;
+@property NSDictionary *selectedRouteDictionary;
 
 @end
 
@@ -661,13 +661,16 @@
                 NSLog(@"Route 1 found");
                 NSArray *routeItems1 = response.routes;
                 self.walkRoute1 = [routeItems1 firstObject];
-                self.walkrouteSteps1 = self.walkRoute1.steps;
                 self.etaCounter += self.walkRoute1.expectedTravelTime;
                 NSLog(@"Route 1 Expected Travel time minutes: %.0f", self.walkRoute1.expectedTravelTime/60);
-
+                self.routeDictionaries = [NSMutableArray new];
                 CGFloat walkRoute1Distance = 0.0f;
-                    for (MKRouteStep *routeStep in self.walkrouteSteps1) {
+                    for (MKRouteStep *routeStep in self.walkRoute1.steps) {
                         walkRoute1Distance += routeStep.distance;
+                        NSNumber *distance = [NSNumber numberWithFloat:routeStep.distance];
+                        NSDictionary *dictionary = [[NSDictionary alloc] initWithObjectsAndKeys:routeStep.instructions, @"instructions",
+                        distance, @"distance", @"walking", @"transportType",nil];
+                        [self.routeDictionaries addObject:dictionary];
                     }
                 self.walkRoute1DistanceString = [NSString stringWithFormat:@"%.01f", walkRoute1Distance * 0.000621371];
                 self.distanceCounter +=walkRoute1Distance;
@@ -691,13 +694,15 @@
                 NSLog(@"Route 2 found");
                 NSArray *routeItems2 = response.routes;
                 self.bikeRoute = [routeItems2 firstObject];
-                self.bikerouteSteps = self.bikeRoute.steps;
                 // Assumes cycling is about 3 times faster than walking (approx. biking speed assumption is between 9.0-9.5 MPH)
                 self.etaCounter += (self.bikeRoute.expectedTravelTime/3);
                 NSLog(@"Route 2 Expected Travel time minutes: %.0f", self.bikeRoute.expectedTravelTime/60/3);
                 CGFloat bikingDistance = 0.0f;
-                    for (MKRouteStep *routeStep in self.bikerouteSteps) {
+                    for (MKRouteStep *routeStep in self.bikeRoute.steps) {
                         bikingDistance += routeStep.distance;
+                        NSNumber *distance = [NSNumber numberWithFloat:routeStep.distance];
+                        NSDictionary *dictionary = [[NSDictionary alloc] initWithObjectsAndKeys:routeStep.instructions, @"instructions", distance, @"distance", @"biking", @"transportType", nil];
+                        [self.routeDictionaries addObject:dictionary];
                         }
                 self.bikeRouteDistanceString = [NSString stringWithFormat:@"%.01f", bikingDistance * 0.000621371];
                 self.distanceCounter += bikingDistance;
@@ -719,12 +724,14 @@
                     NSLog(@"Route 3 found");
                     NSArray *routeItems3 = response.routes;
                     self.walkroute2 = [routeItems3 firstObject];
-                    self.walkrouteSteps2 = self.walkroute2.steps;
                     self.etaCounter += (self.walkroute2.expectedTravelTime);
                     NSLog(@"Route 3 Expected Travel time minutes: %.0f", self.walkroute2.expectedTravelTime/60);
                     CGFloat walkRoute2Distance = 0.0f;
-                        for (MKRouteStep *routeStep in self.walkrouteSteps2) {
+                        for (MKRouteStep *routeStep in self.walkroute2.steps) {
                             walkRoute2Distance += routeStep.distance;
+                            NSNumber *distance = [NSNumber numberWithFloat:routeStep.distance];
+                            NSDictionary *dictionary = [[NSDictionary alloc] initWithObjectsAndKeys:routeStep.instructions, @"instructions",distance, @"distance", @"walking", @"transportType", nil];
+                            [self.routeDictionaries addObject:dictionary];
                         }
 
                     self.walkRoute2DistanceString = [NSString stringWithFormat:@"%.01f", walkRoute2Distance * 0.000621371];
@@ -827,7 +834,7 @@
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-        return 6;
+        return 4;
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -841,17 +848,8 @@
     else if (section == 2) {
         return self.stationsNearDestination.count;
         }
-    else if (section == 3) {
-        return self.walkrouteSteps1.count;
-    }
-    else if (section == 4) {
-        return self.bikerouteSteps.count;
-    }
-    else if (section == 5) {
-        return self.walkrouteSteps2.count;
-    }
     else {
-        return 0;
+        return self.routeDictionaries.count;
     }
 }
 
@@ -962,129 +960,58 @@
         }
 
     // Tableview cells with walking directions for the first leg of the trip
-        else if (indexPath.section == 3) {
+        else  {
             RouteTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"routecell"];
-            MKRouteStep *routeStep = [self.walkrouteSteps1 objectAtIndex:indexPath.row];
+            NSDictionary *dictionary = [self.routeDictionaries objectAtIndex:indexPath.row];
 
-            // If distance is less than 0.1 mile, display feet.
-            NSString *distanceString = [NSString new];
-            if (routeStep.distance < 170.0f) {
-                CGFloat distance = routeStep.distance * 3.28084;
-                distanceString = [NSString stringWithFormat:@"%.0f feet", distance];
-            }
-            else {
-                CGFloat distance = routeStep.distance * 0.000621371;
-                distanceString = [NSString stringWithFormat:@"%.01f miles", distance];
-            }
+            cell.stepLabel.font = [UIFont bigFont];
+            cell.stepLabel.textColor = [UIColor whiteColor];
 
-            // First element in a routeSteps array always has distance 0.00, so not necessary to display it.
-            if ([routeStep isEqual:[self.walkrouteSteps1 firstObject]]) {
-                cell.stepLabel.text = [NSString stringWithFormat:@"%@", routeStep.instructions];
-                }
-
-            // Last element in a routeSteps array says "The destination". I want "The destination" to be replaced by "Divvy Station"
-            else if ([routeStep isEqual:[self.walkrouteSteps1 lastObject]]) {
-
-                // Find the instructions string
-                NSString *instructions = [[self.walkrouteSteps1 lastObject] instructions];
-
-                // Replace upper case "The destination"
-                NSString *instructionsNew = [instructions stringByReplacingOccurrencesOfString:@"The destination" withString:@"Divvy Station"];
-
-                // Replace lower case "the destination"
-                NSString *instructionsNew2 = [instructionsNew stringByReplacingOccurrencesOfString:@"the destination" withString:@"Divvy Station"];
-
-                // Set cell label text by adding distance to the end of the reformatted instructions
-                cell.stepLabel.text = [instructionsNew2 stringByAppendingString:[NSString stringWithFormat:@" in %@", distanceString]];
-            }
-
-            else {
-                cell.stepLabel.text = [NSString stringWithFormat:@"%@ in %@", routeStep.instructions, distanceString];
-            }
-                cell.stepLabel.font = [UIFont mediumFont];
-                cell.transportModeImageView.image = [UIImage imageNamed:@"Walking"];
+            if ([[dictionary objectForKey:@"transportType"] isEqualToString:@"walking"]) {
                 cell.backgroundColor = [UIColor walkRouteColor];
-                cell.stepLabel.textColor = [UIColor whiteColor];
-            return cell;
-        }
-
-    // Tableview cells with cycling directions.
-        else if (indexPath.section == 4)
-        {
-            RouteTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"routecell"];
-            MKRouteStep *routeStep = [self.bikerouteSteps objectAtIndex:indexPath.row];
-
-            // If distance is less than 0.1 mile, display feet.
-            NSString *distanceString = [NSString new];
-            if (routeStep.distance < 170.0f) {
-                CGFloat distance = routeStep.distance * 3.28084;
-                distanceString = [NSString stringWithFormat:@"%.0f feet", distance];
+                cell.transportModeImageView.image = [UIImage imageNamed:@"Walking"];
             }
             else {
-                CGFloat distance = routeStep.distance * 0.000621371;
-                distanceString = [NSString stringWithFormat:@"%.01f miles", distance];
-            }
-
-            // First element in a routeSteps array always has distance 0.00, so not necessary to display it.
-            if ([routeStep isEqual:[self.bikerouteSteps firstObject]]) {
-                cell.stepLabel.text = [NSString stringWithFormat:@"%@", routeStep.instructions];
-            }
-
-            // Last element in a routeSteps array says "The destination". I want "The destination" to be replaced by "Divvy Station"
-            else if ([routeStep isEqual:[self.bikerouteSteps lastObject]]) {
-
-                // Find the instructions string
-                NSString *instructions = [[self.bikerouteSteps lastObject] instructions];
-
-                // Replace upper case "The destination"
-                NSString *instructionsNew = [instructions stringByReplacingOccurrencesOfString:@"The destination" withString:@"Divvy Station"];
-
-                // Replace lower case "the destination"
-                NSString *instructionsNew2 = [instructionsNew stringByReplacingOccurrencesOfString:@"the destination" withString:@"Divvy Station"];
-
-                // Set cell label text by adding distance to the end of the reformatted instructions
-                cell.stepLabel.text = [instructionsNew2 stringByAppendingString:[NSString stringWithFormat:@" in %@", distanceString]];
-            }
-
-            else {
-                cell.stepLabel.text = [NSString stringWithFormat:@"%@ in %@ ", routeStep.instructions, distanceString];
-            }
-                cell.stepLabel.font = [UIFont mediumFont];
-                cell.transportModeImageView.image = [UIImage imageNamed:@"bicycle"];
                 cell.backgroundColor = [UIColor divvyColor];
-                cell.stepLabel.textColor = [UIColor whiteColor];
-            return cell;
-        }
+                cell.transportModeImageView.image = [UIImage imageNamed:@"bicycle"];
+            }
 
-    // Tableview cells with walking directions for the last leg of the trip.
-        else {
-            RouteTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"routecell"];
-            MKRouteStep *routeStep = [self.walkrouteSteps2 objectAtIndex:indexPath.row];
-
-            // If distance is less than 0.1 mile, display feet.
             NSString *distanceString = [NSString new];
-            if (routeStep.distance < 170.0f) {
-                CGFloat distance = routeStep.distance * 3.28084;
+            if ([[dictionary objectForKey:@"distance"] floatValue] < 170.0f) {
+                CGFloat distance = [[dictionary objectForKey:@"distance"] floatValue] * 3.28084;
                 distanceString = [NSString stringWithFormat:@"%.0f feet", distance];
             }
             else {
-                CGFloat distance = routeStep.distance * 0.000621371;
+                CGFloat distance = [[dictionary objectForKey:@"distance"] floatValue] * 0.000621371;
                 distanceString = [NSString stringWithFormat:@"%.01f miles", distance];
             }
 
             // First element in a routeSteps array always has distance 0.00, so not necessary to display it.
-            if ([routeStep isEqual:[self.walkrouteSteps2 firstObject]]) {
-                cell.stepLabel.text = [NSString stringWithFormat:@"%@", routeStep.instructions];
+            if ([[dictionary objectForKey:@"distance"] floatValue] == 0.0f) {
+                cell.stepLabel.text = [dictionary objectForKey:@"instructions"];
+            }
+
+            // Last element in a routeSteps array says "The destination". I want "The destination" to be replaced by "Divvy Station"
+            else if ([dictionary isEqual:[self.routeDictionaries lastObject]]) {
+
+                // Find the instructions string
+                NSString *instructions = [dictionary objectForKey:@"instructions"];
+
+                // Replace upper case "The destination"
+                NSString *instructionsNew = [instructions stringByReplacingOccurrencesOfString:@"The destination" withString:@"Divvy Station"];
+
+                // Replace lower case "the destination"
+                NSString *instructionsNew2 = [instructionsNew stringByReplacingOccurrencesOfString:@"the destination" withString:@"Divvy Station"];
+
+                // Set cell label text by adding distance to the end of the reformatted instructions
+                cell.stepLabel.text = [instructionsNew2 stringByAppendingString:[NSString stringWithFormat:@" in %@", distanceString]];
             }
             else {
-                cell.stepLabel.text = [NSString stringWithFormat:@"%@ in %@", routeStep.instructions, distanceString];
+                cell.stepLabel.text = [NSString stringWithFormat:@"%@ in %@", [dictionary objectForKey:@"instructions"], distanceString];
             }
-                cell.stepLabel.font = [UIFont mediumFont];
-                cell.transportModeImageView.image = [UIImage imageNamed:@"Walking"];
-                cell.backgroundColor = [UIColor walkRouteColor];
-                cell.stepLabel.textColor = [UIColor whiteColor];
-            return cell;
-        }
+
+        return cell;
+     }
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -1099,14 +1026,36 @@
         return 80.0f;
     }
     else {
-        return 45.0f;
+        return 75.0f;
     }
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
+    if (section == 3) {
+        return 35.0f;
+    }
+    else{
         return 0.0f;
+    }
 }
+-(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, 30)];
+    /* Create custom view to display section header... */
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(10, 5, tableView.frame.size.width, 30)];
+    [label setFont:[UIFont bigFontBold]];
+    NSString *string = @"Directions";
+    /* Section header is in 0th index... */
+    [label setText:string];
+    [label setTextColor:[UIColor whiteColor]];
+    [label setTextAlignment:NSTextAlignmentCenter];
+    [view addSubview:label];
+    [view setBackgroundColor:[UIColor blackColor]];
+    return view;
+}
+
+
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -1118,17 +1067,28 @@
         self.selectedStation = [self.stationsNearDestination firstObject];
         [self performSegueWithIdentifier:@"station" sender:self];
     }
-
+    else
+    {
+        self.selectedRouteDictionary = [self.routeDictionaries objectAtIndex:indexPath.row];
+        [self performSegueWithIdentifier:@"routedetails" sender:self];
+    }
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
+    if ([segue.identifier isEqualToString:@"station"]) {
     DivvyStation *station = self.selectedStation;
     StationDetailViewController *detailViewController = segue.destinationViewController;
     detailViewController.stationFromSourceVC = station;
     detailViewController.userLocationFromSourceVC = self.userLocation;
     detailViewController.userLocationStringFromSource = self.userLocationString;
+    }
+    else if ([segue.identifier isEqualToString:@"routedetails"]) {
+        RouteDetailsViewController *detailViewController = segue.destinationViewController;
+        detailViewController.routeDictionaries = self.routeDictionaries;
+        detailViewController.selectedRouteDictionary = self.selectedRouteDictionary;
+    }
 }
 
 #pragma mark - mapview methods
@@ -1299,7 +1259,7 @@ calloutAccessoryControlTapped:(UIControl *)control
     self.activityIndicator.color = [UIColor divvyColor];
 
     //Tableview
-    self.tableView.separatorColor = [UIColor divvyColor];
+    self.tableView.separatorColor = [UIColor blackColor];
     self.tableView.backgroundColor = [UIColor divvyColor];
 
     //Cancel button

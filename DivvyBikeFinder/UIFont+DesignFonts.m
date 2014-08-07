@@ -60,4 +60,9 @@
     return [UIFont fontWithName:@"STHeitiTC-Medium" size:50.0f];
 }
 
++ (UIFont *)bigHugeFontBold
+{
+    return [UIFont fontWithName:@"STHeitiTC-Medium" size:32.0f];
+}
+
 @end
