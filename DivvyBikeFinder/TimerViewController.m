@@ -42,8 +42,20 @@
 {
     [super viewDidLoad];
 
-    self.navigationItem.title = @"Divvy & Conquer";
-    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
+    // Set navigation bar title label
+    CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
+    CGFloat navBarHeight = self.navigationController.navigationBar.frame.size.height;
+    CGFloat labelWidth = 200.0f;
+    CGFloat labelHeight = 25.0f;
+    CGFloat horizontalOffset = (self.view.frame.size.width/2) - (labelWidth/2);
+    CGFloat verticalOffset = statusBarHeight + (navBarHeight/2);
+    UILabel *navigationBarLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
+
+    navigationBarLabel.text = @"Divvy & Conquer";
+    navigationBarLabel.textColor = [UIColor whiteColor];
+    navigationBarLabel.textAlignment = NSTextAlignmentCenter;
+    navigationBarLabel.font = [UIFont bigFontBold];
+    self.navigationItem.titleView = navigationBarLabel;
 
     // Set up notification center observers for updating timer after the app re-enters foreground.
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillEnterInBackGround) name:UIApplicationWillResignActiveNotification object:nil];

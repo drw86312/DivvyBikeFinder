@@ -8,6 +8,7 @@
 
 #import "StationDetailViewController.h"
 #import "DivvyBikeAnnotation.h"
+#import "UserSearchAnnotation.h"
 #import "UIColor+DesignColors.h"
 #import "UIFont+DesignFonts.h"
 #import "WebviewViewController.h"
@@ -24,8 +25,11 @@
 #import <QuartzCore/QuartzCore.h>
 #import "TDOAuth.h"
 
-@interface StationDetailViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UITableViewDataSource, UITableViewDelegate>
+@interface StationDetailViewController () <CLLocationManagerDelegate, MKMapViewDelegate, UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate>
 
+@property UIButton *cancelButton;
+@property UIButton *searchButton;
+@property UITextField *searchTextField;
 @property CLLocationManager *locationManager;
 @property UIView *backgroundView;
 @property NSMutableArray *buttonsArray;
@@ -59,6 +63,7 @@
 @property BOOL shopSearch;
 @property BOOL sightseeSearch;
 @property BOOL musicSearch;
+@property BOOL searchSelected;
 
 @end
 
@@ -76,14 +81,63 @@
     [self makeViews];
     [self findNeighborhoods];
 
-    self.navigationItem.title = self.stationFromSourceVC.stationName;
-    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
+
+    // Create the right bar button search button.
+    self.searchButton = [[UIButton alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 25.0f, 25.0f)];
+    [_searchButton setImage:[UIImage imageNamed:@"search"] forState:UIControlStateNormal];
+    [_searchButton setTintColor:[UIColor divvyColor]];
+    [_searchButton addTarget:self
+                     action:@selector(searchButtonSelected:)
+           forControlEvents:UIControlEventTouchUpInside];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_searchButton];
+
+    // Create the right bar button cancel button.
+    self.cancelButton = [[UIButton alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 60.0f, 31.0f)];
+    [_cancelButton setTitleColor:[UIColor divvyColor] forState:UIControlStateNormal];
+    [_cancelButton setTitle:@"Cancel" forState:UIControlStateNormal];
+    _cancelButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+    _cancelButton.titleLabel.font = [UIFont smallFontBold];
+    _cancelButton.layer.cornerRadius = 5.0f;
+    _cancelButton.layer.borderWidth = 1.0f;
+    _cancelButton.layer.borderColor = [[UIColor divvyColor] CGColor];
+    [_cancelButton addTarget:self
+                     action:@selector(cancelButtonSelected:)
+           forControlEvents:UIControlEventTouchUpInside];
+
+
+    // Create the search textfield
+    CGRect textFieldFrame = CGRectMake(0.0f, 0.0f, 220.0f, 31.0f);
+    self.searchTextField = [[UITextField alloc] initWithFrame:textFieldFrame];
+    self.searchTextField.placeholder = @"Search locations";
+    self.searchTextField.backgroundColor = [UIColor whiteColor];
+    self.searchTextField.textColor = [UIColor divvyColor];
+    self.searchTextField.font = [UIFont smallFont];
+    self.searchTextField.borderStyle = UITextBorderStyleRoundedRect;
+    self.searchTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+    self.searchTextField.returnKeyType = UIReturnKeyDone;
+    self.searchTextField.delegate = self;
+
+
+    // Set navigation bar title label
+    CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
+    CGFloat navBarHeight = self.navigationController.navigationBar.frame.size.height;
+    CGFloat labelWidth = 200.0f;
+    CGFloat labelHeight = 25.0f;
+    CGFloat horizontalOffset = (self.view.frame.size.width/2) - (labelWidth/2);
+    CGFloat verticalOffset = statusBarHeight + (navBarHeight/2);
+    UILabel *navigationBarLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
+
+    navigationBarLabel.text = self.stationFromSourceVC.stationName;
+    navigationBarLabel.textColor = [UIColor whiteColor];
+    navigationBarLabel.textAlignment = NSTextAlignmentCenter;
+    navigationBarLabel.font = [UIFont bigFontBold];
+    self.navigationItem.titleView = navigationBarLabel;
+
     self.navigationController.navigationBar.tintColor = [UIColor divvyColor];
-
     self.tableView.separatorColor = [UIColor walkRouteColor];
-
     self.view.backgroundColor = [UIColor walkRouteColor];
     self.blockerView.backgroundColor = [UIColor walkRouteColor];
+    self.searchSelected = NO;
 }
 
 -(void)makeViews
@@ -247,13 +301,69 @@
 
 #pragma mark - Explore buttons
 
+
+-(void)cancelButtonSelected:(id)sender
+{
+    self.navigationItem.titleView.hidden = NO;
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_searchButton];
+    self.navigationItem.leftBarButtonItem = nil;
+}
+
+-(void)searchButtonSelected:(id)sender
+{
+    self.navigationItem.titleView.hidden = YES;
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:self.searchTextField];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_cancelButton];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    if (self.searchTextField.text.length > 0) {
+        //Set API call parameters
+        self.searchTerm = self.searchTextField.text;
+        self.sortType = @0;
+
+        // Remove old map annotations, but add back the Divvy Bike annotation
+        [self.mapView removeAnnotations:self.mapView.annotations];
+        [self setMapViewandPlacePin];
+        [self clearContainerView];
+
+        // Set search text to nil
+        self.searchTextField.text = nil;
+
+        // Disable UI while search occurs
+        [self disableButtons];
+        [self disableSearchBooleans];
+
+        // Make API call
+        [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType andLimit:@1];
+    }
+    else {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Use the field above for nearby locations" message:nil delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        [alert show];
+    }
+
+    self.navigationItem.titleView.hidden = NO;
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_searchButton];
+    self.navigationItem.leftBarButtonItem = nil;
+
+    return YES;
+}
+
+
+
 // When one of these buttons is pushed...1) remove mapview annotations 2) set search boolean to YES 3) disable user interaction of all the buttons, 4) perform API call with relevent search term.
 -(void)button1Selected:(id)sender
 {
+    //Set the navbar look
+    self.navigationItem.titleView.hidden = NO;
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_searchButton];
+    self.navigationItem.leftBarButtonItem = nil;
+
     // Switch button from picture to text.
     [self setButtonImages];
     [self.button1 setImage:[UIImage new] forState:UIControlStateNormal];
-    [self.button1 setTitle:@"Food" forState:UIControlStateNormal];
+    [self.button1 setTitle:@"Eats" forState:UIControlStateNormal];
     [self.button1.titleLabel setFont:[UIFont mediumFont]];
 
     NSLog(@"Food search");
@@ -274,14 +384,19 @@
     [self disableButtons];
 
     // Make Yelp call with the proper parameters
-    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType andLimit:@20];
 }
 
 -(void)button2Selected:(id)sender
 {
+    //Set the navbar look
+    self.navigationItem.titleView.hidden = NO;
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_searchButton];
+    self.navigationItem.leftBarButtonItem = nil;
+
     [self setButtonImages];
     [self.button2 setImage:[UIImage new] forState:UIControlStateNormal];
-    [self.button2 setTitle:@"Bars" forState:UIControlStateNormal];
+    [self.button2 setTitle:@"Drinks" forState:UIControlStateNormal];
     [self.button2.titleLabel setFont:[UIFont mediumFont]];
 
     NSLog(@"Bar search");
@@ -302,11 +417,16 @@
     [self disableButtons];
 
     // Make Yelp call with the proper parameters
-    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType andLimit:@20];
 }
 
 -(void)button3Selected:(id)sender
 {
+    //Set the navbar look
+    self.navigationItem.titleView.hidden = NO;
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_searchButton];
+    self.navigationItem.leftBarButtonItem = nil;
+
     [self setButtonImages];
     [self.button3 setImage:[UIImage new] forState:UIControlStateNormal];
     [self.button3 setTitle:@"Shop" forState:UIControlStateNormal];
@@ -330,11 +450,16 @@
     [self disableButtons];
 
     // Make Yelp call with the proper parameters
-    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType andLimit:@20];
 }
 
 -(void)button4Selected:(id)sender
 {
+    //Set the navbar look
+    self.navigationItem.titleView.hidden = NO;
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_searchButton];
+    self.navigationItem.leftBarButtonItem = nil;
+
     [self setButtonImages];
     [self.button4 setImage:[UIImage new] forState:UIControlStateNormal];
     [self.button4 setTitle:@"Sights" forState:UIControlStateNormal];
@@ -357,11 +482,16 @@
     [self disableButtons];
 
     // Make Yelp call with the proper parameters
-    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType andLimit:@20];
 }
 
 -(void)button5Selected:(id)sender
 {
+    //Set the navbar look
+    self.navigationItem.titleView.hidden = NO;
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_searchButton];
+    self.navigationItem.leftBarButtonItem = nil;
+
     [self setButtonImages];
     [self.button5 setImage:[UIImage new] forState:UIControlStateNormal];
     [self.button5 setTitle:@"Music" forState:UIControlStateNormal];
@@ -385,7 +515,7 @@
     [self disableButtons];
 
     // Make Yelp call with the proper parameters
-    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType andLimit:@20];
 }
 
 #pragma mark - map/location manager methods
@@ -556,6 +686,26 @@
         annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
         return annotationView;
     }
+
+    else if ([annotation isKindOfClass:[UserSearchAnnotation class]]) {
+        UserSearchAnnotation *searchAnnotation = annotation;
+        static NSString *annotationIdentifier = @"MyAnnotation";
+        MKAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:annotationIdentifier];
+
+        if (!annotationView) {
+            annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:annotationIdentifier];
+            annotationView.canShowCallout = YES;
+            annotationView.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+        }
+        else {
+            annotationView.annotation = annotation;
+        }
+        annotationView.image = [UIImage imageNamed:searchAnnotation.imageName];
+        annotationView.frame = CGRectMake(0, 0, 30, 30);
+        annotationView.layer.cornerRadius = annotationView.frame.size.width/2;
+        return annotationView;
+    }
+
     else {
         return nil;
     }
@@ -659,7 +809,7 @@ calloutAccessoryControlTapped:(UIControl *)control
 
 #pragma mark - Yelp API call methods
 
--(void)makeYelpAPICallwithTerm:(NSString *)term andSortType:(NSNumber *) sortType
+-(void)makeYelpAPICallwithTerm:(NSString *)term andSortType:(NSNumber *) sortType andLimit:(NSNumber *) limit
 {
     // Start the activity indicator
     self.activityIndicator.hidden = NO;
@@ -673,7 +823,7 @@ calloutAccessoryControlTapped:(UIControl *)control
     NSLog(@"Search term: %@", term);
     NSLog(@"Sort type: %@", sortType);
 
-    self.request = [TDOAuth URLRequestForPath:@"/v2/search" GETParameters:@{@"term": term, @"ll": [NSString stringWithFormat:@"%@,%@", self.stationFromSourceVC.latitude, self.stationFromSourceVC.longitude], @"limit" : @20, @"sort" : sortType}
+    self.request = [TDOAuth URLRequestForPath:@"/v2/search" GETParameters:@{@"term": term, @"ll": [NSString stringWithFormat:@"%@,%@", self.stationFromSourceVC.latitude, self.stationFromSourceVC.longitude], @"limit" : limit, @"sort" : sortType}
                                          host:@"api.yelp.com"
                                   consumerKey:@"LdaQSTTYqZuYXrta5vVAgw"
                                consumerSecret:@"k6KpVPXHSykD8aQXSXqdi7GboMY"
@@ -1017,6 +1167,12 @@ calloutAccessoryControlTapped:(UIControl *)control
     if (self.yelpLocations.count < 1) {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:@"Oops! could not find %@ in this area", self.searchTerm] message:@"Please try again" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
         [alert show];
+        [self disableSearchBooleans];
+        [self enableButtons];
+
+        // Stop the activity indicator
+        self.activityIndicator.hidden = YES;
+        [self.activityIndicator stopAnimating];
     }
     else {
         NSLog(@"Pins count: %lu", (unsigned long)self.yelpLocations.count);
@@ -1068,7 +1224,7 @@ calloutAccessoryControlTapped:(UIControl *)control
                 sightseeannotation.backgroundColor = [UIColor walkRouteColor];
                 [self.mapView addAnnotation:sightseeannotation];
         }
-            else {
+            else if (self.musicSearch) {
             MusicAnnotation *musicsannotation = [[MusicAnnotation alloc] init];
             musicsannotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
             musicsannotation.title = yelpLocation.name;
@@ -1077,6 +1233,14 @@ calloutAccessoryControlTapped:(UIControl *)control
             musicsannotation.backgroundColor = [UIColor walkRouteColor];
             [self.mapView addAnnotation:musicsannotation];
         }
+            else {
+                UserSearchAnnotation *searchAnnotation = [[UserSearchAnnotation alloc] init];
+                searchAnnotation.coordinate = CLLocationCoordinate2DMake(yelpLocation.latitude, yelpLocation.longitude);
+                searchAnnotation.title = yelpLocation.name;
+                searchAnnotation.subtitle = [NSString stringWithFormat:@"%.01f miles from Divvy Station", yelpLocation.distanceFromStation * 0.000621371];
+                searchAnnotation.imageName = @"logo";
+                [self.mapView addAnnotation:searchAnnotation];
+            }
         }
     }
     // Enable user interaction of buttons, reload tableview, create the mapcontainer view, scale map to fit the annotations, display the segmented control, stop the activity indictor.
@@ -1249,7 +1413,7 @@ calloutAccessoryControlTapped:(UIControl *)control
     NSLog(@"Find nearest button selected");
     // Perform an API call with returned results sorted by distance.
     self.sortType = @1;
-    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType andLimit:@20];
 }
 
 -(void)topRatedSelected:(id)sender
@@ -1269,7 +1433,7 @@ calloutAccessoryControlTapped:(UIControl *)control
     NSLog(@"Find highest rated button selected");
     // Perform an API call with returned results sorted by highest rated.
     self.sortType = @2;
-    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType];
+    [self makeYelpAPICallwithTerm:self.searchTerm andSortType:self.sortType andLimit:@20];
 }
 
 
@@ -1280,6 +1444,9 @@ calloutAccessoryControlTapped:(UIControl *)control
     for (UIButton *button in self.buttonsArray) {
         button.enabled = NO;
     }
+    self.searchTextField.enabled = NO;
+    self.searchButton.enabled = NO;
+    self.cancelButton.enabled = NO;
 }
 
 -(void)enableButtons
@@ -1287,6 +1454,9 @@ calloutAccessoryControlTapped:(UIControl *)control
     for (UIButton *button in self.buttonsArray) {
         button.enabled = YES;
     }
+    self.searchTextField.enabled = YES;
+    self.searchButton.enabled = YES;
+    self.cancelButton.enabled = YES;
 }
 
 -(void)clearContainerView

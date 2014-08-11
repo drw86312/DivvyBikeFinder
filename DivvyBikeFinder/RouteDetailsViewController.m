@@ -26,6 +26,23 @@
     [super viewDidLoad];
     [self createViews];
 
+    // Set navigation bar title label
+    CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
+    CGFloat navBarHeight = self.navigationController.navigationBar.frame.size.height;
+    CGFloat labelWidth = 200.0f;
+    CGFloat labelHeight = 25.0f;
+    CGFloat horizontalOffset = (self.view.frame.size.width/2) - (labelWidth/2);
+    CGFloat verticalOffset = statusBarHeight + (navBarHeight/2);
+    UILabel *navigationBarLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
+
+    navigationBarLabel.text = @"Route Details";
+    navigationBarLabel.textColor = [UIColor whiteColor];
+    navigationBarLabel.textAlignment = NSTextAlignmentCenter;
+    navigationBarLabel.font = [UIFont bigFontBold];
+    self.navigationItem.titleView = navigationBarLabel;
+
+    self.navigationController.navigationBar.tintColor = [UIColor divvyColor];
+
     // Iterate through all the dictionaries until the once matching the one selected by the user is found...
     NSInteger counter = 0;
     for (NSDictionary *dictionary in self.routeDictionaries) {

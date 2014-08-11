@@ -1255,8 +1255,20 @@ calloutAccessoryControlTapped:(UIControl *)control
 
 -(void)setStyle
 {
-    self.navigationItem.title = @"Divvy & Conquer";
-    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
+    // Set navigation bar title label
+    CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
+    CGFloat navBarHeight = self.navigationController.navigationBar.frame.size.height;
+    CGFloat labelWidth = 200.0f;
+    CGFloat labelHeight = 25.0f;
+    CGFloat horizontalOffset = (self.view.frame.size.width/2) - (labelWidth/2);
+    CGFloat verticalOffset = statusBarHeight + (navBarHeight/2);
+    UILabel *navigationBarLabel = [[UILabel alloc] initWithFrame:CGRectMake(horizontalOffset, verticalOffset, labelWidth, labelHeight)];
+
+    navigationBarLabel.text = @"Divvy & Conquer";
+    navigationBarLabel.textColor = [UIColor whiteColor];
+    navigationBarLabel.textAlignment = NSTextAlignmentCenter;
+    navigationBarLabel.font = [UIFont bigFontBold];
+    self.navigationItem.titleView = navigationBarLabel;
 
     //Segmented control
     self.segmentedControl.backgroundColor = [UIColor divvyColor];
@@ -1294,10 +1306,12 @@ calloutAccessoryControlTapped:(UIControl *)control
     // From search bar
     self.fromTextFieldOutlet.layer.cornerRadius = 5.0f;
     [self.fromTextFieldOutlet setTextColor:[UIColor divvyColor]];
+    self.fromTextFieldOutlet.font = [UIFont smallFont];
 
     // To search bar
     self.destinationTextFieldOutlet.layer.cornerRadius = 5.0f;
     [self.destinationTextFieldOutlet setTextColor:[UIColor divvyColor]];
+    self.destinationTextFieldOutlet.font = [UIFont smallFont];
 
     // Background view
     self.view.backgroundColor = [UIColor divvyColor];

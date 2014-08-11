@@ -509,12 +509,6 @@
                     <view key="view" contentMode="scaleToFill" id="n97-eU-PJu">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="bridge" translatesAutoresizingMaskIntoConstraints="NO" id="WRn-LX-A2M">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="573"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                            </imageView>
-                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
                     <navigationItem key="navigationItem" id="8RL-lX-rBe"/>
@@ -552,7 +546,7 @@
         <scene sceneID="BFf-oa-rAh">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="kc6-sX-vIl" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Explore" image="map" id="mNw-Ve-edt"/>
+                    <tabBarItem key="tabBarItem" title="Explore" image="compass" id="mNw-Ve-edt"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="bkP-40-AKv">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
@@ -586,11 +580,11 @@
             </objects>
             <point key="canvasLocation" x="1466" y="-1396"/>
         </scene>
-        <!--Navigation Controller-->
+        <!--Navigation Controller - Routes-->
         <scene sceneID="Fc7-Bw-RmU">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="vjD-zy-tWp" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" systemItem="search" id="YvV-7M-ja4"/>
+                    <tabBarItem key="tabBarItem" title="Routes" image="map" id="YvV-7M-ja4"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="zDm-IY-4GW">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
@@ -628,7 +622,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="bridge" width="213" height="320"/>
+        <image name="compass" width="33" height="33"/>
         <image name="map" width="34" height="28"/>
         <image name="stopwatch" width="28" height="33"/>
     </resources>
