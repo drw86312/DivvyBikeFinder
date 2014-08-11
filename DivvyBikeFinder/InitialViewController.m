@@ -16,13 +16,13 @@
 
 @implementation InitialViewController
 
-
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
     [self setStyle];
 }
+
 
 -(void)viewDidAppear:(BOOL)animated
 {

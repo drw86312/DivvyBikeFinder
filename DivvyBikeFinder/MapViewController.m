@@ -899,7 +899,6 @@ calloutAccessoryControlTapped:(UIControl *)control
     navigationBarLabel.font = [UIFont bigFontBold];
     self.navigationItem.titleView = navigationBarLabel;
 
-
     //Segmented control
     self.segmentedControl.backgroundColor = [UIColor divvyColor];
     self.segmentedControl.tintColor = [UIColor whiteColor];
@@ -918,5 +917,6 @@ calloutAccessoryControlTapped:(UIControl *)control
     //Tab bar
     [self.tabBarController.tabBar setSelectedImageTintColor:[UIColor divvyColor]];
 }
+
 
 @end

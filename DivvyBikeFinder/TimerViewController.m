@@ -104,7 +104,7 @@
 
             // Style start button
             self.startButton.enabled = NO;
-            [self.startButton setTitle:@"Times Up!" forState:UIControlStateNormal];
+            [self.startButton setTitle:@"Time's Up!" forState:UIControlStateNormal];
             [self.startButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
             [self.startButton setBackgroundColor:[UIColor walkRouteColor]];
             self.startButton.layer.borderWidth = 0.0;
