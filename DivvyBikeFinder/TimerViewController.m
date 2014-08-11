@@ -479,7 +479,7 @@
 
     // Make sure there is enough time left on the clock to set the alert.
     if (abs(timeInterval) > self.timeInterval) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Not enough time left on the timer to set that alert" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Not enough time remaining to set that alert" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
         [alert show];
         NSLog(@"Alert time too close to deadline");
     }
@@ -487,7 +487,7 @@
     else {
         NSDate *oneMinToDeadline = [self.deadline dateByAddingTimeInterval:timeInterval];
         self.notification.fireDate = oneMinToDeadline;
-        self.notification.alertBody = @"One minute to timer expiration";
+        self.notification.alertBody = @"One minute remaining";
         self.notification.soundName = UILocalNotificationDefaultSoundName;
         self.notification.timeZone = [NSTimeZone defaultTimeZone];
         [[UIApplication sharedApplication] scheduleLocalNotification:self.notification];
@@ -508,12 +508,12 @@
 
     // Make sure there is enough time left on the clock to set the alert.
     if (abs(timeInterval) > self.timeInterval) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Not enough time left on the timer to set that alert" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Not enough time remaining to set that alert" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
         [alert show];    }
     else {
     NSDate *twoMinToDeadline = [self.deadline dateByAddingTimeInterval:timeInterval];
     self.notification.fireDate = twoMinToDeadline;
-    self.notification.alertBody = @"Two minutes to timer expiration";
+    self.notification.alertBody = @"Two minutes remaining";
     self.notification.soundName = UILocalNotificationDefaultSoundName;
     self.notification.timeZone = [NSTimeZone defaultTimeZone];
     [[UIApplication sharedApplication] scheduleLocalNotification:self.notification];
@@ -534,12 +534,12 @@
 
     // Make sure there is enough time left on the clock to set the alert.
     if (abs(timeInterval) > self.timeInterval) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Not enough time left on the timer to set that alert" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Not enough time remaining to set that alert" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
         [alert show];    }
     else {
         NSDate *fiveMinToDeadline = [self.deadline dateByAddingTimeInterval:timeInterval];
         self.notification.fireDate = fiveMinToDeadline;
-        self.notification.alertBody = @"Five minutes to timer expiration";
+        self.notification.alertBody = @"Five minutes remaining";
         self.notification.soundName = UILocalNotificationDefaultSoundName;
         self.notification.timeZone = [NSTimeZone defaultTimeZone];
         [[UIApplication sharedApplication] scheduleLocalNotification:self.notification];
@@ -560,12 +560,12 @@
 
     // Make sure there is enough time left on the clock to set the alert.
     if (abs(timeInterval) > self.timeInterval) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Not enough time left on the timer to set that alert" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops" message:@"Not enough time remaining to set that alert" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
         [alert show];    }
     else {
         NSDate *tenMinToDeadline = [self.deadline dateByAddingTimeInterval:timeInterval];
         self.notification.fireDate = tenMinToDeadline;
-        self.notification.alertBody = @"Ten minutes to timer expiration";
+        self.notification.alertBody = @"Ten minutes remaining";
         self.notification.soundName = UILocalNotificationDefaultSoundName;
         self.notification.timeZone = [NSTimeZone defaultTimeZone];
         [[UIApplication sharedApplication] scheduleLocalNotification:self.notification];

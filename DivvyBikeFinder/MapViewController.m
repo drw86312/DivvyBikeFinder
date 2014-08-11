@@ -60,50 +60,85 @@
     self.refreshButtonOutlet.enabled = NO;
 
     [self setStyle];
-
-    self.locationManager = [[CLLocationManager alloc] init];
-    self.locationManager.delegate = self;
-    [self.locationManager startUpdatingLocation];
     [self createMapContainerView];
     [self createMapDivvyImageView];
+    [self getJSON];
 }
 
 #pragma mark - Location manager methods
 
 -(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
-    NSLog(@"Locations count: %lu", (unsigned long)locations.count);
     for (CLLocation *location in locations) {
-        if (location.verticalAccuracy < 1000 && location.horizontalAccuracy < 1000) {
+        if (location.verticalAccuracy < 700 && location.horizontalAccuracy < 700) {
             [self.locationManager stopUpdatingLocation];
 
             // Assign userlocation IVar
             self.userLocation = location;
-            [self getJSON];
 
-            // Instantiate chicago location and assign the "distance from chicago" variable
-            CLLocation *chicago = [[CLLocation alloc] initWithLatitude:41.891813 longitude:-87.647343];
-            CGFloat userDistanceFromChicago = [chicago distanceFromLocation:self.userLocation];
+            // If there is a user location assign the distance from user property
+            if (self.userLocation) {
+                NSLog(@"User location found");
+                for (DivvyStation *divvyStation in self.divvyStations) {
+                    // Assign the distance from user property, if there is a user location.
+                    CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:divvyStation.latitude.floatValue longitude:divvyStation.longitude.floatValue];
+                    divvyStation.distanceFromUser = [stationLocation distanceFromLocation:self.userLocation];
+                    }
+                // Sort stations array by distance from user
+                NSArray *tempArray = [NSArray arrayWithArray:self.divvyStations];
+                NSSortDescriptor *distanceDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distanceFromUser" ascending:YES];
+                NSArray *sortDescriptors = @[distanceDescriptor];
+                NSArray *divvyStationsArray = [NSArray arrayWithArray:tempArray];
+                self.divvyStations = [divvyStationsArray sortedArrayUsingDescriptors:sortDescriptors];
 
-            // If user is too far from Chicago, map will default to the Chicago area.
-            // 80,466 meters is 50 miles, approximately.
-            if (userDistanceFromChicago > 80466) {
-                CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(chicago.coordinate.latitude, chicago.coordinate.longitude);
-                MKCoordinateSpan span = MKCoordinateSpanMake(.1, .1);
-                MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
+                // Instantiate chicago location and assign the "distance from chicago" variable
+                CLLocation *chicago = [[CLLocation alloc] initWithLatitude:41.891813 longitude:-87.647343];
+                CGFloat userDistanceFromChicago = [chicago distanceFromLocation:self.userLocation];
                 self.mapView.showsUserLocation = YES;
-                [self.mapView setRegion:region animated:YES];
-                break;
+
+                    // If user is too far from Chicago, map will default to the Chicago area.
+                    // 80,466 meters is 50 miles, approximately.
+                    if (userDistanceFromChicago > 80466) {
+                        NSLog(@"User is not in Chicago");
+                        CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(chicago.coordinate.latitude, chicago.coordinate.longitude);
+                        MKCoordinateSpan span = MKCoordinateSpanMake(.1, .1);
+                        MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
+                        [self.mapView setRegion:region animated:YES];
+                    }
+                    // If user is in Chicago, draw map around their location.
+                    else {
+                        NSLog(@"User is in Chicago");
+                        CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.userLocation.coordinate.latitude, self.userLocation.coordinate.longitude);
+                        MKCoordinateSpan span = MKCoordinateSpanMake(.03, .03);
+                        MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
+                        [self.mapView setRegion:region animated:YES];
+                    }
+                // Call helper method to set station colors, reload the tableview and call method to create map annotations.
+                [self setStationColors:self.divvyStations];
+                [self createMapAnnotations];
+                [self.tableView reloadData];
+
+                // After JSON data has returned stop the activity indicator and enable buttons.
+                self.activityIndicator.hidden = YES;
+                [self.activityIndicator stopAnimating];
+                self.refreshButtonOutlet.enabled = YES;
             }
-            // If user is in Chicago, draw map around their location.
-            else {
-                CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.userLocation.coordinate.latitude, self.userLocation.coordinate.longitude);
-                MKCoordinateSpan span = MKCoordinateSpanMake(.03, .03);
-                MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
-                self.mapView.showsUserLocation = YES;
-                [self.mapView setRegion:region animated:YES];
-                break;
-            }
+            // Else, no user locations returned.
+                else {
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Attention" message:@"Let Divvy & Conquer use your current location for best performance" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                    [alert show];
+                    self.activityIndicator.hidden = YES;
+                    [self.activityIndicator stopAnimating];
+                    self.refreshButtonOutlet.enabled = YES;
+                }
+        }
+        // Else, user location found, but not with sufficient accuracy...
+        else {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Attention" message:@"Let Divvy & Conquer use your current location for best performance" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+            [alert show];
+            self.activityIndicator.hidden = YES;
+            [self.activityIndicator stopAnimating];
+            self.refreshButtonOutlet.enabled = YES;
         }
     }
 }
@@ -122,7 +157,6 @@
 -(void)getJSON
 {
     NSLog(@"Getting JSON");
-
     // Start the activity indicator spinning while waiting for API call to return data.
     self.activityIndicator.hidden = NO;
     [self.activityIndicator startAnimating];
@@ -180,34 +214,18 @@
                  divvyStation.coordinate = CLLocationCoordinate2DMake(divvyStation.latitude.floatValue, divvyStation.longitude.floatValue);
                  divvyStation.annotationSize = 20.0f + (0.5f * (divvyStation.availableBikes.floatValue + divvyStation.availableDocks.floatValue));
 
-                 // Assign the distance from user property, if there is a user location.
-                 if (self.userLocation) {
-                     CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:divvyStation.latitude.floatValue longitude:divvyStation.longitude.floatValue];
-                     divvyStation.distanceFromUser = [stationLocation distanceFromLocation:self.userLocation];
-                    }
-
                  // Add the divvyStation to the temporary array.
                  [tempArray addObject:divvyStation];
                 }
 
-             // Sort the temporary array by distance from the user's location.
-            NSSortDescriptor *distanceDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distanceFromUser" ascending:YES];
-             NSArray *sortDescriptors = @[distanceDescriptor];
-             NSArray *divvyStationsArray = [NSArray arrayWithArray:tempArray];
-
              // Assign the sorted array to the divvyStations ivar array.
-             self.divvyStations = [divvyStationsArray sortedArrayUsingDescriptors:sortDescriptors];
+             self.divvyStations = [NSArray arrayWithArray:tempArray];
 
-             // Call helper method to set station colors, reload the tableview and call method to create map annotations.
-             [self setStationColors:self.divvyStations];
-             [self createMapAnnotations];
-             [self.tableView reloadData];
+             // Find user location..
+             self.locationManager = [[CLLocationManager alloc] init];
+             self.locationManager.delegate = self;
+             [self.locationManager startUpdatingLocation];
             }
-
-         // After JSON data has returned stop the activity indicator and enable buttons.
-         self.activityIndicator.hidden = YES;
-         [self.activityIndicator stopAnimating];
-         self.refreshButtonOutlet.enabled = YES;
     }];
 }
 
@@ -217,7 +235,12 @@
         if (divvyStation.availableBikes.intValue < 1) {
             NoBikesAnnotation *annotation = [[NoBikesAnnotation alloc] init];
             annotation.title = divvyStation.stationName;
-            annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks: %@", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
+                if (divvyStation.distanceFromUser) {
+                    annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks: %@", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
+                }
+                else {
+                    annotation.subtitle = [NSString stringWithFormat:@"Bikes: %@ Docks: %@", divvyStation.availableBikes, divvyStation.availableDocks];
+                }
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"No-Bikes";
             annotation.backgroundColor = [UIColor redColor];
@@ -227,7 +250,12 @@
         else if (divvyStation.availableDocks.intValue < 1) {
             NoDocksAnnotation *annotation = [[NoDocksAnnotation alloc] init];
             annotation.title = divvyStation.stationName;
-            annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks:%@", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
+                if (divvyStation.distanceFromUser) {
+                    annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks: %@", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
+                }
+                else {
+                    annotation.subtitle = [NSString stringWithFormat:@"Bikes: %@ Docks: %@", divvyStation.availableBikes, divvyStation.availableDocks];
+                }
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"No-Docks";
             annotation.backgroundColor = [UIColor greenColor];
@@ -237,7 +265,12 @@
         else {
             DivvyBikeAnnotation *annotation = [[DivvyBikeAnnotation alloc] init];
             annotation.title = divvyStation.stationName;
-            annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks: %@", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
+                if (divvyStation.distanceFromUser) {
+                    annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks: %@", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
+                }
+                else {
+                    annotation.subtitle = [NSString stringWithFormat:@"Bikes: %@ Docks: %@", divvyStation.availableBikes, divvyStation.availableDocks];
+                }
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"Divvy";
             annotation.backgroundColor = divvyStation.bikesColor;
@@ -337,9 +370,7 @@ calloutAccessoryControlTapped:(UIControl *)control
     }
 }
 
-
 #pragma mark - Tableview methods
-
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -371,15 +402,21 @@ calloutAccessoryControlTapped:(UIControl *)control
         cell.docksLabel.layer.borderColor = [[UIColor blackColor] CGColor];
         cell.docksLabel.font = [UIFont mediumFont];
 
+        // If distanceFromUser exists, set proper units (feet or miles).
         NSString *distanceString = [NSString new];
-            if (divvyStation.distanceFromUser < 170.0f) {
-                CGFloat distance = divvyStation.distanceFromUser * 3.28084;
-                distanceString = [NSString stringWithFormat:@"%.0f feet away", distance];
-            }
-            else {
-                CGFloat distance = divvyStation.distanceFromUser * 0.000621371;
-                distanceString = [NSString stringWithFormat:@"%.01f miles away", distance];
-            }
+        if (divvyStation.distanceFromUser) {
+                if (divvyStation.distanceFromUser < 170.0f) {
+                    CGFloat distance = divvyStation.distanceFromUser * 3.28084;
+                    distanceString = [NSString stringWithFormat:@"%.0f feet away", distance];
+                }
+                else {
+                    CGFloat distance = divvyStation.distanceFromUser * 0.000621371;
+                    distanceString = [NSString stringWithFormat:@"%.01f miles away", distance];
+                }
+        }
+        else {
+            distanceString = @"N/A";
+        }
         cell.distanceLabel.text = distanceString;
         cell.distanceLabel.font = [UIFont smallFont];
         return cell;
@@ -765,7 +802,7 @@ calloutAccessoryControlTapped:(UIControl *)control
 -(void)setStationColors:(NSArray *)stationsArray
 {
     // Dynamically update the background color from red -> yellow -> green
-    // Max RGB value = 255.0, the blue color is not in this spectrum, thus it is always 0.
+    // The blue color is not in this spectrum, thus it is always 0.
     CGFloat blue = 0.0f/255.0f;
 
     for (DivvyStation *divvyStation in stationsArray) {

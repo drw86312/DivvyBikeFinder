@@ -285,7 +285,7 @@ static NSString* timestamp() {
     if (postbody.length) {
         [rq setHTTPBody:[postbody dataUsingEncoding:NSUTF8StringEncoding]];
         [rq setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-        [rq setValue:[NSString stringWithFormat:@"%u", rq.HTTPBody.length] forHTTPHeaderField:@"Content-Length"];
+        [rq setValue:[NSString stringWithFormat:@"%lu", (unsigned long)rq.HTTPBody.length] forHTTPHeaderField:@"Content-Length"];
     }
 
     return rq;

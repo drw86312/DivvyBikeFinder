@@ -53,7 +53,6 @@
 @property (weak, nonatomic) IBOutlet UITextField *destinationTextFieldOutlet;
 @property (weak, nonatomic) IBOutlet UIView *tableViewBlockerView;
 @property UIView *mapContainerView;
-@property BOOL currentLocationButtonPressed;
 @property BOOL firstSearch;
 @property CGFloat distanceCounter;
 @property CGFloat etaCounter;
@@ -63,7 +62,6 @@
 @end
 
 @implementation SearchViewController
-
 
 - (void)viewDidLoad
 {
@@ -78,25 +76,18 @@
 
     self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
     self.activityIndicator.frame = CGRectMake((self.view.frame.size.width/2) - (indicatorWidth/2), (self.view.frame.size.height/2) - (indicatorHeight/2), indicatorWidth, indicatorHeight);
-    self.activityIndicator.hidden = YES;
     [self.view addSubview:self.activityIndicator];
 
     // Instantiate a location for the city of Chicago (used for handling cases when users are not in Chicago)
     self.chicago = [[CLLocation alloc] initWithLatitude:41.891813 longitude:-87.647343];
 
-    // Instantiate location manager and start updating user location.
-    self.locationManager = [[CLLocationManager alloc] init];
-    [self.locationManager startUpdatingLocation];
-
     // Set delegates
     self.destinationTextFieldOutlet.delegate = self;
     self.fromTextFieldOutlet.delegate = self;
-    self.locationManager.delegate = self;
 
     // Set correct views to show or be hidden.
     self.mapView.hidden = NO;
     self.tableView.hidden = YES;
-    self.currentLocationButtonPressed = NO;
     self.segmentedControl.enabled = NO;
     self.toggleIndex = 0;
 
@@ -107,80 +98,110 @@
     [self getJSON];
 }
 
-
 #pragma mark - Location manager methods
 
 -(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
-    // If no CLLocations, alert the user.
-    if (locations.count < 1) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Please enable location services to use this feature" message:nil delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-        [alert show];
-        [self enableUI];
-        NSLog(@"No CLLocations");
-    }
-    else {
-
     for (CLLocation *location in locations) {
-        if (location.verticalAccuracy < 1000 && location.horizontalAccuracy < 1000) {
+        if (location.verticalAccuracy < 700 && location.horizontalAccuracy < 700) {
             [self.locationManager stopUpdatingLocation];
 
-            // Set the user location property.
+            // Assign userlocation IVar
             self.userLocation = location;
-            CGFloat userDistanceFromChicago = [self.chicago distanceFromLocation:self.userLocation];
 
-            // If user is too far from Chicago, map will default to the Chicago area.
-            // 80,466 meters is 50 miles, approximately.
-            if (userDistanceFromChicago > 80466) {
-                CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.chicago.coordinate.latitude, self.chicago.coordinate.longitude);
-                MKCoordinateSpan span = MKCoordinateSpanMake(.1, .1);
-                MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
-                self.mapView.showsUserLocation = YES;
-                [self.mapView setRegion:region animated:YES];
-            }
-            // If user is in Chicago, draw map around their location.
-            else {
-                CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.userLocation.coordinate.latitude, self.   userLocation.coordinate.longitude);
-                MKCoordinateSpan span = MKCoordinateSpanMake(.03, .03);
-                MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
-                self.mapView.showsUserLocation = YES;
-                [self.mapView setRegion:region animated:YES];
+            // If there is a user location assign the distance from user property
+            if (self.userLocation) {
+                NSLog(@"User location found");
+                for (DivvyStation *divvyStation in self.divvyStations) {
+                    // Assign the distance from user property, if there is a user location.
+                    CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:divvyStation.latitude.floatValue longitude:divvyStation.longitude.floatValue];
+                    divvyStation.distanceFromUser = [stationLocation distanceFromLocation:self.userLocation];
                 }
-            [self getUserLocationString];
-            break;
+                // Sort stations array by distance from user
+                NSArray *tempArray = [NSArray arrayWithArray:self.divvyStations];
+                NSSortDescriptor *distanceDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distanceFromUser" ascending:YES];
+                NSArray *sortDescriptors = @[distanceDescriptor];
+                NSArray *divvyStationsArray = [NSArray arrayWithArray:tempArray];
+                self.divvyStations = [divvyStationsArray sortedArrayUsingDescriptors:sortDescriptors];
+
+                // Instantiate chicago location and assign the "distance from chicago" variable
+                CLLocation *chicago = [[CLLocation alloc] initWithLatitude:41.891813 longitude:-87.647343];
+                CGFloat userDistanceFromChicago = [chicago distanceFromLocation:self.userLocation];
+                self.mapView.showsUserLocation = YES;
+
+                // If user is too far from Chicago, map will default to the Chicago area.
+                // 80,466 meters is 50 miles, approximately.
+                if (userDistanceFromChicago > 80466) {
+                    NSLog(@"User is not in Chicago");
+                    CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(chicago.coordinate.latitude, chicago.coordinate.longitude);
+                    MKCoordinateSpan span = MKCoordinateSpanMake(.1, .1);
+                    MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
+                    [self.mapView setRegion:region animated:YES];
+                }
+                // If user is in Chicago, draw map around their location.
+                else {
+                    NSLog(@"User is in Chicago");
+                    CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.userLocation.coordinate.latitude, self.userLocation.coordinate.longitude);
+                    MKCoordinateSpan span = MKCoordinateSpanMake(.03, .03);
+                    MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
+                    [self.mapView setRegion:region animated:YES];
+                }
+            }
+            // Else, no user locations returned.
+            else {
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Attention" message:@"Let Divvy & Conquer use your current location for best performance" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                [alert show];
             }
         }
+        // Else, user location found, but not with sufficient accuracy...
+        else {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Attention" message:@"Let Divvy & Conquer use your current location for best performance" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+            [alert show];
+        }
+    // Enable UI and dismiss activity indicator.
+    self.activityIndicator.hidden = YES;
+    [self.activityIndicator stopAnimating];
+    [self enableUI];
+    NSLog(@"Enabling UI");
     }
 }
 
 -(void)getJSON
 {
     NSLog(@"Getting JSON");
+    // Start the activity indicator spinning while waiting for API call to return data.
     self.activityIndicator.hidden = NO;
     [self.activityIndicator startAnimating];
 
+    // Create a temporary array to hold divvyStation objects
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
+
+    // Formulate Divvy API request
     NSString *urlString = @"http://www.divvybikes.com/stations/json";
     NSURL *url = [NSURL URLWithString:urlString];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
-
     [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError)
      {
+         // Check for connection error..
          if (connectionError) {
              UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Unable to Connect to Divvy" message:@"Try again later" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
              [alert show];
              [self enableUI];
-             NSLog(@"Divvy API connection Error");
+             self.activityIndicator.hidden = YES;
+             [self.activityIndicator stopAnimating];
          }
+
+         // If no connection error
          else {
 
+             // Serialize the returned JSON and assign properties to divvyStation objects
              NSDictionary *dictionary  = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&connectionError];
-
              NSArray *stationsArray = [dictionary objectForKey:@"stationBeanList"];
 
              for (NSDictionary *dictionary in stationsArray) {
 
                  DivvyStation *divvyStation = [[DivvyStation alloc] init];
+
                  divvyStation.stationName = [dictionary objectForKey:@"stationName"];
                  divvyStation.statusValue = [dictionary objectForKey:@"statusValue"];
                  divvyStation.streetAddress1 = [dictionary objectForKey:@"stAddress1"];
@@ -189,6 +210,7 @@
                  divvyStation.postalCode = [dictionary objectForKey:@"postalCode"];
                  divvyStation.location = [dictionary objectForKey:@"location"];
                  divvyStation.landMark = [dictionary objectForKey:@"landMark"];
+
                  float longitude = [[dictionary objectForKey:@"longitude"] floatValue];
                  divvyStation.longitude = [NSNumber numberWithFloat:longitude];
                  float latitude = [[dictionary objectForKey:@"latitude"] floatValue];
@@ -206,21 +228,18 @@
                  divvyStation.coordinate = CLLocationCoordinate2DMake(divvyStation.latitude.floatValue, divvyStation.longitude.floatValue);
                  divvyStation.annotationSize = 20.0f + (0.5f * (divvyStation.availableBikes.floatValue + divvyStation.availableDocks.floatValue));
 
-                 CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:divvyStation.latitude.floatValue longitude:divvyStation.longitude.floatValue];
-                 divvyStation.distanceFromUser = [stationLocation distanceFromLocation:self.userLocation];
-                 [self setStationColors:divvyStation];
+                 // Add the divvyStation to the temporary array.
                  [tempArray addObject:divvyStation];
              }
 
-             NSSortDescriptor *distanceDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distanceFromUser" ascending:YES];
-             NSArray *sortDescriptors = @[distanceDescriptor];
-             NSArray *divvyStationsArray = [NSArray arrayWithArray:tempArray];
-             self.divvyStations = [divvyStationsArray sortedArrayUsingDescriptors:sortDescriptors];
+             // Assign the temp array to the iVar
+             self.divvyStations = [NSArray arrayWithArray:tempArray];
+             [self setStationColors:self.divvyStations];
 
-             self.activityIndicator.hidden = YES;
-             [self.activityIndicator stopAnimating];
-             [self enableUI];
-             self.segmentedControl.enabled = NO;
+             // Find user location..
+             self.locationManager = [[CLLocationManager alloc] init];
+             self.locationManager.delegate = self;
+             [self.locationManager startUpdatingLocation];
          }
      }];
 }
@@ -232,23 +251,18 @@
     self.userDestinationString = nil;
     self.fromTextFieldOutlet.text = nil;
     self.destinationTextFieldOutlet.text = nil;
-
     [self.fromTextFieldOutlet endEditing:YES];
     [self.destinationTextFieldOutlet endEditing:YES];
-
-    [self enableUI];
 }
 
 - (IBAction)onCurrentLocationButtonPressed:(id)sender
 {
     [self disableUI];
-
     // Show activity indicator
     self.activityIndicator.hidden = NO;
     [self.activityIndicator startAnimating];
-
-    self.currentLocationButtonPressed = YES;
-    [self.locationManager startUpdatingLocation];
+    // Get user location string
+    [self getUserLocationString];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
@@ -275,6 +289,8 @@
 
         // If search fields aren't empty...
         if (self.fromTextFieldOutlet && self.destinationTextFieldOutlet) {
+            // Disable user interaction
+            [self disableUI];
 
             // Clear map of annotations and route overlays
             [self.mapView removeAnnotations:self.mapView.annotations];
@@ -310,7 +326,6 @@
             [self.mapContainerView removeFromSuperview];
 
             // Begin search process
-            [self disableUI];
             self.firstSearch = YES;
             [self getOriginFromName];
             }
@@ -439,6 +454,8 @@
 
     // If both origin and destinations have been found...
     if (self.destinationPlacemark && self.originPlacemark) {
+
+        NSLog(@"Destination placemark: %@", self.destinationPlacemark.description);
 
         // Create CLLoction objects for origin and destination placemarks
         CLLocation *originLocation = [[CLLocation alloc] initWithLatitude:self.originPlacemark.coordinate.latitude longitude:self.originPlacemark.coordinate.longitude];
@@ -1202,28 +1219,36 @@ calloutAccessoryControlTapped:(UIControl *)control
 
 - (void)getUserLocationString
 {
-    CLGeocoder *geocoder = [[CLGeocoder alloc] init];
-
-    [geocoder reverseGeocodeLocation:self.userLocation completionHandler:^(NSArray *placemarks, NSError *error) {
-        for (CLPlacemark *placemark in placemarks) {
-            if (placemarks.count < 1) {
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Unable to find your current location" message:@"Please try again later" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-                [alert show];
-                NSLog(@"No current location found");
-            }
-            else {
-                self.userLocationString = ABCreateStringWithAddressDictionary(placemark.addressDictionary, NO);
-                    if (self.currentLocationButtonPressed) {
+    if (self.userLocation) {
+        CLGeocoder *geocoder = [[CLGeocoder alloc] init];
+        [geocoder reverseGeocodeLocation:self.userLocation completionHandler:^(NSArray *placemarks, NSError *error) {
+            for (CLPlacemark *placemark in placemarks) {
+                if (placemarks.count < 1) {
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Unable to find your current location" message:@"Please try again later" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                    [alert show];
+                    NSLog(@"No current location found");
+                }
+                else {
+                        CLPlacemark *pmark = [placemarks firstObject];
+                        self.userLocationString = ABCreateStringWithAddressDictionary(pmark.addressDictionary, NO);
                         self.fromTextFieldOutlet.text = self.userLocationString;
                         NSLog(@"User Location: %@", self.userLocationString);
+                        break;
                 }
             }
-        }
-        self.currentLocationButtonPressed = NO;
         self.activityIndicator.hidden = YES;
         [self.activityIndicator stopAnimating];
         [self enableUI];
-    }];
+        }];
+    }
+    else {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Unable to find your current location" message:@"Make sure you have allowed Divvy & Conquer to user your current location" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        [alert show];
+        NSLog(@"No current location found");
+        self.activityIndicator.hidden = YES;
+        [self.activityIndicator stopAnimating];
+        [self enableUI];
+    }
 }
 
 // Scales the map view appropriately to include both origin and destination location.
@@ -1318,11 +1343,14 @@ calloutAccessoryControlTapped:(UIControl *)control
     self.tableViewBlockerView.backgroundColor = [UIColor divvyColor];
 }
 
--(void)setStationColors:(DivvyStation *)divvyStation
+-(void)setStationColors:(NSArray *)stationsArray
 {
+    NSLog(@"Setting station annotation colors");
     // Dynamically update the background color from red -> yellow -> green
-    // Max RGB value = 255.0, the blue color is not in this spectrum, thus it is always 0.
+    // The blue color is not in this spectrum, thus it is always 0.
     CGFloat blue = 0.0f/255.0f;
+
+    for (DivvyStation *divvyStation in stationsArray) {
 
         // Set values
         CGFloat totalDocks = divvyStation.availableDocks.floatValue + divvyStation.availableBikes.floatValue;
@@ -1370,6 +1398,7 @@ calloutAccessoryControlTapped:(UIControl *)control
             CGFloat green = 1.0f;
             divvyStation.docksColor =[UIColor colorWithRed:red green:green blue:blue alpha:1.0];
         }
+    }
 }
 
 -(void)disableUI
