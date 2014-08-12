@@ -47,6 +47,7 @@
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UIButton *currentLocationButtonOutlet;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *refreshButtonOutlet;
 @property (weak, nonatomic) IBOutlet UIButton *cancelButtonOutlet;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *segmentedControl;
 @property (weak, nonatomic) IBOutlet UITextField *fromTextFieldOutlet;
@@ -266,7 +267,6 @@
     NSLog(@"Enabling UI");
 }
 
-
 #pragma mark - IBActions
 
 - (IBAction)onCancelButtonPressed:(id)sender
@@ -286,6 +286,50 @@
     [self.activityIndicator startAnimating];
     // Get user location string
     [self getUserLocationString];
+}
+
+- (IBAction)onRefreshButtonPushed:(id)sender
+{
+    // Disable user interaction
+    [self disableUI];
+
+    // Clear map of annotations and route overlays
+    [self.mapView removeAnnotations:self.mapView.annotations];
+    if (self.walkRoute1) {
+        [self.mapView removeOverlay:self.walkRoute1.polyline];
+    }
+
+    if (self.bikeRoute) {
+        [self.mapView removeOverlay:self.bikeRoute.polyline];
+    }
+
+    if (self.walkroute2) {
+        [self.mapView removeOverlay:self.walkroute2.polyline];
+    }
+
+    // Remove map labels
+    [self.mapContainerView removeFromSuperview];
+
+    //Zoom to Chicago
+    [self zoomToChicago];
+
+    // Dismiss keyboard
+    [self.destinationTextFieldOutlet endEditing:YES];
+    [self.fromTextFieldOutlet endEditing:YES];
+
+    // Clear search fields' text.
+    self.destinationTextFieldOutlet.text = nil;
+    self.fromTextFieldOutlet.text = nil;
+
+    // Set selected segment index to 0 and reset to the initial load view
+    self.mapView.hidden = NO;
+    self.tableView.hidden = YES;
+    self.toggleIndex = 0;
+    self.segmentedControl.selectedSegmentIndex = 0;
+    self.segmentedControl.enabled = NO;
+
+    // Reload the JSON
+    [self getJSON];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
@@ -1362,6 +1406,9 @@ calloutAccessoryControlTapped:(UIControl *)control
     // Background view
     self.view.backgroundColor = [UIColor divvyColor];
     self.tableViewBlockerView.backgroundColor = [UIColor divvyColor];
+
+    // Refresh button
+    self.refreshButtonOutlet.tintColor = [UIColor divvyColor];
 }
 
 -(void)setStationColors:(NSArray *)stationsArray
@@ -1429,6 +1476,7 @@ calloutAccessoryControlTapped:(UIControl *)control
     self.destinationTextFieldOutlet.enabled = NO;
     self.currentLocationButtonOutlet.enabled = NO;
     self.cancelButtonOutlet.enabled = NO;
+    self.refreshButtonOutlet.enabled = NO;
 }
 
 -(void)enableUI
@@ -1438,6 +1486,8 @@ calloutAccessoryControlTapped:(UIControl *)control
     self.destinationTextFieldOutlet.enabled = YES;
     self.currentLocationButtonOutlet.enabled = YES;
     self.cancelButtonOutlet.enabled = YES;
+    self.refreshButtonOutlet.enabled = YES;
+
 }
 
 

@@ -323,13 +323,20 @@
                             <constraint firstItem="iHK-Yv-EUD" firstAttribute="top" secondItem="Lyr-oA-bbQ" secondAttribute="top" constant="126" id="jdn-iR-Emz"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="pCs-uh-7tN"/>
+                    <navigationItem key="navigationItem" id="pCs-uh-7tN">
+                        <barButtonItem key="leftBarButtonItem" systemItem="refresh" id="Xn6-ek-lAv">
+                            <connections>
+                                <action selector="onRefreshButtonPushed:" destination="1wR-ee-ML0" id="0Mh-Qx-20Q"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="cancelButtonOutlet" destination="hHo-s4-Rzo" id="yPB-Od-6Yk"/>
                         <outlet property="currentLocationButtonOutlet" destination="boZ-PI-7u5" id="vZh-1r-FOS"/>
                         <outlet property="destinationTextFieldOutlet" destination="QAZ-Tn-lv8" id="xcJ-lY-yuf"/>
                         <outlet property="fromTextFieldOutlet" destination="z0z-ai-w7N" id="kaL-WB-Yqp"/>
                         <outlet property="mapView" destination="EWM-ia-MWo" id="yv4-oK-6L1"/>
+                        <outlet property="refreshButtonOutlet" destination="Xn6-ek-lAv" id="D8W-fl-QGr"/>
                         <outlet property="segmentedControl" destination="ca7-OP-MbM" id="PyG-3s-Wsb"/>
                         <outlet property="tableView" destination="iHK-Yv-EUD" id="bR5-oc-WEL"/>
                         <outlet property="tableViewBlockerView" destination="IIw-XW-MsA" id="EAK-71-hQz"/>
