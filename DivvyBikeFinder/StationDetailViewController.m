@@ -74,13 +74,11 @@
     [super viewDidLoad];
 
     self.locationManager = [[CLLocationManager alloc] init];
-//    [self.locationManager startUpdatingLocation];
     self.locationManager.delegate = self;
     [self disableSearchBooleans];
     [self setMapViewandPlacePin];
     [self makeViews];
     [self findNeighborhoods];
-
 
     // Create the right bar button search button.
     self.searchButton = [[UIButton alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 25.0f, 25.0f)];
@@ -520,22 +518,6 @@
 
 #pragma mark - map/location manager methods
 
--(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
-{
-    for (CLLocation *location in locations) {
-        if (location.verticalAccuracy < 1000 && location.horizontalAccuracy < 1000) {
-            [self.locationManager stopUpdatingLocation];
-            self.userLocationFromSourceVC = location;
-            CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.userLocationFromSourceVC.coordinate.latitude, self.userLocationFromSourceVC.coordinate.longitude);
-            MKCoordinateSpan span = MKCoordinateSpanMake(.005, .005);
-            MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
-            self.mapView.showsUserLocation = YES;
-            [self.mapView setRegion:region animated:YES];
-            break;
-        }
-    }
-}
-
 -(void)setMapViewandPlacePin
 {
     // Set MapView around Divvy Station
@@ -547,13 +529,22 @@
 
     MKPlacemark *stationPlacemark = [[MKPlacemark alloc] initWithCoordinate:CLLocationCoordinate2DMake(self.stationFromSourceVC.latitude.floatValue, self.stationFromSourceVC.longitude.floatValue) addressDictionary:nil];
     CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:stationPlacemark.coordinate.latitude longitude:stationPlacemark.coordinate.longitude];
-    CGFloat distanceFromUser = [self.userLocationFromSourceVC distanceFromLocation:stationLocation];
+
+    CGFloat distanceFromUser = 0.0;
+    if (self.userLocationFromSourceVC) {
+        distanceFromUser = [self.userLocationFromSourceVC distanceFromLocation:stationLocation];
+    }
 
     // Place Divvy pin annotation
     DivvyBikeAnnotation *annotation = [[DivvyBikeAnnotation alloc] init];
     annotation.coordinate = self.stationFromSourceVC.coordinate;
     annotation.title = self.stationFromSourceVC.stationName;
-    annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks: %@", distanceFromUser * 0.000621371, self.stationFromSourceVC.availableBikes, self.stationFromSourceVC.availableDocks];
+    if (self.userLocationFromSourceVC) {
+            annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks: %@", distanceFromUser * 0.000621371, self.stationFromSourceVC.availableBikes, self.stationFromSourceVC.availableDocks];
+    }
+    else {
+            annotation.subtitle = [NSString stringWithFormat:@"Bikes: %@ | Docks: %@", self.stationFromSourceVC.availableBikes, self.stationFromSourceVC.availableDocks];
+    }
     annotation.imageName = @"Divvy";
     annotation.backgroundColor = self.stationFromSourceVC.bikesColor;
     annotation.annotationSize = self.stationFromSourceVC.annotationSize;

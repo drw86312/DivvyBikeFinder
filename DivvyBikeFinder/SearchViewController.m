@@ -66,6 +66,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [self zoomToChicago];
 
     // Disable UI, enable when JSON has returned.
     [self disableUI];
@@ -98,72 +99,14 @@
     [self getJSON];
 }
 
-#pragma mark - Location manager methods
-
--(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
+-(void)zoomToChicago
 {
-    for (CLLocation *location in locations) {
-        if (location.verticalAccuracy < 700 && location.horizontalAccuracy < 700) {
-            [self.locationManager stopUpdatingLocation];
-
-            // Assign userlocation IVar
-            self.userLocation = location;
-
-            // If there is a user location assign the distance from user property
-            if (self.userLocation) {
-                NSLog(@"User location found");
-                for (DivvyStation *divvyStation in self.divvyStations) {
-                    // Assign the distance from user property, if there is a user location.
-                    CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:divvyStation.latitude.floatValue longitude:divvyStation.longitude.floatValue];
-                    divvyStation.distanceFromUser = [stationLocation distanceFromLocation:self.userLocation];
-                }
-                // Sort stations array by distance from user
-                NSArray *tempArray = [NSArray arrayWithArray:self.divvyStations];
-                NSSortDescriptor *distanceDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distanceFromUser" ascending:YES];
-                NSArray *sortDescriptors = @[distanceDescriptor];
-                NSArray *divvyStationsArray = [NSArray arrayWithArray:tempArray];
-                self.divvyStations = [divvyStationsArray sortedArrayUsingDescriptors:sortDescriptors];
-
-                // Instantiate chicago location and assign the "distance from chicago" variable
-                CLLocation *chicago = [[CLLocation alloc] initWithLatitude:41.891813 longitude:-87.647343];
-                CGFloat userDistanceFromChicago = [chicago distanceFromLocation:self.userLocation];
-                self.mapView.showsUserLocation = YES;
-
-                // If user is too far from Chicago, map will default to the Chicago area.
-                // 80,466 meters is 50 miles, approximately.
-                if (userDistanceFromChicago > 80466) {
-                    NSLog(@"User is not in Chicago");
-                    CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(chicago.coordinate.latitude, chicago.coordinate.longitude);
-                    MKCoordinateSpan span = MKCoordinateSpanMake(.1, .1);
-                    MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
-                    [self.mapView setRegion:region animated:YES];
-                }
-                // If user is in Chicago, draw map around their location.
-                else {
-                    NSLog(@"User is in Chicago");
-                    CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.userLocation.coordinate.latitude, self.userLocation.coordinate.longitude);
-                    MKCoordinateSpan span = MKCoordinateSpanMake(.03, .03);
-                    MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
-                    [self.mapView setRegion:region animated:YES];
-                }
-            }
-            // Else, no user locations returned.
-            else {
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Attention" message:@"Let Divvy & Conquer use your current location for best performance" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-                [alert show];
-            }
-        }
-        // Else, user location found, but not with sufficient accuracy...
-        else {
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Attention" message:@"Let Divvy & Conquer use your current location for best performance" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-            [alert show];
-        }
-    // Enable UI and dismiss activity indicator.
-    self.activityIndicator.hidden = YES;
-    [self.activityIndicator stopAnimating];
-    [self enableUI];
-    NSLog(@"Enabling UI");
-    }
+    NSLog(@"Zooming to Chicago");
+    CLLocation *chicago = [[CLLocation alloc] initWithLatitude:41.891813 longitude:-87.647343];
+    CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(chicago.coordinate.latitude, chicago.coordinate.longitude);
+    MKCoordinateSpan span = MKCoordinateSpanMake(.1, .1);
+    MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
+    [self.mapView setRegion:region animated:YES];
 }
 
 -(void)getJSON
@@ -243,6 +186,86 @@
          }
      }];
 }
+
+#pragma mark - Location manager methods
+
+// If user denies location services, this method will be called
+- (void)locationManager: (CLLocationManager *)manager didFailWithError: (NSError *)error
+{
+    [manager stopUpdatingLocation];
+    switch([error code])
+    {
+        case kCLErrorNetwork: // general, network-related error
+        {
+            NSLog(@"Cannot find user location - bad network connection");
+        }
+            break;
+        case kCLErrorDenied:{
+            NSLog(@"Cannot find user location - user denied location services");
+        }
+            break;
+        default:
+        {
+            NSLog(@"Cannot find user location - other error");
+        }
+            break;
+    }
+    // After JSON data has returned stop the activity indicator and enable buttons.
+    self.activityIndicator.hidden = YES;
+    [self.activityIndicator stopAnimating];
+    [self enableUI];
+}
+
+-(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
+{
+    NSLog(@"Did update locations method ran, locations: %lu", (unsigned long)locations.count);
+    for (CLLocation *location in locations) {
+        if (location.verticalAccuracy < 700 && location.horizontalAccuracy < 700) {
+            [self.locationManager stopUpdatingLocation];
+
+            // Assign userlocation IVar
+            self.userLocation = location;
+
+            // If there is a user location assign the distance from user property
+            if (self.userLocation) {
+                NSLog(@"User location found");
+                for (DivvyStation *divvyStation in self.divvyStations) {
+                    // Assign the distance from user property, if there is a user location.
+                    CLLocation *stationLocation = [[CLLocation alloc] initWithLatitude:divvyStation.latitude.floatValue longitude:divvyStation.longitude.floatValue];
+                    divvyStation.distanceFromUser = [stationLocation distanceFromLocation:self.userLocation];
+                }
+                // Sort stations array by distance from user
+                NSArray *tempArray = [NSArray arrayWithArray:self.divvyStations];
+                NSSortDescriptor *distanceDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distanceFromUser" ascending:YES];
+                NSArray *sortDescriptors = @[distanceDescriptor];
+                NSArray *divvyStationsArray = [NSArray arrayWithArray:tempArray];
+                self.divvyStations = [divvyStationsArray sortedArrayUsingDescriptors:sortDescriptors];
+
+                // Instantiate chicago location and assign the "distance from chicago" variable
+                CLLocation *chicago = [[CLLocation alloc] initWithLatitude:41.891813 longitude:-87.647343];
+                CGFloat userDistanceFromChicago = [chicago distanceFromLocation:self.userLocation];
+                self.mapView.showsUserLocation = YES;
+
+                // If user is too far from Chicago, map will default to the Chicago area.
+                // 80,466 meters is 50 miles, approximately.
+                if (userDistanceFromChicago < 80466) {
+                    NSLog(@"User is in Chicago");
+                    CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.userLocation.coordinate.latitude, self.userLocation.coordinate.longitude);
+                    MKCoordinateSpan span = MKCoordinateSpanMake(.03, .03);
+                    MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
+                    [self.mapView setRegion:region animated:YES];
+                }
+            }
+        }
+        break;
+    }
+    // Enable UI and dismiss activity indicator.
+    self.activityIndicator.hidden = YES;
+    [self.activityIndicator stopAnimating];
+    [self enableUI];
+    NSLog(@"Enabling UI");
+}
+
 
 #pragma mark - IBActions
 
@@ -1029,9 +1052,7 @@
             }
 
             // If its the Divvy Step
-            if ([cell.stepLabel.text rangeOfString:@"Divvy"].location == NSNotFound) {
-                NSLog(@"string does not contain Divvy");
-            }
+            if ([cell.stepLabel.text rangeOfString:@"Divvy"].location == NSNotFound) {}
             else {
                 cell.transportModeImageView.image = [UIImage imageNamed:@"DivvyLogo"];
                 cell.transportModeImageView.layer.cornerRadius = 5.0f;
@@ -1242,7 +1263,7 @@ calloutAccessoryControlTapped:(UIControl *)control
         }];
     }
     else {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Unable to find your current location" message:@"Make sure you have allowed Divvy & Conquer to user your current location" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Unable to find your current location" message:@"Make sure you have allowed Divvy & Conquer to use your current location" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
         [alert show];
         NSLog(@"No current location found");
         self.activityIndicator.hidden = YES;

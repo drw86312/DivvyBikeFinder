@@ -46,6 +46,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [self zoomToChicago];
 
     // Create the activity indicator
     CGFloat indicatorWidth = 50.0f;
@@ -65,10 +66,132 @@
     [self getJSON];
 }
 
+-(void)zoomToChicago
+{
+    NSLog(@"Zooming to Chicago");
+    CLLocation *chicago = [[CLLocation alloc] initWithLatitude:41.891813 longitude:-87.647343];
+    CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(chicago.coordinate.latitude, chicago.coordinate.longitude);
+    MKCoordinateSpan span = MKCoordinateSpanMake(.1, .1);
+    MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
+    [self.mapView setRegion:region animated:YES];
+}
+
+#pragma  mark - Helper methods
+
+-(void)getJSON
+{
+    NSLog(@"Making call for Divvy Data");
+    // Start the activity indicator spinning while waiting for API call to return data.
+    self.activityIndicator.hidden = NO;
+    [self.activityIndicator startAnimating];
+
+    // Create a temporary array to hold divvyStation objects
+    NSMutableArray *tempArray = [[NSMutableArray alloc] init];
+
+    // Formulate Divvy API request
+    NSString *urlString = @"http://www.divvybikes.com/stations/json";
+    NSURL *url = [NSURL URLWithString:urlString];
+    NSURLRequest *request = [NSURLRequest requestWithURL:url];
+    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError)
+     {
+         NSLog(@"Divvy Data returned");
+         // Check for connection error..
+         if (connectionError) {
+             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Unable to Connect to Divvy" message:@"Try again later" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+             [alert show];
+             self.refreshButtonOutlet.enabled = YES;
+         }
+
+         // If no connection error
+         else {
+             // Serialize the returned JSON and assign properties to divvyStation objects
+             NSDictionary *dictionary  = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&connectionError];
+             NSArray *stationsArray = [dictionary objectForKey:@"stationBeanList"];
+
+             for (NSDictionary *dictionary in stationsArray) {
+
+                 DivvyStation *divvyStation = [[DivvyStation alloc] init];
+
+                 divvyStation.stationName = [dictionary objectForKey:@"stationName"];
+                 divvyStation.statusValue = [dictionary objectForKey:@"statusValue"];
+                 divvyStation.streetAddress1 = [dictionary objectForKey:@"stAddress1"];
+                 divvyStation.streetAddress2 = [dictionary objectForKey:@"stAddress2"];
+                 divvyStation.city = [dictionary objectForKey:@"city"];
+                 divvyStation.postalCode = [dictionary objectForKey:@"postalCode"];
+                 divvyStation.location = [dictionary objectForKey:@"location"];
+                 divvyStation.landMark = [dictionary objectForKey:@"landMark"];
+
+                 float longitude = [[dictionary objectForKey:@"longitude"] floatValue];
+                 divvyStation.longitude = [NSNumber numberWithFloat:longitude];
+                 float latitude = [[dictionary objectForKey:@"latitude"] floatValue];
+                 divvyStation.latitude = [NSNumber numberWithFloat:latitude];
+                 int docks = [[dictionary objectForKey:@"availableDocks"] intValue];
+                 divvyStation.availableDocks = [NSNumber numberWithInt:docks];
+                 int bikes = [[dictionary objectForKey:@"availableBikes"] intValue];
+                 divvyStation.availableBikes = [NSNumber numberWithInt:bikes];
+                 int totaldocks = [[dictionary objectForKey:@"totalDocks"] intValue];
+                 divvyStation.totalDocks = [NSNumber numberWithInt:totaldocks];
+                 int key = [[dictionary objectForKey:@"statusKey"] intValue];
+                 divvyStation.statusKey = [NSNumber numberWithInt:key];
+                 int identifier = [[dictionary objectForKey:@"id"] intValue];
+                 divvyStation.identifier = [NSNumber numberWithInt:identifier];
+                 divvyStation.coordinate = CLLocationCoordinate2DMake(divvyStation.latitude.floatValue, divvyStation.longitude.floatValue);
+                 divvyStation.annotationSize = 20.0f + (0.5f * (divvyStation.availableBikes.floatValue + divvyStation.availableDocks.floatValue));
+
+                 // Add the divvyStation to the temporary array.
+                 [tempArray addObject:divvyStation];
+             }
+
+             // Assign the sorted array to the divvyStations ivar array.
+             self.divvyStations = [NSArray arrayWithArray:tempArray];
+             NSLog(@"Divvy Stations Count: %lu", (unsigned long)self.divvyStations.count);
+             [self setStationColors:self.divvyStations];
+
+             // Find user location..
+             self.locationManager = [[CLLocationManager alloc] init];
+             self.locationManager.delegate = self;
+             [self.locationManager startUpdatingLocation];
+         }
+     }];
+}
+
 #pragma mark - Location manager methods
 
+// If user denies location services, this method will be called
+- (void)locationManager: (CLLocationManager *)manager didFailWithError: (NSError *)error
+{
+    [manager stopUpdatingLocation];
+    switch([error code])
+    {
+        case kCLErrorNetwork: // general, network-related error
+        {
+            NSLog(@"Cannot find user location - bad network connection");
+        }
+            break;
+        case kCLErrorDenied:{
+            NSLog(@"Cannot find user location - user denied location services");
+        }
+            break;
+        default:
+        {
+            NSLog(@"Cannot find user location - other error");
+        }
+            break;
+    }
+    // Reload the tableview and call method to create map annotations.
+    [self createMapAnnotations];
+    [self.tableView reloadData];
+
+    // After JSON data has returned stop the activity indicator and enable buttons.
+    self.activityIndicator.hidden = YES;
+    [self.activityIndicator stopAnimating];
+    self.refreshButtonOutlet.enabled = YES;
+}
+
+// If user allows location services, this method will be called
 -(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
+    NSLog(@"Did update locations method ran, locations: %lu", (unsigned long)locations.count);
     for (CLLocation *location in locations) {
         if (location.verticalAccuracy < 700 && location.horizontalAccuracy < 700) {
             [self.locationManager stopUpdatingLocation];
@@ -98,49 +221,25 @@
 
                     // If user is too far from Chicago, map will default to the Chicago area.
                     // 80,466 meters is 50 miles, approximately.
-                    if (userDistanceFromChicago > 80466) {
-                        NSLog(@"User is not in Chicago");
-                        CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(chicago.coordinate.latitude, chicago.coordinate.longitude);
-                        MKCoordinateSpan span = MKCoordinateSpanMake(.1, .1);
-                        MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
-                        [self.mapView setRegion:region animated:YES];
-                    }
-                    // If user is in Chicago, draw map around their location.
-                    else {
+                    if (userDistanceFromChicago < 80466) {
                         NSLog(@"User is in Chicago");
                         CLLocationCoordinate2D centerCoordinate = CLLocationCoordinate2DMake(self.userLocation.coordinate.latitude, self.userLocation.coordinate.longitude);
                         MKCoordinateSpan span = MKCoordinateSpanMake(.03, .03);
                         MKCoordinateRegion region = MKCoordinateRegionMake(centerCoordinate, span);
                         [self.mapView setRegion:region animated:YES];
                     }
-                // Call helper method to set station colors, reload the tableview and call method to create map annotations.
-                [self setStationColors:self.divvyStations];
-                [self createMapAnnotations];
-                [self.tableView reloadData];
-
-                // After JSON data has returned stop the activity indicator and enable buttons.
-                self.activityIndicator.hidden = YES;
-                [self.activityIndicator stopAnimating];
-                self.refreshButtonOutlet.enabled = YES;
             }
-            // Else, no user locations returned.
-                else {
-                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Attention" message:@"Let Divvy & Conquer use your current location for best performance" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-                    [alert show];
-                    self.activityIndicator.hidden = YES;
-                    [self.activityIndicator stopAnimating];
-                    self.refreshButtonOutlet.enabled = YES;
-                }
         }
-        // Else, user location found, but not with sufficient accuracy...
-        else {
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Attention" message:@"Let Divvy & Conquer use your current location for best performance" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-            [alert show];
-            self.activityIndicator.hidden = YES;
-            [self.activityIndicator stopAnimating];
-            self.refreshButtonOutlet.enabled = YES;
-        }
+        break;
     }
+    // Reload the tableview and call method to create map annotations.
+    [self createMapAnnotations];
+    [self.tableView reloadData];
+
+    // After JSON data has returned stop the activity indicator and enable buttons.
+    self.activityIndicator.hidden = YES;
+    [self.activityIndicator stopAnimating];
+    self.refreshButtonOutlet.enabled = YES;
 }
 
 #pragma  mark - IBActions
@@ -149,84 +248,6 @@
 {
     [self.mapView removeAnnotations:self.mapView.annotations];
     [self.locationManager startUpdatingLocation];
-}
-
-
-#pragma  mark - Helper methods
-
--(void)getJSON
-{
-    NSLog(@"Getting JSON");
-    // Start the activity indicator spinning while waiting for API call to return data.
-    self.activityIndicator.hidden = NO;
-    [self.activityIndicator startAnimating];
-
-    // Create a temporary array to hold divvyStation objects
-    NSMutableArray *tempArray = [[NSMutableArray alloc] init];
-
-    // Formulate Divvy API request
-    NSString *urlString = @"http://www.divvybikes.com/stations/json";
-    NSURL *url = [NSURL URLWithString:urlString];
-    NSURLRequest *request = [NSURLRequest requestWithURL:url];
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError)
-     {
-         // Check for connection error..
-         if (connectionError) {
-             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Unable to Connect to Divvy" message:@"Try again later" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-             [alert show];
-             self.refreshButtonOutlet.enabled = YES;
-         }
-
-         // If no connection error
-         else {
-
-             // Serialize the returned JSON and assign properties to divvyStation objects
-             NSDictionary *dictionary  = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&connectionError];
-             NSArray *stationsArray = [dictionary objectForKey:@"stationBeanList"];
-
-             for (NSDictionary *dictionary in stationsArray) {
-
-                 DivvyStation *divvyStation = [[DivvyStation alloc] init];
-
-                 divvyStation.stationName = [dictionary objectForKey:@"stationName"];
-                 divvyStation.statusValue = [dictionary objectForKey:@"statusValue"];
-                 divvyStation.streetAddress1 = [dictionary objectForKey:@"stAddress1"];
-                 divvyStation.streetAddress2 = [dictionary objectForKey:@"stAddress2"];
-                 divvyStation.city = [dictionary objectForKey:@"city"];
-                 divvyStation.postalCode = [dictionary objectForKey:@"postalCode"];
-                 divvyStation.location = [dictionary objectForKey:@"location"];
-                divvyStation.landMark = [dictionary objectForKey:@"landMark"];
-
-                 float longitude = [[dictionary objectForKey:@"longitude"] floatValue];
-                 divvyStation.longitude = [NSNumber numberWithFloat:longitude];
-                 float latitude = [[dictionary objectForKey:@"latitude"] floatValue];
-                 divvyStation.latitude = [NSNumber numberWithFloat:latitude];
-                 int docks = [[dictionary objectForKey:@"availableDocks"] intValue];
-                 divvyStation.availableDocks = [NSNumber numberWithInt:docks];
-                 int bikes = [[dictionary objectForKey:@"availableBikes"] intValue];
-                 divvyStation.availableBikes = [NSNumber numberWithInt:bikes];
-                 int totaldocks = [[dictionary objectForKey:@"totalDocks"] intValue];
-                 divvyStation.totalDocks = [NSNumber numberWithInt:totaldocks];
-                 int key = [[dictionary objectForKey:@"statusKey"] intValue];
-                 divvyStation.statusKey = [NSNumber numberWithInt:key];
-                 int identifier = [[dictionary objectForKey:@"id"] intValue];
-                 divvyStation.identifier = [NSNumber numberWithInt:identifier];
-                 divvyStation.coordinate = CLLocationCoordinate2DMake(divvyStation.latitude.floatValue, divvyStation.longitude.floatValue);
-                 divvyStation.annotationSize = 20.0f + (0.5f * (divvyStation.availableBikes.floatValue + divvyStation.availableDocks.floatValue));
-
-                 // Add the divvyStation to the temporary array.
-                 [tempArray addObject:divvyStation];
-                }
-
-             // Assign the sorted array to the divvyStations ivar array.
-             self.divvyStations = [NSArray arrayWithArray:tempArray];
-
-             // Find user location..
-             self.locationManager = [[CLLocationManager alloc] init];
-             self.locationManager.delegate = self;
-             [self.locationManager startUpdatingLocation];
-            }
-    }];
 }
 
 -(void)createMapAnnotations
@@ -239,7 +260,7 @@
                     annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks: %@", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
                 }
                 else {
-                    annotation.subtitle = [NSString stringWithFormat:@"Bikes: %@ Docks: %@", divvyStation.availableBikes, divvyStation.availableDocks];
+                    annotation.subtitle = [NSString stringWithFormat:@"Bikes: %@ | Docks: %@", divvyStation.availableBikes, divvyStation.availableDocks];
                 }
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"No-Bikes";
@@ -254,7 +275,7 @@
                     annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks: %@", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
                 }
                 else {
-                    annotation.subtitle = [NSString stringWithFormat:@"Bikes: %@ Docks: %@", divvyStation.availableBikes, divvyStation.availableDocks];
+                    annotation.subtitle = [NSString stringWithFormat:@"Bikes: %@ | Docks: %@", divvyStation.availableBikes, divvyStation.availableDocks];
                 }
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"No-Docks";
@@ -269,7 +290,7 @@
                     annotation.subtitle = [NSString stringWithFormat:@"%.01f mi. away | Bikes: %@ Docks: %@", divvyStation.distanceFromUser * 0.000621371, divvyStation.availableBikes, divvyStation.availableDocks];
                 }
                 else {
-                    annotation.subtitle = [NSString stringWithFormat:@"Bikes: %@ Docks: %@", divvyStation.availableBikes, divvyStation.availableDocks];
+                    annotation.subtitle = [NSString stringWithFormat:@"Bikes: %@ | Docks: %@", divvyStation.availableBikes, divvyStation.availableDocks];
                 }
             annotation.coordinate = divvyStation.coordinate;
             annotation.imageName = @"Divvy";
@@ -415,7 +436,7 @@ calloutAccessoryControlTapped:(UIControl *)control
                 }
         }
         else {
-            distanceString = @"N/A";
+            distanceString = @"Distance not available";
         }
         cell.distanceLabel.text = distanceString;
         cell.distanceLabel.font = [UIFont smallFont];
